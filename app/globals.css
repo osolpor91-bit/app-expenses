@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;          /* Fondo general del body */
+  --foreground: #3f4f24;          /* Texto general por defecto */
+
+  --color-bg: #ffffff;            /* Fondo principal de la app: bg-app */
+  --color-bg-soft: #f8fafc;       /* Fondo suave: bg-app-soft, zonas secundarias */
+  --color-primary: #3f4f24;       /* Verde oliva oscuro principal: botones, títulos, enlaces destacados */
+  --color-primary-hover: #2f3b1b; /* Verde oliva más oscuro al pasar el ratón por botones */
+  --color-text: #3f4f24;          /* Texto principal: text-app */
+  --color-text-muted: #64748b;    /* Texto secundario/gris: text-app-muted */
+  --color-border: #e2e8f0;        /* Bordes: border-app */
+  --color-card: #ffffff;          /* Fondo de tarjetas principales: card-app */
+  --color-card-soft: #f8fafc;     /* Fondo de tarjetas suaves: card-app-soft */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Tema global */
+
+.bg-app {
+  background-color: var(--color-bg);
+}
+
+.bg-app-soft {
+  background-color: var(--color-bg-soft);
+}
+
+.text-app {
+  color: var(--color-text);
+}
+
+.text-app-muted {
+  color: var(--color-text-muted);
+}
+
+.text-primary-app {
+  color: var(--color-primary);
+}
+
+.bg-primary-app {
+  background-color: var(--color-primary);
+}
+
+.bg-primary-app:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.border-app {
+  border-color: var(--color-border);
+}
+
+.card-app {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+.card-app-soft {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card-soft);
+  border-radius: 1rem;
+}
+
+.btn-primary-app {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 600;
+  transition: background-color 150ms ease;
+}
+
+.btn-primary-app:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-secondary-app {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-weight: 600;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.btn-secondary-app:hover {
+  background-color: var(--color-bg-soft);
+  border-color: var(--color-primary);
+}
+
+.link-app {
+  color: var(--color-text-muted);
+  transition: color 150ms ease;
+}
+
+.link-app:hover {
+  color: var(--color-primary);
+}
+
+.badge-app {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid rgb(2 17 31 / 0.15);
+  background-color: rgb(2 17 31 / 0.05);
+  color: var(--color-primary);
+}
+
+.input-app {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background-color: #ffffff;
+  color: var(--color-text);
+  outline: none;
+}
+
+.input-app:focus {
+  border-color: var(--color-primary);
+}
+
+.table-app {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table-head-app {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text);
+}
+
+.table-row-app:hover {
+  background-color: var(--color-bg-soft);
+}
+
+.shell-app {
+  width: 100%;
+  max-width: 1500px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
