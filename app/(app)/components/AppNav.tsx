@@ -4,22 +4,19 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
+import { canAccessTenantPage } from "@/lib/auth/tenantRolePermissions";
+
 type AppNavLabels = {
   menu: string;
   configurations: string;
   admin: string;
   adminTenants: string;
-  adminProducts: string;
-  adminPlans: string;
-  adminPlanProducts: string;
-  adminSubscriptions: string;
-  adminTenantProducts: string;
   adminTenantUsers: string;
   adminUsersWithoutTenant: string;
 };
 
 type AppNavProps = {
-  isPlatformAdmin: boolean;
+  role: string;
   labels: AppNavLabels;
 };
 
@@ -160,35 +157,16 @@ function DropdownMenu({
   );
 }
 
-export default function AppNav({ isPlatformAdmin, labels }: AppNavProps) {
+export default function AppNav({ role, labels }: AppNavProps) {
   const pathname = usePathname();
   const navRef = useRef<HTMLDivElement>(null);
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
+  const canAccessAdmin = canAccessTenantPage(role, "admin");
 
   const adminLinks: NavLinkDefinition[] = [
     {
       href: "/admin/tenants",
       label: labels.adminTenants,
-    },
-    {
-      href: "/admin/products",
-      label: labels.adminProducts,
-    },
-    {
-      href: "/admin/plans",
-      label: labels.adminPlans,
-    },
-    {
-      href: "/admin/plan-products",
-      label: labels.adminPlanProducts,
-    },
-    {
-      href: "/admin/subscriptions",
-      label: labels.adminSubscriptions,
-    },
-    {
-      href: "/admin/tenant-products",
-      label: labels.adminTenantProducts,
     },
     {
       href: "/admin/tenant-users",
@@ -256,7 +234,7 @@ export default function AppNav({ isPlatformAdmin, labels }: AppNavProps) {
         ]}
       />
 
-      {isPlatformAdmin && (
+      {canAccessAdmin && (
         <DropdownMenu
           menuKey="admin"
           label={labels.admin}

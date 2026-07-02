@@ -1,4 +1,3 @@
-import { getIsPlatformAdmin } from "@/lib/auth/getIsPlatformAdmin";
 import { requireCompanyContext } from "@/lib/company/requireCompanyContext";
 import { getDictionary } from "@/lib/i18n/server";
 
@@ -10,30 +9,22 @@ export default async function PrivateAppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { supabase, user, companies, activeCompany } =
+  const { user, companies, activeCompany, role } =
     await requireCompanyContext();
 
-  const [{ locale, dict }, isPlatformAdmin] = await Promise.all([
-    getDictionary(),
-    getIsPlatformAdmin(supabase, user.id),
-  ]);
+  const { locale, dict } = await getDictionary();
 
   return (
     <div className="min-h-screen bg-app">
       <header className="sticky top-0 z-[100] bg-app/95 backdrop-blur">
         <div className="shell-app flex min-h-14 items-center justify-between gap-6">
           <AppNav
-            isPlatformAdmin={isPlatformAdmin}
+            role={role}
             labels={{
               menu: dict.nav.menu,
               configurations: dict.nav.configurations,
               admin: dict.admin.menu,
               adminTenants: dict.admin.tenants,
-              adminProducts: dict.admin.products,
-              adminPlans: dict.admin.plans,
-              adminPlanProducts: dict.admin.planProducts,
-              adminSubscriptions: dict.admin.subscriptions,
-              adminTenantProducts: dict.admin.tenantProducts,
               adminTenantUsers: dict.admin.tenantUsers,
               adminUsersWithoutTenant: dict.admin.usersWithoutTenant,
             }}

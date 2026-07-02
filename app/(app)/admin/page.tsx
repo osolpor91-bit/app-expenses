@@ -1,20 +1,17 @@
 import Link from "next/link";
 
-import { requirePlatformAdmin } from "@/lib/auth/requirePlatformAdmin";
+import { requireTenantPageAccess } from "@/lib/auth/requireTenantPageAccess";
 import { getDictionary } from "@/lib/i18n/server";
 
 export default async function AdminPage() {
-  await requirePlatformAdmin();
+  await requireTenantPageAccess("admin");
 
   const { dict } = await getDictionary();
 
   const links = [
-    { href: "/admin/products", label: dict.admin.products },
-    { href: "/admin/plans", label: dict.admin.plans },
-    { href: "/admin/plan-products", label: dict.admin.planProducts },
-    { href: "/admin/subscriptions", label: dict.admin.subscriptions },
-    { href: "/admin/tenant-products", label: dict.admin.tenantProducts },
+    { href: "/admin/tenants", label: dict.admin.tenants },
     { href: "/admin/tenant-users", label: dict.admin.tenantUsers },
+    { href: "/admin/users-without-tenant", label: dict.admin.usersWithoutTenant },
   ];
 
   return (

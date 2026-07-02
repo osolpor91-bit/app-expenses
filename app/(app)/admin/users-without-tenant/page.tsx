@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import { listAllAuthUsers } from "@/lib/admin/authUsers";
-import { requirePlatformAdmin } from "@/lib/auth/requirePlatformAdmin";
+import { requireTenantPageAccess } from "@/lib/auth/requireTenantPageAccess";
 import { getDictionary } from "@/lib/i18n/server";
 import {
   listActiveTenantUserIdsForAdmin,
@@ -49,7 +49,7 @@ function formatDate(value?: string | null) {
 export default async function UsersWithoutTenantPage({
   searchParams,
 }: UsersWithoutTenantPageProps) {
-  await requirePlatformAdmin();
+  await requireTenantPageAccess("admin");
 
   const { dict } = await getDictionary();
 

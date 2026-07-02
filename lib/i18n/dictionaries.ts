@@ -100,10 +100,6 @@ export const dictionaries = {
 
     dashboard: {
       mainMenu: "Menú principal",
-      activeProducts: "Productos activos",
-      noActiveProducts: "Sin productos activos",
-      noActiveProductsDescription:
-        "Este tenant no tiene productos activos. Revisa la configuración de productos, planes o suscripción.",
       indicators: "Indicadores y accesos rápidos",
       quickAction: "Acción rápida",
       newSupplier: "Nuevo proveedor",
@@ -968,10 +964,9 @@ export const dictionaries = {
       login: "Entrar",
       register: "Regístrate",
       badge: "Portal de proveedores/clientes · Facturación con VeriFactu",
-      title:
-        "Una plataforma para gestionar tus relaciones y tu facturación.",
+      title: "App gastos susarros",
       description:
-        "Centraliza la comunicación con clientes y proveedores, organiza documentos y prepara tu facturación para un entorno moderno, seguro y escalable. Actualmente trabajamos sobre dos productos: un portal colaborativo para clientes/proveedores y una solución de facturación sencilla preparada para VeriFactu.",
+        "Centraliza la comunicación con clientes y proveedores, organiza documentos y prepara tu facturación en un entorno moderno, seguro y multiempresa.",
       portalTitle: "Portal clientes/proveedores",
       portalDescription:
         "Un espacio privado para compartir documentos, gestionar comunicaciones y ordenar la relación con tus clientes o proveedores desde un único entorno.",
@@ -985,12 +980,12 @@ export const dictionaries = {
       multiCompanyTitle: "Multiempresa",
       multiCompanyDescription:
         "Dentro de una misma cuenta puedes trabajar con varias empresas internas y mantener sus datos organizados.",
-      activeProductsTitle: "Productos activables",
-      activeProductsDescription:
-        "Puedes contratar o activar los módulos que necesites: portal colaborativo, facturación con VeriFactu y futuros productos de gestión.",
+      roleBasedAccessTitle: "Acceso por roles",
+      roleBasedAccessDescription:
+        "Cada usuario accede a las áreas permitidas por su rol dentro del tenant.",
       inDevelopment: "En desarrollo",
       inDevelopmentDescription:
-        "Estamos construyendo una base común para que cada producto comparta usuarios, empresas, planes, suscripciones y seguridad, evitando duplicidades y facilitando el crecimiento de la plataforma.",
+        "Estamos construyendo una base común para compartir usuarios, empresas y seguridad, evitando duplicidades y facilitando el crecimiento de la aplicación.",
     },
 
     auth: {
@@ -1030,31 +1025,15 @@ export const dictionaries = {
       loggingOut: "Cerrando sesión...",
     },
 
-    productPages: {
-      activeProductForTenant: "Producto activo para el tenant",
-      portalTitle: "Portal clientes/proveedores",
-      portalDescription:
-        "Aquí construiremos el primer producto: portal para clientes y proveedores. Más adelante añadiremos contactos, documentos, mensajes y accesos.",
-      invoicingTitle: "Facturación sencilla",
-      invoicingDescription:
-        "Aquí construiremos más adelante el producto de facturación: clientes, proveedores, facturas y líneas, con una base preparada para VeriFactu.",
-    },
-
     admin: {
       menu: "Admin",
       tenants: "Tenants",
-      title: "Administración de plataforma",
-      description:
-        "Gestiona productos, planes, suscripciones, productos activos por tenant y usuarios.",
-      products: "Productos",
-      plans: "Planes",
-      planProducts: "Productos por plan",
-      subscriptions: "Suscripciones",
-      tenantProducts: "Productos por tenant",
+      title: "Administración",
+      description: "Gestiona tenants y usuarios.",
       tenantUsers: "Usuarios por tenant",
       comingSoonTitle: "Página de administración preparada",
       comingSoonDescription:
-        "Esta página ya está protegida para administradores de plataforma. El siguiente paso será convertirla en un grid editable.",
+        "Consulta y gestiona la estructura de usuarios y tenants.",
       usersWithoutTenant: "Usuarios sin tenant",
       usersWithoutTenantDescription:
         "Usuarios existentes en Supabase Auth que no tienen ningún tenant activo asignado.",
@@ -1321,10 +1300,6 @@ export const dictionaries = {
 
     dashboard: {
       mainMenu: "Main menu",
-      activeProducts: "Active products",
-      noActiveProducts: "No active products",
-      noActiveProductsDescription:
-        "This tenant has no active products. Review the product, plan or subscription setup.",
       indicators: "Indicators and quick access",
       quickAction: "Quick action",
       newSupplier: "New supplier",
@@ -2187,9 +2162,9 @@ export const dictionaries = {
       login: "Log in",
       register: "Sign up",
       badge: "Supplier/customer portal · VeriFactu invoicing",
-      title: "A platform to manage your relationships and invoicing.",
+      title: "App gastos susarros",
       description:
-        "Centralize communication with customers and suppliers, organize documents and prepare your invoicing for a modern, secure and scalable environment. We are currently working on two products: a collaborative customer/supplier portal and a simple invoicing solution prepared for VeriFactu.",
+        "Centralize communication with customers and suppliers, organize documents and prepare your invoicing in a modern, secure, multi-company environment.",
       portalTitle: "Customer/supplier portal",
       portalDescription:
         "A private space to share documents, manage communications and organize the relationship with your customers or suppliers from a single environment.",
@@ -2203,12 +2178,12 @@ export const dictionaries = {
       multiCompanyTitle: "Multi-company",
       multiCompanyDescription:
         "Within the same account you can work with several internal companies and keep their data organized.",
-      activeProductsTitle: "Activatable products",
-      activeProductsDescription:
-        "You can subscribe to or activate the modules you need: collaborative portal, VeriFactu invoicing and future management products.",
+      roleBasedAccessTitle: "Role-based access",
+      roleBasedAccessDescription:
+        "Each user accesses the areas allowed by their role within the tenant.",
       inDevelopment: "In development",
       inDevelopmentDescription:
-        "We are building a common base so each product can share users, companies, plans, subscriptions and security, avoiding duplication and making the platform easier to scale.",
+        "We are building a common base for shared users, companies and security, avoiding duplication and making the application easier to scale.",
     },
 
     auth: {
@@ -2248,31 +2223,15 @@ export const dictionaries = {
       loggingOut: "Logging out...",
     },
 
-    productPages: {
-      activeProductForTenant: "Active product for tenant",
-      portalTitle: "Customer/supplier portal",
-      portalDescription:
-        "Here we will build the first product: a portal for customers and suppliers. Later we will add contacts, documents, messages and access links.",
-      invoicingTitle: "Simple invoicing",
-      invoicingDescription:
-        "Here we will build the invoicing product later: customers, suppliers, invoices and lines, with a VeriFactu-ready base.",
-    },
-
     admin: {
       menu: "Admin",
       tenants: "Tenants",
-      title: "Platform administration",
-      description:
-        "Manage products, plans, subscriptions, active tenant products and users.",
-      products: "Products",
-      plans: "Plans",
-      planProducts: "Plan products",
-      subscriptions: "Subscriptions",
-      tenantProducts: "Tenant products",
+      title: "Administration",
+      description: "Manage tenants and users.",
       tenantUsers: "Tenant users",
       comingSoonTitle: "Administration page ready",
       comingSoonDescription:
-        "This page is already protected for platform administrators. The next step will be turning it into an editable grid.",
+        "Review and manage the tenant and user structure.",
       usersWithoutTenant: "Users without tenant",
       usersWithoutTenantDescription:
         "Users that exist in Supabase Auth but do not have any active tenant assigned.",

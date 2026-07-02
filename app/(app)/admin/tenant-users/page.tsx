@@ -7,7 +7,7 @@ import {
   includesSearch,
   type RelatedRecord,
 } from "@/lib/admin/tableRows";
-import { requirePlatformAdmin } from "@/lib/auth/requirePlatformAdmin";
+import { requireTenantPageAccess } from "@/lib/auth/requireTenantPageAccess";
 import { getDictionary } from "@/lib/i18n/server";
 import { listAdminTenantUsersWithTenants } from "@/lib/repositories/adminTablesRepository";
 import { getSingleSearchParam } from "@/lib/search/textSearch";
@@ -32,7 +32,7 @@ type TenantUserRecord = {
 export default async function TenantUsersPage({
   searchParams,
 }: TenantUsersPageProps) {
-  await requirePlatformAdmin();
+  await requireTenantPageAccess("admin");
 
   const { dict } = await getDictionary();
 

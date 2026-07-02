@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-import { isTenantAdministratorRole } from "@/lib/auth/tenantRolePermissions";
-import { getTenantProducts } from "@/lib/billing/getTenantProducts";
 import { requireCompanyContext } from "@/lib/company/requireCompanyContext";
 import { getDictionary } from "@/lib/i18n/server";
 
@@ -44,15 +42,8 @@ function ConfigurationGroupCard({ group }: { group: ConfigurationGroup }) {
 }
 
 export default async function ConfigurationsPage() {
-  const { supabase, tenant, role } = await requireCompanyContext();
+  await requireCompanyContext();
   const { dict } = await getDictionary();
-
-  const activeProducts = await getTenantProducts(supabase, tenant.id);
-  const hasPortal = activeProducts.some((product) => product.code === "portal");
-  const hasInvoicing = activeProducts.some(
-    (product) => product.code === "invoicing"
-  );
-  const isTenantAdministrator = isTenantAdministratorRole(role);
 
   const generalLinks: ConfigurationLink[] = [
     {
@@ -63,14 +54,11 @@ export default async function ConfigurationsPage() {
       href: "/countries",
       label: dict.nav.countries,
     },
-  ];
-
-  if (isTenantAdministrator) {
-    generalLinks.push({
+    {
       href: "/field-visibility-preferences",
       label: dict.fieldVisibilityPreferences.title,
-    });
-  }
+    },
+  ];
 
   generalLinks.push({
     href: "/email-configurations",
@@ -105,40 +93,33 @@ export default async function ConfigurationsPage() {
 
   const purchasingLinks: ConfigurationLink[] = [
     {
+      href: "/items",
+      label: dict.items.title,
+    },
+    {
       href: "/suppliers",
       label: dict.nav.suppliers,
     },
-  ];
-  purchasingLinks.unshift({
-    href: "/items",
-    label: dict.items.title,
-  });
-
-  if (hasPortal) {
-    purchasingLinks.push({
+    {
       href: "/purchase-invoices",
       label: dict.purchaseInvoices.title,
-    });
-
-    purchasingLinks.push({
+    },
+    {
       href: "/portal-supplier-invoices",
       label: dict.portalSupplierInvoices.title,
-    });
-  }
+    },
+  ];
 
-  const salesLinks: ConfigurationLink[] = [];
-
-  salesLinks.unshift({
-    href: "/items",
-    label: dict.items.title,
-  });
-
-  if (hasInvoicing) {
-    salesLinks.push({
+  const salesLinks: ConfigurationLink[] = [
+    {
+      href: "/items",
+      label: dict.items.title,
+    },
+    {
       href: "/sales-invoices",
       label: dict.salesInvoices.title,
-    });
-  }
+    },
+  ];
 
   const groups: ConfigurationGroup[] = [
     {

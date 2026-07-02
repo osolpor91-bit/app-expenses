@@ -100,11 +100,11 @@ export default async function HomePage() {
 
                 <div className="card-app-soft p-4">
                   <div className="font-semibold text-primary-app">
-                    {dict.publicHome.activeProductsTitle}
+                    {dict.publicHome.roleBasedAccessTitle}
                   </div>
 
                   <div className="mt-1 text-app-muted">
-                    {dict.publicHome.activeProductsDescription}
+                    {dict.publicHome.roleBasedAccessDescription}
                   </div>
                 </div>
               </div>

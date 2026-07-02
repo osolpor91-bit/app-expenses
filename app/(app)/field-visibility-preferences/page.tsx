@@ -1,6 +1,3 @@
-import { notFound } from "next/navigation";
-
-import { isTenantAdministratorRole } from "@/lib/auth/tenantRolePermissions";
 import {
     getEntityDictionarySection,
     getEntitySubformDictionarySection,
@@ -84,12 +81,8 @@ function getTargetLabel({
 }
 
 export default async function FieldVisibilityPreferencesPage() {
-    const { supabase, user, tenant, activeCompany, role } =
+    const { supabase, user, tenant, activeCompany } =
         await requireCompanyContext();
-
-    if (!isTenantAdministratorRole(role)) {
-        notFound();
-    }
     const { dict } = await getDictionary();
 
     const pageLabels = getSection(dict, "fieldVisibilityPreferences");

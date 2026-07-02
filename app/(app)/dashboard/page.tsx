@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { getTenantProducts } from "@/lib/billing/getTenantProducts";
 import { requireCompanyContext } from "@/lib/company/requireCompanyContext";
 import { getDictionary } from "@/lib/i18n/server";
 import { countCompanyRows } from "@/lib/repositories/dashboardRepository";
@@ -10,15 +9,12 @@ export default async function DashboardPage() {
     await requireCompanyContext();
   const { dict } = await getDictionary();
 
-  const [products, suppliersCount] = await Promise.all([
-    getTenantProducts(supabase, tenant.id),
-    countCompanyRows({
-      supabase,
-      tableName: "suppliers",
-      tenantId: tenant.id,
-      companyId: activeCompany?.id,
-    }),
-  ]);
+  const suppliersCount = await countCompanyRows({
+    supabase,
+    tableName: "suppliers",
+    tenantId: tenant.id,
+    companyId: activeCompany?.id,
+  });
 
   return (
     <section className="space-y-8">
@@ -34,41 +30,6 @@ export default async function DashboardPage() {
         <p className="mt-2 text-sm text-app-muted">
           {dict.common.role}: {role}
         </p>
-      </div>
-
-      <div>
-        <h2 className="text-xl font-semibold text-primary-app">
-          {dict.dashboard.activeProducts}
-        </h2>
-
-        {products.length === 0 ? (
-          <div className="card-app-soft mt-4 p-5">
-            <h3 className="text-base font-semibold text-primary-app">
-              {dict.dashboard.noActiveProducts}
-            </h3>
-
-            <p className="mt-2 text-sm text-app-muted">
-              {dict.dashboard.noActiveProductsDescription}
-            </p>
-          </div>
-        ) : (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <div
-                key={product.productId}
-                className="card-app-soft flex min-h-16 items-center justify-between gap-4 px-5 py-3"
-              >
-                <h3 className="text-base font-medium text-primary-app">
-                  {product.name}
-                </h3>
-
-                <span className="badge-app shrink-0 text-sm">
-                  {dict.common.active}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       <div>

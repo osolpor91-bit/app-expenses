@@ -1,7 +1,5 @@
 "use server";
 
-import { isTenantAdministratorRole } from "@/lib/auth/tenantRolePermissions";
-
 import { revalidatePath } from "next/cache";
 
 import { requireCompanyContext } from "@/lib/company/requireCompanyContext";
@@ -186,14 +184,8 @@ export async function saveFieldVisibilityPreferencesAction({
 }: SaveFieldVisibilityPreferencesInput): Promise<
     EntityOperationResult<{ preferences: FieldVisibilityPreference[] }>
 > {
-    const { supabase, user, tenant, activeCompany, role } =
+    const { supabase, user, tenant, activeCompany } =
         await requireCompanyContext();
-
-    if (!isTenantAdministratorRole(role)) {
-        return entityOperationError(
-            "No tienes permisos para modificar la personalización de campos."
-        );
-    }
 
     const entity = getEntityDefinition(entityKey);
 

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getAuthUserById } from "@/lib/admin/authUsers";
-import { requirePlatformAdmin } from "@/lib/auth/requirePlatformAdmin";
+import { requireTenantPageAccess } from "@/lib/auth/requireTenantPageAccess";
 import {
   getAdminTenantIdById,
   getAdminTenantUserAssignment,
@@ -25,7 +25,7 @@ function getRequiredString(formData: FormData, key: string) {
 }
 
 export async function assignTenantToUserAction(formData: FormData) {
-  await requirePlatformAdmin();
+  await requireTenantPageAccess("admin");
 
   const userId = getRequiredString(formData, "userId");
   const tenantId = getRequiredString(formData, "tenantId");

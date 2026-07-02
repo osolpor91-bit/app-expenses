@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import { matchesSearchValues } from "@/lib/admin/tableRows";
-import { requirePlatformAdmin } from "@/lib/auth/requirePlatformAdmin";
+import { requireTenantPageAccess } from "@/lib/auth/requireTenantPageAccess";
 import { getDictionary } from "@/lib/i18n/server";
 import { listAdminTenants } from "@/lib/repositories/adminTablesRepository";
 import { getSingleSearchParam } from "@/lib/search/textSearch";
@@ -27,13 +27,13 @@ type TenantRow = {
 export default async function AdminTenantsPage({
   searchParams,
 }: AdminTenantsPageProps) {
-  const { supabase } = await requirePlatformAdmin();
+  await requireTenantPageAccess("admin");
   const { dict } = await getDictionary();
 
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const search = getSingleSearchParam(resolvedSearchParams.search);
 
-  const { data, error } = await listAdminTenants({ supabase });
+  const { data, error } = await listAdminTenants();
 
   if (error) {
     throw new Error(
