@@ -7,7 +7,7 @@ export const emailSendLogFields: readonly EntityFieldDefinition[] = [
     labelKey: "relatedType",
     type: "option",
     required: true,
-    showInList: true,
+    showInList: true,//
     showInForm: false,
     options: [
       {
