@@ -100,7 +100,7 @@ function TreasuryBalanceSection({
                 : row.expectedExpense;
               const balance = isIncome
                 ? row.realIncome + row.expectedIncome
-                : -row.expenseDifference;
+                : -row.plannedExpense;
 
               return (
                 <tr
@@ -144,10 +144,10 @@ function TreasuryBalanceSection({
               </td>
               <td
                 className={`whitespace-nowrap border-l border-app-border px-1.5 py-1 text-right tabular-nums ${getBalanceTextClass(
-                  totals.balance
+                  totals.plannedBalance
                 )}`}
               >
-                {formatDecimalValue(totals.balance)}
+                {formatDecimalValue(totals.plannedBalance)}
               </td>
             </tr>
           </tfoot>
@@ -276,10 +276,25 @@ export default async function TreasuryBalancePage({
             />
           ) : null}
 
-          <div className="flex w-[365px] max-w-full items-center justify-between rounded-xl border border-primary-app bg-app-soft px-2 py-1.5 text-xs font-bold text-primary-app">
-            <span>{dict.treasuryBalance.totalBalance}</span>
-            <span className={getBalanceTextClass(totals.balance)}>
-              {formatDecimalValue(totals.balance)}
+          <div
+            id="real-balance"
+            className="grid w-[365px] max-w-full grid-cols-[1fr_65px_65px_75px] items-center rounded-xl border border-primary-app bg-app-soft py-1.5 text-xs font-bold text-primary-app"
+          >
+            <span className="px-1.5">
+              {dict.treasuryBalance.totalBalance}
+            </span>
+            <span
+              className={`whitespace-nowrap px-1 text-right tabular-nums ${getBalanceTextClass(
+                totals.realBalance
+              )}`}
+            >
+              {formatDecimalValue(totals.realBalance)}
+            </span>
+            <span aria-hidden="true" />
+            <span className={`whitespace-nowrap px-1.5 text-right tabular-nums ${getBalanceTextClass(
+              totals.plannedBalance
+            )}`}>
+              {formatDecimalValue(totals.plannedBalance)}
             </span>
           </div>
         </div>

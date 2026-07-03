@@ -58,9 +58,9 @@ export default async function DashboardPage() {
     guestsCount = guestsResult.count ?? 0;
   }
 
-  const balance = getTreasuryBalanceTotals(
+  const balanceTotals = getTreasuryBalanceTotals(
     buildTreasuryBalanceRows(movements)
-  ).balance;
+  );
 
   return (
     <section className="space-y-8">
@@ -104,10 +104,31 @@ export default async function DashboardPage() {
 
             <p
               className={`text-3xl font-bold ${
-                balance < 0 ? "text-red-700" : "text-primary-app"
+                balanceTotals.plannedBalance < 0
+                  ? "text-red-700"
+                  : "text-primary-app"
               }`}
             >
-              {formatDecimalValue(balance)}
+              {formatDecimalValue(balanceTotals.plannedBalance)}
+            </p>
+          </Link>
+
+          <Link
+            href="/treasury-general/balance#real-balance"
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.realBalance}
+            </p>
+
+            <p
+              className={`text-3xl font-bold ${
+                balanceTotals.realBalance < 0
+                  ? "text-red-700"
+                  : "text-primary-app"
+              }`}
+            >
+              {formatDecimalValue(balanceTotals.realBalance)}
             </p>
           </Link>
 

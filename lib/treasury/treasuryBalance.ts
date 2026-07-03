@@ -19,8 +19,9 @@ export type TreasuryBalanceRow = {
   expectedIncome: number;
   realExpense: number;
   expectedExpense: number;
-  expenseDifference: number;
-  balance: number;
+  plannedExpense: number;
+  plannedBalance: number;
+  realBalance: number;
 };
 
 export type TreasuryBalanceTotals = Omit<
@@ -86,8 +87,9 @@ export function buildTreasuryBalanceRows(
         expectedIncome: 0,
         realExpense: 0,
         expectedExpense: 0,
-        expenseDifference: 0,
-        balance: 0,
+        plannedExpense: 0,
+        plannedBalance: 0,
+        realBalance: 0,
       } satisfies TreasuryBalanceRow);
 
     addMovementAmount(
@@ -101,14 +103,17 @@ export function buildTreasuryBalanceRows(
 
   return Array.from(rowsByAccount.values())
     .map((row) => {
-      const expenseDifference = Math.abs(
-        row.expectedExpense - row.realExpense
+      const plannedExpense = Math.max(
+        row.expectedExpense,
+        row.realExpense
       );
 
       return {
         ...row,
-        expenseDifference,
-        balance: row.realIncome + row.expectedIncome - expenseDifference,
+        plannedExpense,
+        plannedBalance:
+          row.realIncome + row.expectedIncome - plannedExpense,
+        realBalance: row.realIncome - row.realExpense,
       };
     })
     .sort((left, right) =>
@@ -128,17 +133,18 @@ export function getTreasuryBalanceTotals(
       expectedIncome: totals.expectedIncome + row.expectedIncome,
       realExpense: totals.realExpense + row.realExpense,
       expectedExpense: totals.expectedExpense + row.expectedExpense,
-      expenseDifference:
-        totals.expenseDifference + row.expenseDifference,
-      balance: totals.balance + row.balance,
+      plannedExpense: totals.plannedExpense + row.plannedExpense,
+      plannedBalance: totals.plannedBalance + row.plannedBalance,
+      realBalance: totals.realBalance + row.realBalance,
     }),
     {
       realIncome: 0,
       expectedIncome: 0,
       realExpense: 0,
       expectedExpense: 0,
-      expenseDifference: 0,
-      balance: 0,
+      plannedExpense: 0,
+      plannedBalance: 0,
+      realBalance: 0,
     }
   );
 }
