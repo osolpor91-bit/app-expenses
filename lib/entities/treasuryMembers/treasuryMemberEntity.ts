@@ -32,6 +32,16 @@ export const treasuryMemberFields: readonly EntityFieldDefinition[] = [
     showInList: true,
     showInGrid: true,
   },
+  {
+    key: "is_guest",
+    dbName: "is_guest",
+    labelKey: "isGuest",
+    type: "boolean",
+    required: false,
+    newRowDefaultValue: false,
+    showInList: true,
+    showInGrid: true,
+  },
 ];
 
 export const treasuryMemberFilters: readonly EntityFilterDefinition[] = [
@@ -53,6 +63,12 @@ export const treasuryMemberFilters: readonly EntityFilterDefinition[] = [
     paramName: "isDefault",
     column: "is_default",
     labelKey: "isDefault",
+    type: "boolean",
+  },
+  {
+    paramName: "isGuest",
+    column: "is_guest",
+    labelKey: "isGuest",
     type: "boolean",
   },
 ];
@@ -103,6 +119,10 @@ export const treasuryMemberEntity = {
       is_default: {
         flex: 1,
         minWidth: 140,
+      },
+      is_guest: {
+        flex: 1,
+        minWidth: 110,
       },
     },
   },

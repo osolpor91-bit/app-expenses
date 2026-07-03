@@ -103,6 +103,9 @@ export const dictionaries = {
       indicators: "Indicadores y accesos rápidos",
       quickAction: "Acción rápida",
       newSupplier: "Nuevo proveedor",
+      treasury: "Tesorería",
+      registerExpense: "Registrar gasto",
+      totalBalance: "Balance total",
     },
 
     companies: {
@@ -228,7 +231,7 @@ export const dictionaries = {
 
       treasuryMovementAction: "Añadir movimiento",
       treasuryMovementsAction: "Ver movimientos",
-      treasuryBalanceAction: "Balance",
+      treasuryBalanceAction: "Balance total",
       treasuryMovementTitle: "Nuevo movimiento de tesorería",
       treasuryMovementType: "Tipo",
       treasuryMovementAmount: "Importe",
@@ -246,6 +249,8 @@ export const dictionaries = {
       treasuryMovementNoIncomeAccounts:
         "No hay cuentas disponibles del grupo 7: Ingresos.",
       treasuryMovementPaidBy: "Pagado por",
+      treasuryMovementPaidByPlaceholder:
+        "Buscar miembro por nombre o apellidos",
       treasuryMovementPaidByRequired:
         "El miembro que ha pagado es obligatorio.",
       treasuryMovementNoMembers:
@@ -267,7 +272,7 @@ export const dictionaries = {
       title: "Balance de tesorería",
       backToTreasuryGeneral: "Volver a tesorería general",
       helpText:
-        "Los ingresos reales y previstos se suman. En cada cuenta, los gastos reales compensan a los previstos y solo la diferencia afecta al balance.",
+        "Balance Susarros.",
       date: "Fecha",
       accountNo: "Cuenta",
       accountDescription: "Descripción",
@@ -283,6 +288,7 @@ export const dictionaries = {
       expenseDifference: "Diferencia gastos",
       balance: "Balance",
       total: "Total general",
+      totalBalance: "Balance total",
       emptyList: "No hay movimientos para el periodo seleccionado.",
       errorReading: "Error leyendo el balance de tesorería",
       noActiveCompanyDescription:
@@ -320,6 +326,8 @@ export const dictionaries = {
       treasuryMovementNoIncomeAccounts:
         "No hay cuentas disponibles del grupo 7: Ingresos.",
       treasuryMovementPaidBy: "Pagado por",
+      treasuryMovementPaidByPlaceholder:
+        "Buscar miembro por nombre o apellidos",
       treasuryMovementPaidByRequired:
         "El miembro que ha pagado es obligatorio.",
       treasuryMovementNoMembers:
@@ -349,6 +357,7 @@ export const dictionaries = {
       firstName: "Nombre",
       lastName: "Apellidos",
       isDefault: "Predeterminado",
+      isGuest: "Invitado",
       emptyList: "No hay miembros creados.",
       errorReading: "Error leyendo miembros",
       errorRefreshing: "Error actualizando miembros",
@@ -1412,6 +1421,9 @@ export const dictionaries = {
       indicators: "Indicators and quick access",
       quickAction: "Quick action",
       newSupplier: "New supplier",
+      treasury: "Treasury",
+      registerExpense: "Register expense",
+      totalBalance: "Total balance",
     },
 
     companies: {
@@ -1538,7 +1550,7 @@ export const dictionaries = {
 
       treasuryMovementAction: "Add movement",
       treasuryMovementsAction: "View movements",
-      treasuryBalanceAction: "Balance",
+      treasuryBalanceAction: "Total balance",
       treasuryMovementTitle: "New treasury movement",
       treasuryMovementType: "Type",
       treasuryMovementAmount: "Amount",
@@ -1556,6 +1568,8 @@ export const dictionaries = {
       treasuryMovementNoIncomeAccounts:
         "There are no available accounts in group 7: Income.",
       treasuryMovementPaidBy: "Paid by",
+      treasuryMovementPaidByPlaceholder:
+        "Search member by first or last name",
       treasuryMovementPaidByRequired: "The paying member is required.",
       treasuryMovementNoMembers:
         "There are no members available. Create one in Settings.",
@@ -1592,6 +1606,7 @@ export const dictionaries = {
       expenseDifference: "Expense difference",
       balance: "Balance",
       total: "Grand total",
+      totalBalance: "Total balance",
       emptyList: "There are no movements for the selected period.",
       errorReading: "Error reading treasury balance",
       noActiveCompanyDescription:
@@ -1629,6 +1644,8 @@ export const dictionaries = {
       treasuryMovementNoIncomeAccounts:
         "There are no available accounts in group 7: Income.",
       treasuryMovementPaidBy: "Paid by",
+      treasuryMovementPaidByPlaceholder:
+        "Search member by first or last name",
       treasuryMovementPaidByRequired: "The paying member is required.",
       treasuryMovementNoMembers:
         "There are no members available. Create one in Settings.",
@@ -1657,6 +1674,7 @@ export const dictionaries = {
       firstName: "First name",
       lastName: "Last name",
       isDefault: "Default",
+      isGuest: "Guest",
       emptyList: "There are no members.",
       errorReading: "Error reading members",
       errorRefreshing: "Error refreshing members",

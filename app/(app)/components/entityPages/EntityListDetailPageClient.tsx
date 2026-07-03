@@ -17,6 +17,7 @@ import {
   getFieldsForList,
 } from "@/lib/entityFields/helpers";
 import { formatFieldValueForDisplay } from "@/lib/formatters/fieldFormatters";
+import { isTreasuryMovementType } from "@/lib/treasury/treasuryGeneral";
 
 import SelectableEntityList, {
   type SelectableEntityRecord,
@@ -282,10 +283,19 @@ export default function EntityListDetailPageClient({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const requestedTreasuryMovementTypeValue =
+    entity.key === "treasuryGeneral"
+      ? searchParams.get("addMovement") ?? ""
+      : "";
+  const requestedTreasuryMovementType = isTreasuryMovementType(
+    requestedTreasuryMovementTypeValue
+  )
+    ? requestedTreasuryMovementTypeValue
+    : "";
   const [isTreasuryMovementModalOpen, setIsTreasuryMovementModalOpen] =
-    useState(false);
+    useState(Boolean(requestedTreasuryMovementType));
   const [defaultTreasuryMovementType, setDefaultTreasuryMovementType] =
-    useState("");
+    useState(requestedTreasuryMovementType);
   const [treasuryMovementToEdit, setTreasuryMovementToEdit] =
     useState<TreasuryMovementEditRecord | null>(null);
 
@@ -309,6 +319,21 @@ export default function EntityListDetailPageClient({
     const queryString = params.toString();
 
     router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  }
+
+  function closeTreasuryMovementModal() {
+    setIsTreasuryMovementModalOpen(false);
+    setDefaultTreasuryMovementType("");
+
+    if (!searchParams.has("addMovement")) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("addMovement");
+
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname);
   }
 
   async function deleteRecord(
@@ -464,10 +489,7 @@ export default function EntityListDetailPageClient({
           defaultMemberId={defaultTreasuryMemberId}
           defaultTreasuryType={defaultTreasuryMovementType}
           labels={labels}
-          onClose={() => {
-            setIsTreasuryMovementModalOpen(false);
-            setDefaultTreasuryMovementType("");
-          }}
+          onClose={closeTreasuryMovementModal}
         />
       ) : null}
 

@@ -26,6 +26,8 @@ export type TreasuryAccountOption = {
 export type TreasuryMemberOption = {
   value: string;
   label: string;
+  menuLabel?: string;
+  searchLabel?: string;
 };
 
 export type TreasuryMovementEditRecord = {
@@ -332,20 +334,19 @@ export default function TreasuryMovementModal({
 
             <label className="block text-xs font-semibold text-app">
               {getLabel(labels, "treasuryMovementPaidBy", "Pagado por")}
-              <select
+              <AutocompleteInput
                 value={paidByMemberId}
-                onChange={(event) => setPaidByMemberId(event.target.value)}
+                options={memberOptions}
+                onValueChange={setPaidByMemberId}
                 className="input-app mt-1 px-3 py-2 text-sm"
+                placeholder={getLabel(
+                  labels,
+                  "treasuryMovementPaidByPlaceholder",
+                  "Buscar miembro por nombre o apellidos"
+                )}
                 required
                 disabled={memberOptions.length === 0 || isSubmitting}
-              >
-                <option value="">-</option>
-                {memberOptions.map((member) => (
-                  <option key={member.value} value={member.value}>
-                    {member.label}
-                  </option>
-                ))}
-              </select>
+              />
             </label>
 
             {memberOptions.length === 0 ? (

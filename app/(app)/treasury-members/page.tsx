@@ -16,7 +16,7 @@ export default function TreasuryMembersPage({
     <EntityEditableGridPage
       entity={treasuryMemberEntity}
       searchParams={searchParams}
-      minWidthClass="min-w-[680px]"
+      minWidthClass="min-w-[790px]"
     />
   );
 }

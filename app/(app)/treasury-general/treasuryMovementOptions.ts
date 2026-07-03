@@ -95,6 +95,8 @@ export async function loadTreasuryMovementOptions(): Promise<TreasuryMovementOpt
     options.push({
       value,
       label,
+      menuLabel: label,
+      searchLabel: label,
     });
 
     return options;
