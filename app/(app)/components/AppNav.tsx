@@ -48,11 +48,13 @@ function TopLink({
   label,
   pathname,
   activeHrefs = [],
+  prominent = false,
 }: {
   href: string;
   label: string;
   pathname: string;
   activeHrefs?: string[];
+  prominent?: boolean;
 }) {
   const isActive =
     isActivePath(pathname, href) ||
@@ -61,7 +63,7 @@ function TopLink({
   return (
     <Link
       href={href}
-      className={`text-sm font-medium transition ${isActive ? "text-primary-app" : "text-app-muted hover:text-primary-app"
+      className={`${prominent ? "text-base font-semibold" : "text-sm font-medium"} transition ${isActive ? "text-primary-app" : "text-app-muted hover:text-primary-app"
         }`}
     >
       {label}
@@ -214,7 +216,12 @@ export default function AppNav({ role, labels }: AppNavProps) {
 
   return (
     <nav ref={navRef} className="flex flex-wrap items-center gap-6">
-      <TopLink href="/dashboard" label={labels.menu} pathname={pathname} />
+      <TopLink
+        href="/dashboard"
+        label={labels.menu}
+        pathname={pathname}
+        prominent
+      />
 
       <TopLink
         href="/configurations"

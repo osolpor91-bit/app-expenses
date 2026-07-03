@@ -6,21 +6,58 @@ import { getDictionary } from "@/lib/i18n/server";
 import {
   buildTreasuryBalanceRows,
   getTreasuryBalanceTotals,
+  type TreasuryBalanceMovement,
 } from "@/lib/treasury/treasuryBalance";
 import { listTreasuryBalanceMovements } from "@/lib/treasury/treasuryBalanceRepository";
 
 export default async function DashboardPage() {
-  const { supabase, tenant, role, activeCompany } =
+  const { supabase, tenant, activeCompany } =
     await requireCompanyContext();
   const { dict } = await getDictionary();
 
-  const movements = activeCompany
-    ? await listTreasuryBalanceMovements({
+  let movements: TreasuryBalanceMovement[] = [];
+  let membersCount = 0;
+  let guestsCount = 0;
+
+  if (activeCompany) {
+    const [loadedMovements, membersResult, guestsResult] = await Promise.all([
+      listTreasuryBalanceMovements({
         supabase,
         tenantId: tenant.id,
         companyId: activeCompany.id,
-      })
-    : [];
+      }),
+      supabase
+        .from("treasury_members")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenant.id)
+        .eq("company_id", activeCompany.id)
+        .eq("is_guest", false)
+        .eq("is_default", false),
+      supabase
+        .from("treasury_members")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenant.id)
+        .eq("company_id", activeCompany.id)
+        .eq("is_guest", true),
+    ]);
+
+    if (membersResult.error) {
+      throw new Error(
+        `${dict.dashboard.membersReadError}: ${membersResult.error.message}`
+      );
+    }
+
+    if (guestsResult.error) {
+      throw new Error(
+        `${dict.dashboard.guestsReadError}: ${guestsResult.error.message}`
+      );
+    }
+
+    movements = loadedMovements;
+    membersCount = membersResult.count ?? 0;
+    guestsCount = guestsResult.count ?? 0;
+  }
+
   const balance = getTreasuryBalanceTotals(
     buildTreasuryBalanceRows(movements)
   ).balance;
@@ -28,17 +65,9 @@ export default async function DashboardPage() {
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium text-app-muted">
-          {dict.dashboard.mainMenu}
-        </p>
-
-        <h1 className="mt-1 text-2xl font-bold text-[#6b7f22] sm:text-3xl">
+        <h1 className="text-2xl font-bold text-[#6b7f22] sm:text-3xl">
           {activeCompany?.name ?? tenant.name}
         </h1>
-
-        <p className="mt-2 text-sm text-app-muted">
-          {dict.common.role}: {role}
-        </p>
       </div>
 
       <div>
@@ -79,6 +108,69 @@ export default async function DashboardPage() {
               }`}
             >
               {formatDecimalValue(balance)}
+            </p>
+          </Link>
+
+          <Link
+            href="/treasury-general/pending-settlements"
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.settlements}
+            </p>
+
+            <p className="text-2xl font-bold text-primary-app">
+              {dict.dashboard.pendingSettlements}
+            </p>
+          </Link>
+
+          <Link
+            href="/treasury-general/settle-payments"
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.quickAction}
+            </p>
+
+            <p className="text-2xl font-bold text-primary-app">
+              {dict.dashboard.settlePayments}
+            </p>
+          </Link>
+
+          <Link
+            href={{
+              pathname: "/treasury-members",
+              query: {
+                isGuest: "false",
+                isDefault: "false",
+              },
+            }}
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.members}
+            </p>
+
+            <p className="text-3xl font-bold text-primary-app">
+              {membersCount}
+            </p>
+          </Link>
+
+          <Link
+            href={{
+              pathname: "/treasury-members",
+              query: {
+                isGuest: "true",
+              },
+            }}
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.guests}
+            </p>
+
+            <p className="text-3xl font-bold text-primary-app">
+              {guestsCount}
             </p>
           </Link>
         </div>

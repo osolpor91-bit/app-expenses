@@ -27,6 +27,11 @@ export type UpdateTreasuryMovementInput = CreateTreasuryMovementInput & {
   id: string;
 };
 
+export type SettleTreasuryMovementsInput = {
+  movementIds: string[];
+  settledByMemberId: string;
+};
+
 function isValidMovementDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false;
@@ -218,5 +223,178 @@ export async function updateTreasuryMovementAction(
   return saveTreasuryMovement({
     input,
     movementId,
+  });
+}
+
+export async function settleTreasuryMovementsAction(
+  input: SettleTreasuryMovementsInput
+): Promise<
+  EntityOperationResult<{
+    movementCount: number;
+    totalAmount: number;
+    settledByMemberName: string;
+    isClosed: boolean;
+  }>
+> {
+  const movementIds = Array.from(
+    new Set(
+      (input.movementIds ?? [])
+        .map((movementId) => String(movementId ?? "").trim())
+        .filter(Boolean)
+    )
+  );
+  const settledByMemberId = String(input.settledByMemberId ?? "").trim();
+
+  if (movementIds.length === 0) {
+    return entityOperationError(
+      "Selecciona al menos un movimiento para liquidar."
+    );
+  }
+
+  if (movementIds.length > 500) {
+    return entityOperationError(
+      "No se pueden liquidar más de 500 movimientos a la vez."
+    );
+  }
+
+  if (!settledByMemberId) {
+    return entityOperationError("Selecciona el miembro que realiza el pago.");
+  }
+
+  const { supabase, tenant, activeCompany } = await requireCompanyContext();
+
+  if (!activeCompany) {
+    return entityOperationError(
+      "No hay una empresa activa. Selecciona una empresa para liquidar pagos."
+    );
+  }
+
+  const [membersResult, movementsResult] = await Promise.all([
+    supabase
+      .from("treasury_members")
+      .select("id, first_name, last_name, is_default")
+      .eq("tenant_id", tenant.id)
+      .eq("company_id", activeCompany.id),
+    supabase
+      .from("treasury_general_movements")
+      .select(
+        "id, treasury_type, amount, paid_by_member_id, settled_by_member_id"
+      )
+      .eq("tenant_id", tenant.id)
+      .eq("company_id", activeCompany.id)
+      .in("id", movementIds),
+  ]);
+
+  if (membersResult.error) {
+    return entityOperationError(membersResult.error.message);
+  }
+
+  if (movementsResult.error) {
+    return entityOperationError(movementsResult.error.message);
+  }
+
+  const members = membersResult.data ?? [];
+  const defaultMembers = members.filter((member) => member.is_default);
+  const settledByMember = members.find(
+    (member) => member.id === settledByMemberId
+  );
+
+  if (defaultMembers.length !== 1) {
+    return entityOperationError(
+      "Debe existir un único miembro predeterminado para liquidar pagos."
+    );
+  }
+
+  if (!settledByMember) {
+    return entityOperationError(
+      "El miembro que realiza el pago no existe o pertenece a otra empresa."
+    );
+  }
+
+  const movements = movementsResult.data ?? [];
+
+  if (movements.length !== movementIds.length) {
+    return entityOperationError(
+      "Alguno de los movimientos seleccionados ya no está disponible."
+    );
+  }
+
+  const defaultMemberId = String(defaultMembers[0]?.id ?? "");
+  let totalInCents = 0;
+
+  for (const movement of movements) {
+    if (movement.treasury_type !== "Gastos Reales") {
+      return entityOperationError(
+        "Solo se pueden liquidar movimientos de Gastos Reales."
+      );
+    }
+
+    const currentCreditorId = String(
+      movement.settled_by_member_id ?? movement.paid_by_member_id ?? ""
+    ).trim();
+
+    if (!currentCreditorId || currentCreditorId === defaultMemberId) {
+      return entityOperationError(
+        "Alguno de los movimientos seleccionados ya está liquidado."
+      );
+    }
+
+    if (currentCreditorId === settledByMemberId) {
+      return entityOperationError(
+        "Un miembro no puede liquidar un importe que ya se le debe a él."
+      );
+    }
+
+    const amount = Number(movement.amount);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return entityOperationError(
+        "Alguno de los movimientos tiene un importe no válido."
+      );
+    }
+
+    totalInCents += Math.round(amount * 100);
+  }
+
+  const { data: updatedMovements, error: updateError } = await supabase
+    .from("treasury_general_movements")
+    .update({
+      settled_by_member_id: settledByMemberId,
+    })
+    .eq("tenant_id", tenant.id)
+    .eq("company_id", activeCompany.id)
+    .eq("treasury_type", "Gastos Reales")
+    .in("id", movementIds)
+    .select("id");
+
+  if (updateError) {
+    return entityOperationError(updateError.message);
+  }
+
+  if ((updatedMovements ?? []).length !== movementIds.length) {
+    return entityOperationError(
+      "No se han podido liquidar todos los movimientos seleccionados."
+    );
+  }
+
+  revalidatePath("/treasury-general");
+  revalidatePath("/treasury-general/movements");
+  revalidatePath("/treasury-general/pending-settlements");
+  revalidatePath("/treasury-general/settle-payments");
+  revalidatePath("/dashboard");
+
+  const settledByMemberName = [
+    settledByMember.first_name,
+    settledByMember.last_name,
+  ]
+    .map((part) => String(part ?? "").trim())
+    .filter(Boolean)
+    .join(" ");
+
+  return entityOperationOk({
+    movementCount: movementIds.length,
+    totalAmount: totalInCents / 100,
+    settledByMemberName,
+    isClosed: settledByMemberId === defaultMemberId,
   });
 }

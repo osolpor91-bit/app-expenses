@@ -442,6 +442,29 @@ export default function EntityListDetailPageClient({
               >
                 {labels.treasuryBalanceAction ?? "Balance"}
               </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  router.push("/treasury-general/pending-settlements")
+                }
+                disabled={!scopeAvailable}
+                className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.treasuryPendingSettlementsAction ??
+                  "Liquidaciones pendientes"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  router.push("/treasury-general/settle-payments")
+                }
+                disabled={!scopeAvailable}
+                className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.treasurySettlePaymentsAction ?? "Liquidar pagos"}
+              </button>
             </>
           );
         }}

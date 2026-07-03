@@ -55,6 +55,24 @@ export const treasuryGeneralMovementFields: readonly EntityFieldDefinition[] = [
     showInForm: false,
   },
   {
+    key: "settled_by_member_id",
+    dbName: "settled_by_member_id",
+    labelKey: "settledBy",
+    type: "select",
+    required: false,
+    editable: false,
+    relation: {
+      entityKey: "treasuryMembers",
+      displayFieldName: "settled_by_member_display",
+      relationDataFieldName: "settled_by_member",
+      optionValueField: "id",
+      optionLabelFieldNames: ["first_name", "last_name"],
+      labelSeparator: " ",
+    },
+    showInList: true,
+    showInForm: false,
+  },
+  {
     key: "amount",
     dbName: "amount",
     labelKey: "amount",
@@ -112,6 +130,7 @@ export const treasuryGeneralMovementSelectColumns = getDbColumnsFromFields(
     "created_at",
     "updated_at",
     "treasury_members:paid_by_member_id(id, first_name, last_name)",
+    "settled_by_member:settled_by_member_id(id, first_name, last_name)",
   ]
 );
 

@@ -106,6 +106,13 @@ export const dictionaries = {
       treasury: "Tesorería",
       registerExpense: "Registrar gasto",
       totalBalance: "Balance total",
+      settlements: "Liquidaciones",
+      pendingSettlements: "Liquidaciones pendientes",
+      settlePayments: "Liquidar pagos",
+      members: "Miembros",
+      guests: "Invitados",
+      membersReadError: "Error contando miembros",
+      guestsReadError: "Error contando invitados",
     },
 
     companies: {
@@ -232,6 +239,8 @@ export const dictionaries = {
       treasuryMovementAction: "Añadir movimiento",
       treasuryMovementsAction: "Ver movimientos",
       treasuryBalanceAction: "Balance total",
+      treasuryPendingSettlementsAction: "Liquidaciones pendientes",
+      treasurySettlePaymentsAction: "Liquidar pagos",
       treasuryMovementTitle: "Nuevo movimiento de tesorería",
       treasuryMovementType: "Tipo",
       treasuryMovementAmount: "Importe",
@@ -295,6 +304,46 @@ export const dictionaries = {
         "No hay una empresa activa. Selecciona una empresa para consultar el balance.",
     },
 
+    treasurySettlements: {
+      pendingTitle: "Liquidaciones pendientes",
+      pendingHelpText:
+        "Importes de gastos reales que SUSARROS debe actualmente a cada miembro.",
+      settleTitle: "Liquidar pagos",
+      settleHelpText:
+        "Selecciona los movimientos completos y quién realiza el pago. Si paga otro miembro, SUSARROS pasará a deberle el importe.",
+      backToTreasuryGeneral: "Volver a tesorería general",
+      viewPendingAction: "Ver liquidaciones pendientes",
+      settlePaymentsAction: "Liquidar pagos",
+      paidBy: "Liquidado por",
+      paidByPlaceholder: "Buscar miembro por nombre o apellidos",
+      selectAll: "Seleccionar todos",
+      selected: "Seleccionados",
+      movements: "movimiento(s)",
+      total: "Total",
+      grandTotal: "Total pendiente",
+      settle: "Liquidar seleccionados",
+      settling: "Liquidando...",
+      noComment: "Sin comentario",
+      cannotPaySelf: "No puede liquidarse a sí mismo",
+      selectAtLeastOne:
+        "Selecciona al menos un movimiento para liquidar.",
+      selectPayer: "Selecciona el miembro que realiza el pago.",
+      confirmClose:
+        "{member} liquidará {amount} de {count} movimiento(s). Los movimientos quedarán cerrados. ¿Quieres continuar?",
+      confirmTransfer:
+        "{member} asumirá {amount} de {count} movimiento(s). SUSARROS pasará a deberle ese importe. ¿Quieres continuar?",
+      successClosed:
+        "{count} movimiento(s) liquidados por {amount}. La deuda ha quedado cerrada.",
+      successTransferred:
+        "{count} movimiento(s) por {amount} pasan a estar pendientes para {member}.",
+      error: "Error al liquidar los movimientos",
+      emptyList: "No hay liquidaciones pendientes.",
+      noDefaultMember:
+        "Debes marcar un único miembro como predeterminado antes de liquidar pagos.",
+      noActiveCompany:
+        "No hay una empresa activa. Selecciona una empresa para consultar liquidaciones.",
+    },
+
     treasuryGeneralMovements: {
       title: "Movimientos de tesorería",
       backToTreasuryGeneral: "Volver a tesorería general",
@@ -302,6 +351,7 @@ export const dictionaries = {
       treasuryType: "Tipo",
       accountDescription: "Cuenta contable",
       paidBy: "Pagado por",
+      settledBy: "Liquidado por",
       amount: "Importe",
       comment: "Comentario",
       treasuryTypeRealIncome: "Ingresos Reales",
@@ -1424,6 +1474,13 @@ export const dictionaries = {
       treasury: "Treasury",
       registerExpense: "Register expense",
       totalBalance: "Total balance",
+      settlements: "Settlements",
+      pendingSettlements: "Pending settlements",
+      settlePayments: "Settle payments",
+      members: "Members",
+      guests: "Guests",
+      membersReadError: "Error counting members",
+      guestsReadError: "Error counting guests",
     },
 
     companies: {
@@ -1551,6 +1608,8 @@ export const dictionaries = {
       treasuryMovementAction: "Add movement",
       treasuryMovementsAction: "View movements",
       treasuryBalanceAction: "Total balance",
+      treasuryPendingSettlementsAction: "Pending settlements",
+      treasurySettlePaymentsAction: "Settle payments",
       treasuryMovementTitle: "New treasury movement",
       treasuryMovementType: "Type",
       treasuryMovementAmount: "Amount",
@@ -1613,6 +1672,45 @@ export const dictionaries = {
         "There is no active company. Select a company to view the balance.",
     },
 
+    treasurySettlements: {
+      pendingTitle: "Pending settlements",
+      pendingHelpText:
+        "Actual expense amounts that SUSARROS currently owes to each member.",
+      settleTitle: "Settle payments",
+      settleHelpText:
+        "Select complete movements and who makes the payment. If another member pays, SUSARROS will owe that amount to them.",
+      backToTreasuryGeneral: "Back to general treasury",
+      viewPendingAction: "View pending settlements",
+      settlePaymentsAction: "Settle payments",
+      paidBy: "Settled by",
+      paidByPlaceholder: "Search member by first or last name",
+      selectAll: "Select all",
+      selected: "Selected",
+      movements: "movement(s)",
+      total: "Total",
+      grandTotal: "Total pending",
+      settle: "Settle selected",
+      settling: "Settling...",
+      noComment: "No comment",
+      cannotPaySelf: "Cannot settle their own debt",
+      selectAtLeastOne: "Select at least one movement to settle.",
+      selectPayer: "Select the member making the payment.",
+      confirmClose:
+        "{member} will settle {amount} across {count} movement(s). The movements will be closed. Continue?",
+      confirmTransfer:
+        "{member} will assume {amount} across {count} movement(s). SUSARROS will owe that amount to them. Continue?",
+      successClosed:
+        "{count} movement(s) for {amount} were settled. The debt is now closed.",
+      successTransferred:
+        "{count} movement(s) for {amount} are now pending for {member}.",
+      error: "Error settling movements",
+      emptyList: "There are no pending settlements.",
+      noDefaultMember:
+        "Mark exactly one member as default before settling payments.",
+      noActiveCompany:
+        "There is no active company. Select a company to view settlements.",
+    },
+
     treasuryGeneralMovements: {
       title: "Treasury movements",
       backToTreasuryGeneral: "Back to general treasury",
@@ -1620,6 +1718,7 @@ export const dictionaries = {
       treasuryType: "Type",
       accountDescription: "G/L account",
       paidBy: "Paid by",
+      settledBy: "Settled by",
       amount: "Amount",
       comment: "Comment",
       treasuryTypeRealIncome: "Actual income",
