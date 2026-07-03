@@ -116,6 +116,10 @@ function applyEntityStaticFilters(
       return filteredQuery.is(filter.column, null);
     }
 
+    if (filter.operator === "neq") {
+      return filteredQuery.neq(filter.column, filter.value);
+    }
+
     return filteredQuery.eq(filter.column, filter.value);
   }, query);
 }

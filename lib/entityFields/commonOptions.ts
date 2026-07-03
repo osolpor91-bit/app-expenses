@@ -150,12 +150,31 @@ export function getCurrencySymbol(currencyCode: string | null | undefined) {
 }
 
 export const purchaseLineTypeOptions = [
-  {
-    value: "item",
-    labelKey: "purchaseLineTypeItem",
-  },
-  {
-    value: "account",
-    labelKey: "purchaseLineTypeAccount",
-  },
+    {
+        value: "item",
+        labelKey: "purchaseLineTypeItem",
+    },
+    {
+        value: "account",
+        labelKey: "purchaseLineTypeAccount",
+    },
+] as const satisfies readonly EntityFieldOptionDefinition[];
+
+export const treasuryGeneralTypeOptions = [
+    {
+        value: "Ingresos Reales",
+        labelKey: "treasuryTypeRealIncome",
+    },
+    {
+        value: "Ingresos Previstos",
+        labelKey: "treasuryTypeExpectedIncome",
+    },
+    {
+        value: "Gastos Reales",
+        labelKey: "treasuryTypeRealExpense",
+    },
+    {
+        value: "Gastos Previstos",
+        labelKey: "treasuryTypeExpectedExpense",
+    },
 ] as const satisfies readonly EntityFieldOptionDefinition[];

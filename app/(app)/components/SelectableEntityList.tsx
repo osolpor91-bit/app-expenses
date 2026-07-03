@@ -84,6 +84,7 @@ type SelectableEntityListProps<TRecord extends SelectableEntityRecord> = {
   newHref: string;
   minWidthClass?: string;
   primaryFieldDbName: string;
+  renderToolbarContent?: (selectedRecord: TRecord | null) => ReactNode;
   actionsContent?: ReactNode;
   listActions?: SelectableEntityListActionsDefinition;
   scopeAvailable?: boolean;
@@ -488,6 +489,7 @@ export default function SelectableEntityList<
   newHref,
   minWidthClass = "",
   primaryFieldDbName,
+  renderToolbarContent,
   actionsContent = null,
   listActions,
   scopeAvailable = true,
@@ -858,6 +860,8 @@ export default function SelectableEntityList<
               {labels.new}
             </button>
           ) : null}
+
+          {renderToolbarContent?.(selectedRecord)}
 
           {canEdit ? (
             <button

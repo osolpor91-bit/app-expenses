@@ -230,7 +230,8 @@ export default function AppNav({ role, labels }: AppNavProps) {
           "/tax-areas",
           "/fiscal-treatments",
           "/portal-supplier-invoices",
-          "/sales-invoices",
+          "/treasury-general",
+          "/treasury-members",
         ]}
       />
 

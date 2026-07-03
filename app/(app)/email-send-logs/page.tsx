@@ -89,10 +89,20 @@ function getCellValue({
   }
 
   if (field.dbName === "sent_at") {
+    if (!value) {
+      return "";
+    }
+
+    const date = new Date(String(value));
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
     return new Intl.DateTimeFormat("es-ES", {
       dateStyle: "short",
       timeStyle: "short",
-    }).format(new Date(String(value)));
+    }).format(date);
   }
 
   return formatFieldValueForDisplay(field, value);

@@ -51,6 +51,7 @@ type FilterBarProps = {
   primaryFields?: FilterBarField[];
   secondaryFields?: FilterBarField[];
   initialValues: Record<string, string>;
+  initiallyShowSecondaryFilters?: boolean;
   labels: FilterBarLabels;
 };
 
@@ -305,6 +306,7 @@ export default function FilterBar({
   primaryFields,
   secondaryFields = emptyFilterFields,
   initialValues,
+  initiallyShowSecondaryFilters,
   labels,
 }: FilterBarProps) {
   const router = useRouter();
@@ -331,7 +333,7 @@ export default function FilterBar({
     {}
   );
   const [showSecondaryFilters, setShowSecondaryFilters] = useState(
-    hasActiveSecondaryFilters
+    initiallyShowSecondaryFilters ?? hasActiveSecondaryFilters
   );
   const [isPending, startTransition] = useTransition();
 
@@ -339,10 +341,13 @@ export default function FilterBar({
     setValues(initialValues);
     setFieldErrors({});
 
-    if (hasActiveValues(secondaryFields, initialValues)) {
+    if (
+      initiallyShowSecondaryFilters !== false &&
+      hasActiveValues(secondaryFields, initialValues)
+    ) {
       setShowSecondaryFilters(true);
     }
-  }, [initialValues, secondaryFields]);
+  }, [initialValues, initiallyShowSecondaryFilters, secondaryFields]);
 
   const hasActiveFilters = hasActiveValues(allFields, initialValues);
   const hasSecondaryFields = secondaryFields.length > 0;

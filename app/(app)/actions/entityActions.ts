@@ -60,6 +60,7 @@ import {
   normalizeUnitOfMeasure,
   readItemBaseUnitInventory,
 } from "@/lib/items/inventory";
+import { getChartOfAccountDerivedValues } from "@/lib/chartOfAccounts/chartOfAccountRules";
 
 type EntityActionContext = {
   supabase: SupabaseServerClient;
@@ -253,6 +254,43 @@ function getActionSubform(entity: EntityDefinition, subformKey: string) {
 
 function isPurchaseHeaderEntity(entity: EntityDefinition) {
   return entity.table === "purchases_header";
+}
+
+async function validatePurchaseInvoiceHasNoAttachmentsBeforeDelete({
+  supabase,
+  context,
+  id,
+}: {
+  supabase: SupabaseServerClient;
+  context: EntityScopeContext;
+  id: string;
+}): Promise<EntityOperationResult<null>> {
+  let query = supabase
+    .from("entity_attachments")
+    .select("id")
+    .eq("tenant_id", context.tenantId)
+    .eq("entity_table", "purchases_header")
+    .eq("record_id", id);
+
+  if (context.companyId) {
+    query = query.eq("company_id", context.companyId);
+  }
+
+  const { data, error } = await query.limit(1);
+
+  if (error) {
+    return entityOperationError(
+      `No se han podido comprobar los adjuntos de la factura: ${error.message}`
+    );
+  }
+
+  if ((data ?? []).length > 0) {
+    return entityOperationError(
+      "No se puede eliminar la factura porque tiene adjuntos. Elimina primero los adjuntos de la factura."
+    );
+  }
+
+  return entityOperationOk(null);
 }
 
 function isPurchaseInvoiceLinesSubform({
@@ -595,11 +633,11 @@ async function getPurchaseLineDerivedPayload({
 
   const purchasePricePayload = shouldApplyPurchasePrice
     ? getPurchaseLinePurchasePricePayload({
-        lineType,
-        purchasePrice: payload.purchase_price,
-        values,
-        purchaseHeaderSourceType: headerContextResult.data.sourceType,
-      })
+      lineType,
+      purchasePrice: payload.purchase_price,
+      values,
+      purchaseHeaderSourceType: headerContextResult.data.sourceType,
+    })
     : {};
 
   delete payload.purchase_price;
@@ -776,6 +814,69 @@ function getPurchaseHeaderSourceType(entity: EntityDefinition) {
   return null;
 }
 
+function isChartOfAccountEntity(entity: EntityDefinition) {
+  return entity.key === "chartOfAccounts";
+}
+
+function getChartOfAccountCreateExtraPayload(
+  values: Record<string, string>
+): EntityWritePayload {
+  const derivedValues = getChartOfAccountDerivedValues({
+    code: values.code,
+  });
+  const accountType = String(values.account_type ?? "").trim();
+  const accountGroup = String(values.account_group ?? "").trim();
+  const specialAccountCategory = String(
+    values.special_account_category ?? ""
+  ).trim();
+
+  return {
+    account_type: accountType || derivedValues.accountType,
+    account_group: accountGroup || derivedValues.accountGroup,
+    special_account_category:
+      specialAccountCategory || derivedValues.specialAccountCategory,
+    account_type_source: accountType ? "manual" : "auto",
+    account_level: derivedValues.accountLevel,
+    code_length: derivedValues.codeLength,
+    sort_code: derivedValues.sortCode,
+    is_heading:
+      values.is_heading === "true" ? true : derivedValues.isHeading,
+  };
+}
+
+function getChartOfAccountUpdateExtraPayload({
+  fieldName,
+  value,
+}: {
+  fieldName: string;
+  value: string;
+}): EntityWritePayload {
+  if (fieldName === "account_type") {
+    return {
+      account_type_source: "manual",
+    };
+  }
+
+  if (fieldName !== "code") {
+    return {};
+  }
+
+  const derivedValues = getChartOfAccountDerivedValues({
+    code: value,
+  });
+
+  return {
+    account_type: derivedValues.accountType,
+    account_group: derivedValues.accountGroup,
+    special_account_category: derivedValues.specialAccountCategory,
+    account_type_source: "auto",
+    account_level: derivedValues.accountLevel,
+    code_length: derivedValues.codeLength,
+    sort_code: derivedValues.sortCode,
+    is_heading: derivedValues.isHeading,
+  };
+}
+
 async function getCreateListDetailExtraPayload({
   entity,
   supabase,
@@ -789,6 +890,10 @@ async function getCreateListDetailExtraPayload({
   activeCompanyCurrencyCode?: string | null;
   values: Record<string, string>;
 }): Promise<EntityOperationResult<EntityWritePayload>> {
+  if (isChartOfAccountEntity(entity)) {
+    return entityOperationOk(getChartOfAccountCreateExtraPayload(values));
+  }
+
   if (!isPurchaseHeaderEntity(entity)) {
     return entityOperationOk({});
   }
@@ -830,6 +935,15 @@ async function getUpdateListDetailFieldExtraPayload({
   fieldName: string;
   value: string;
 }): Promise<EntityOperationResult<EntityWritePayload>> {
+  if (isChartOfAccountEntity(entity)) {
+    return entityOperationOk(
+      getChartOfAccountUpdateExtraPayload({
+        fieldName,
+        value,
+      })
+    );
+  }
+
   if (!isPurchaseHeaderEntity(entity)) {
     return entityOperationOk({});
   }
@@ -1219,6 +1333,19 @@ export async function deleteListDetailRecordAction({
   const { entity, supabase, context } = actionDataResult.data;
   const { dict } = await getDictionary();
 
+  if (entity.key === "purchaseInvoices") {
+    const attachmentsValidationResult =
+      await validatePurchaseInvoiceHasNoAttachmentsBeforeDelete({
+        supabase,
+        context,
+        id,
+      });
+
+    if (!attachmentsValidationResult.ok) {
+      return attachmentsValidationResult;
+    }
+  }
+
   const result = await deleteStandardEntityRecord({
     supabase,
     entity,
@@ -1229,6 +1356,10 @@ export async function deleteListDetailRecordAction({
 
   if (result.ok) {
     revalidateEntity(entity);
+
+    if (entity.key === "treasuryGeneralMovements") {
+      revalidatePath("/treasury-general");
+    }
   }
 
   return result;

@@ -1,0 +1,144 @@
+import {
+  isTreasuryMovementType,
+  type TreasuryMovementType,
+} from "./treasuryGeneral";
+
+export type TreasuryBalanceMovement = {
+  account_id?: unknown;
+  account_no?: unknown;
+  account_description?: unknown;
+  treasury_type?: unknown;
+  amount?: unknown;
+};
+
+export type TreasuryBalanceRow = {
+  accountId: string;
+  accountNo: string;
+  accountDescription: string;
+  realIncome: number;
+  expectedIncome: number;
+  realExpense: number;
+  expectedExpense: number;
+  expenseDifference: number;
+  balance: number;
+};
+
+export type TreasuryBalanceTotals = Omit<
+  TreasuryBalanceRow,
+  "accountId" | "accountNo" | "accountDescription"
+>;
+
+function getAmount(value: unknown) {
+  const amount = Number(value);
+
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function getMovementAccountKey(movement: TreasuryBalanceMovement) {
+  const accountId = String(movement.account_id ?? "").trim();
+  const accountNo = String(movement.account_no ?? "").trim();
+  const accountDescription = String(
+    movement.account_description ?? ""
+  ).trim();
+
+  return accountId || accountNo || accountDescription;
+}
+
+function addMovementAmount(
+  row: TreasuryBalanceRow,
+  treasuryType: TreasuryMovementType,
+  amount: number
+) {
+  if (treasuryType === "Ingresos Reales") {
+    row.realIncome += amount;
+  } else if (treasuryType === "Ingresos Previstos") {
+    row.expectedIncome += amount;
+  } else if (treasuryType === "Gastos Reales") {
+    row.realExpense += amount;
+  } else {
+    row.expectedExpense += amount;
+  }
+}
+
+export function buildTreasuryBalanceRows(
+  movements: readonly TreasuryBalanceMovement[]
+) {
+  const rowsByAccount = new Map<string, TreasuryBalanceRow>();
+
+  movements.forEach((movement) => {
+    const accountKey = getMovementAccountKey(movement);
+    const treasuryType = String(movement.treasury_type ?? "").trim();
+
+    if (!accountKey || !isTreasuryMovementType(treasuryType)) {
+      return;
+    }
+
+    const existingRow = rowsByAccount.get(accountKey);
+    const row =
+      existingRow ??
+      ({
+        accountId: String(movement.account_id ?? "").trim(),
+        accountNo: String(movement.account_no ?? "").trim(),
+        accountDescription: String(
+          movement.account_description ?? ""
+        ).trim(),
+        realIncome: 0,
+        expectedIncome: 0,
+        realExpense: 0,
+        expectedExpense: 0,
+        expenseDifference: 0,
+        balance: 0,
+      } satisfies TreasuryBalanceRow);
+
+    addMovementAmount(
+      row,
+      treasuryType,
+      getAmount(movement.amount)
+    );
+
+    rowsByAccount.set(accountKey, row);
+  });
+
+  return Array.from(rowsByAccount.values())
+    .map((row) => {
+      const expenseDifference = Math.abs(
+        row.expectedExpense - row.realExpense
+      );
+
+      return {
+        ...row,
+        expenseDifference,
+        balance: row.realIncome + row.expectedIncome - expenseDifference,
+      };
+    })
+    .sort((left, right) =>
+      left.accountNo.localeCompare(right.accountNo, "es", {
+        numeric: true,
+        sensitivity: "base",
+      })
+    );
+}
+
+export function getTreasuryBalanceTotals(
+  rows: readonly TreasuryBalanceRow[]
+): TreasuryBalanceTotals {
+  return rows.reduce<TreasuryBalanceTotals>(
+    (totals, row) => ({
+      realIncome: totals.realIncome + row.realIncome,
+      expectedIncome: totals.expectedIncome + row.expectedIncome,
+      realExpense: totals.realExpense + row.realExpense,
+      expectedExpense: totals.expectedExpense + row.expectedExpense,
+      expenseDifference:
+        totals.expenseDifference + row.expenseDifference,
+      balance: totals.balance + row.balance,
+    }),
+    {
+      realIncome: 0,
+      expectedIncome: 0,
+      realExpense: 0,
+      expectedExpense: 0,
+      expenseDifference: 0,
+      balance: 0,
+    }
+  );
+}

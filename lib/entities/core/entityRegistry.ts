@@ -6,7 +6,6 @@ import {
   portalSupplierInvoiceEntity,
   purchaseInvoiceEntity,
 } from "@/lib/entities/portalSupplierInvoices/portalSupplierInvoiceEntity";
-import { salesInvoiceEntity } from "@/lib/entities/salesInvoices/salesInvoiceEntity";
 import { supplierEntity } from "@/lib/entities/suppliers/supplierEntity";
 import { chartOfAccountEntity } from "@/lib/entities/chartOfAccounts/chartOfAccountEntity";
 import { paymentChannelEntity } from "@/lib/entities/paymentChannels/paymentChannelEntity";
@@ -15,6 +14,9 @@ import { taxAreaEntity } from "@/lib/entities/taxAreas/taxAreaEntity";
 import { itemBalanceEntryEntity } from "@/lib/entities/itemBalanceEntries/itemBalanceEntryEntity";
 import { itemEntity } from "@/lib/entities/items/itemEntity";
 import { taxConfigurationEntity } from "@/lib/entities/taxConfigurations/taxConfigurationEntity";
+import { treasuryGeneralEntity } from "@/lib/entities/treasuryGeneral/treasuryGeneralEntity";
+import { treasuryGeneralMovementEntity } from "@/lib/entities/treasuryGeneralMovements/treasuryGeneralMovementEntity";
+import { treasuryMemberEntity } from "@/lib/entities/treasuryMembers/treasuryMemberEntity";
 
 export const entityRegistry = {
   [countryEntity.key]: countryEntity,
@@ -28,9 +30,11 @@ export const entityRegistry = {
   [supplierEntity.key]: supplierEntity,
   [portalSupplierInvoiceEntity.key]: portalSupplierInvoiceEntity,
   [purchaseInvoiceEntity.key]: purchaseInvoiceEntity,
-  [salesInvoiceEntity.key]: salesInvoiceEntity,
   [itemEntity.key]: itemEntity,
   [itemBalanceEntryEntity.key]: itemBalanceEntryEntity,
+  [treasuryGeneralEntity.key]: treasuryGeneralEntity,
+  [treasuryGeneralMovementEntity.key]: treasuryGeneralMovementEntity,
+  [treasuryMemberEntity.key]: treasuryMemberEntity,
 } satisfies Record<string, EntityDefinition>;
 
 export type RegisteredEntityKey = keyof typeof entityRegistry;

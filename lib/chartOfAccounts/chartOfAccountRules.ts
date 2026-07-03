@@ -309,7 +309,7 @@ export function getChartOfAccountSortCode(value: string | null | undefined) {
 }
 
 export function getDefaultIsHeadingFromCode(value: string | null | undefined) {
-  return normalizeChartOfAccountCode(value).length <= 3;
+  return normalizeChartOfAccountCode(value).length <= 2;
 }
 
 export function getChartOfAccountTypeFromCode(

@@ -35,6 +35,8 @@ export const dictionaries = {
       all: "Todos",
       filters: "Filtros",
       hideFilters: "Ocultar filtros",
+      invalidDateRange:
+        "Formato de fecha no válido. Usa 01/01/2026..31/01/2026.",
       activeCompany: "Empresa activa",
       changeCompany: "Cambiar empresa",
       currentCompany: "Empresa actual",
@@ -72,6 +74,7 @@ export const dictionaries = {
     nav: {
       menu: "Menú",
       configurations: "Configuraciones",
+      treasury: "Tesorería",
       companies: "Empresas",
       suppliers: "Proveedores",
       countries: "Países",
@@ -86,9 +89,6 @@ export const dictionaries = {
         },
         purchasing: {
           title: "Compras",
-        },
-        sales: {
-          title: "Ventas",
         },
       },
     },
@@ -212,6 +212,166 @@ export const dictionaries = {
         updateError: "Error actualizando países",
         success: "Países UE actualizados correctamente: {count}.",
         unexpected: "Error inesperado rellenando países UE.",
+      },
+    },
+
+    treasuryGeneral: {
+      title: "Tesorería general",
+
+      treasuryType: "Tipo",
+      balance: "Saldo",
+
+      treasuryTypeRealIncome: "Ingresos Reales",
+      treasuryTypeExpectedIncome: "Ingresos Previstos",
+      treasuryTypeRealExpense: "Gastos Reales",
+      treasuryTypeExpectedExpense: "Gastos Previstos",
+
+      treasuryMovementAction: "Añadir movimiento",
+      treasuryMovementsAction: "Ver movimientos",
+      treasuryBalanceAction: "Balance",
+      treasuryMovementTitle: "Nuevo movimiento de tesorería",
+      treasuryMovementType: "Tipo",
+      treasuryMovementAmount: "Importe",
+      treasuryMovementDate: "Fecha",
+      treasuryMovementAccount: "Cuenta contable",
+      treasuryMovementAccountPlaceholder: "Buscar cuenta por descripción",
+      treasuryMovementSelectTypeFirst: "Selecciona primero el tipo",
+      treasuryMovementAccountRequired: "La cuenta contable es obligatoria.",
+      treasuryMovementAccountTypeMismatch:
+        "La cuenta contable no corresponde al tipo de movimiento.",
+      treasuryMovementNoAccounts:
+        "No hay cuentas contables disponibles para movimientos.",
+      treasuryMovementNoExpenseAccounts:
+        "No hay cuentas disponibles del grupo 6: Gastos.",
+      treasuryMovementNoIncomeAccounts:
+        "No hay cuentas disponibles del grupo 7: Ingresos.",
+      treasuryMovementPaidBy: "Pagado por",
+      treasuryMovementPaidByRequired:
+        "El miembro que ha pagado es obligatorio.",
+      treasuryMovementNoMembers:
+        "No hay miembros disponibles. Crea al menos uno en Configuraciones.",
+      treasuryMovementComment: "Comentario",
+      treasuryMovementCommentPlaceholder: "Comentario opcional",
+      treasuryMovementSaving: "Guardando...",
+      treasuryMovementError: "Error al crear el movimiento",
+      accept: "Aceptar",
+      close: "Cerrar",
+
+      emptyList: "No hay registros de tesorería general.",
+      errorReading: "Error leyendo tesorería general",
+      noActiveCompanyDescription:
+        "No hay una empresa activa. Selecciona una empresa para consultar tesorería general.",
+    },
+
+    treasuryBalance: {
+      title: "Balance de tesorería",
+      backToTreasuryGeneral: "Volver a tesorería general",
+      helpText:
+        "Los ingresos reales y previstos se suman. En cada cuenta, los gastos reales compensan a los previstos y solo la diferencia afecta al balance.",
+      date: "Fecha",
+      accountNo: "Cuenta",
+      accountDescription: "Descripción",
+      incomeGroup: "Ingresos",
+      expenseGroup: "Gastos",
+      realShort: "Reales",
+      expectedShort: "Previstos",
+      differenceShort: "Diferencia",
+      realIncome: "Ingresos reales",
+      expectedIncome: "Ingresos previstos",
+      realExpense: "Gastos reales",
+      expectedExpense: "Gastos previstos",
+      expenseDifference: "Diferencia gastos",
+      balance: "Balance",
+      total: "Total general",
+      emptyList: "No hay movimientos para el periodo seleccionado.",
+      errorReading: "Error leyendo el balance de tesorería",
+      noActiveCompanyDescription:
+        "No hay una empresa activa. Selecciona una empresa para consultar el balance.",
+    },
+
+    treasuryGeneralMovements: {
+      title: "Movimientos de tesorería",
+      backToTreasuryGeneral: "Volver a tesorería general",
+      movementDate: "Fecha",
+      treasuryType: "Tipo",
+      accountDescription: "Cuenta contable",
+      paidBy: "Pagado por",
+      amount: "Importe",
+      comment: "Comentario",
+      treasuryTypeRealIncome: "Ingresos Reales",
+      treasuryTypeExpectedIncome: "Ingresos Previstos",
+      treasuryTypeRealExpense: "Gastos Reales",
+      treasuryTypeExpectedExpense: "Gastos Previstos",
+      treasuryMovementEditAction: "Modificar datos",
+      treasuryMovementEditTitle: "Modificar movimiento de tesorería",
+      treasuryMovementType: "Tipo",
+      treasuryMovementAmount: "Importe",
+      treasuryMovementDate: "Fecha",
+      treasuryMovementAccount: "Cuenta contable",
+      treasuryMovementAccountPlaceholder: "Buscar cuenta por descripción",
+      treasuryMovementSelectTypeFirst: "Selecciona primero el tipo",
+      treasuryMovementAccountRequired: "La cuenta contable es obligatoria.",
+      treasuryMovementAccountTypeMismatch:
+        "La cuenta contable no corresponde al tipo de movimiento.",
+      treasuryMovementNoAccounts:
+        "No hay cuentas contables disponibles para movimientos.",
+      treasuryMovementNoExpenseAccounts:
+        "No hay cuentas disponibles del grupo 6: Gastos.",
+      treasuryMovementNoIncomeAccounts:
+        "No hay cuentas disponibles del grupo 7: Ingresos.",
+      treasuryMovementPaidBy: "Pagado por",
+      treasuryMovementPaidByRequired:
+        "El miembro que ha pagado es obligatorio.",
+      treasuryMovementNoMembers:
+        "No hay miembros disponibles. Crea al menos uno en Configuraciones.",
+      treasuryMovementComment: "Comentario",
+      treasuryMovementCommentPlaceholder: "Comentario opcional",
+      treasuryMovementUpdate: "Modificar",
+      treasuryMovementUpdating: "Modificando...",
+      treasuryMovementUpdateError: "Error al modificar el movimiento",
+      close: "Cerrar",
+      emptyList: "No hay movimientos de tesorería.",
+      listHelpText:
+        "Consulta los movimientos registrados y utiliza los filtros para localizar ingresos o gastos.",
+      errorReading: "Error leyendo movimientos de tesorería",
+      noActiveCompanyDescription:
+        "No hay una empresa activa. Selecciona una empresa para consultar los movimientos.",
+      selectRecordToDelete: "Selecciona un movimiento para eliminar.",
+      confirmDelete:
+        "¿Seguro que quieres eliminar el movimiento de \"{name}\"?",
+      deleteError: "Error al eliminar el movimiento",
+      noRowsDeleted: "No se ha eliminado ningún movimiento.",
+      recordDeleted: "Movimiento eliminado correctamente.",
+    },
+
+    treasuryMembers: {
+      title: "Miembros",
+      firstName: "Nombre",
+      lastName: "Apellidos",
+      isDefault: "Predeterminado",
+      emptyList: "No hay miembros creados.",
+      errorReading: "Error leyendo miembros",
+      errorRefreshing: "Error actualizando miembros",
+      noActiveCompanyDescription:
+        "No hay una empresa activa. Selecciona una empresa para gestionar miembros.",
+      grid: {
+        deleteSelected: "Eliminar seleccionados",
+        selectedSuffix: "seleccionado(s)",
+        helpText:
+          "Edita los miembros directamente en la lista. Solo puede haber un miembro predeterminado.",
+        createRequiredFields:
+          "Para crear un miembro informa Nombre y Apellidos.",
+        requiredFields: "Nombre y Apellidos son obligatorios.",
+        saveError: "Error al guardar el miembro",
+        createError: "Error al crear el miembro",
+        deleteError: "Error al eliminar miembros",
+        recordCreated: "Miembro creado correctamente.",
+        changeSaved: "Miembro actualizado correctamente.",
+        selectAtLeastOneToDelete:
+          "Selecciona al menos un miembro para eliminar.",
+        confirmDelete: "¿Seguro que quieres eliminar {count} miembro(s)?",
+        noRowsDeleted: "No se ha eliminado ningún miembro.",
+        recordsDeleted: "Miembros eliminados correctamente.",
       },
     },
 
@@ -375,6 +535,7 @@ export const dictionaries = {
       taxArea: "Área impuesto",
       portalDefaultLineType: "Tipo por defecto portal",
       portalDefaultLineNo: "Nº por defecto portal",
+      pricesIncludeVat: "Precios IVA incluido",
       purchaseLineTypeItem: "Artículo",
       purchaseLineTypeAccount: "Cuenta",
       tenant: "Tenant",
@@ -591,58 +752,6 @@ export const dictionaries = {
       confirmDelete:
         "Vas a eliminar este adjunto. Esta acción no se puede deshacer. ¿Quieres continuar?",
       error: "Error",
-    },
-
-    salesInvoices: {
-      title: "Facturas venta",
-      invoiceNo: "Nº factura",
-      customerName: "Cliente",
-      postingDate: "Fecha registro",
-      totalBaseAmount: "Importe Base Total",
-      status: "Estado",
-      emptyList: "No hay facturas de venta.",
-      errorReading: "Error leyendo facturas de venta",
-      errorRefreshing: "Error actualizando facturas de venta",
-
-      sectionGeneral: "General",
-
-      grid: {
-        deleteSelected: "Eliminar seleccionadas",
-        selectedSuffix: "seleccionada(s)",
-        helpText:
-          "Edita los datos directamente en la lista. La última fila sirve para crear una factura nueva.",
-        createRequiredFields:
-          "Para crear una factura informa Nº factura y Cliente.",
-        requiredFields: "Nº factura y Cliente son obligatorios.",
-        saveError: "Error al guardar",
-        createError: "Error al crear factura",
-        deleteError: "Error al eliminar facturas",
-        recordCreated: "Factura creada correctamente.",
-        changeSaved: "Cambio guardado correctamente.",
-        selectAtLeastOneToDelete:
-          "Selecciona al menos una factura para eliminar.",
-        confirmDelete: "¿Seguro que quieres eliminar {count} factura(s)?",
-        noRowsDeleted: "No se ha eliminado ninguna factura.",
-        recordsDeleted: "Facturas eliminadas correctamente.",
-      },
-    },
-
-    salesInvoiceLines: {
-      title: "Líneas",
-      baseAmount: "Importe base",
-      addLine: "Añadir línea",
-      deleteLine: "Eliminar",
-      empty: "No hay líneas.",
-      deleteSelectedLine: "Borrar",
-      deleteAllLines: "Borrar todas",
-      selectLineToDelete: "Selecciona una línea para borrar.",
-      confirmDeleteAll:
-        "Vas a borrar todas las líneas. Esta acción no se puede deshacer. ¿Quieres continuar?",
-      recordsDeleted: "Líneas borradas correctamente.",
-      saveError: "Error al guardar la línea",
-      deleteError: "Error al eliminar la línea",
-      recordSaved: "Línea guardada correctamente.",
-      confirmDelete: "¿Seguro que quieres eliminar esta línea?",
     },
 
     emailConfigurations: {
@@ -1234,6 +1343,8 @@ export const dictionaries = {
       all: "All",
       filters: "Filters",
       hideFilters: "Hide filters",
+      invalidDateRange:
+        "Invalid date format. Use 01/01/2026..31/01/2026.",
       activeCompany: "Active company",
       changeCompany: "Change company",
       currentCompany: "Current company",
@@ -1272,6 +1383,7 @@ export const dictionaries = {
     nav: {
       menu: "Menu",
       configurations: "Settings",
+      treasury: "Treasury",
       companies: "Companies",
       suppliers: "Suppliers",
       countries: "Countries",
@@ -1286,9 +1398,6 @@ export const dictionaries = {
         },
         purchasing: {
           title: "Purchasing",
-        },
-        sales: {
-          title: "Sales",
         },
       },
     },
@@ -1413,6 +1522,164 @@ export const dictionaries = {
         updateError: "Error updating countries",
         success: "EU countries updated successfully: {count}.",
         unexpected: "Unexpected error filling EU countries.",
+      },
+    },
+
+    treasuryGeneral: {
+      title: "General treasury",
+
+      treasuryType: "Type",
+      balance: "Balance",
+
+      treasuryTypeRealIncome: "Actual income",
+      treasuryTypeExpectedIncome: "Expected income",
+      treasuryTypeRealExpense: "Actual expenses",
+      treasuryTypeExpectedExpense: "Expected expenses",
+
+      treasuryMovementAction: "Add movement",
+      treasuryMovementsAction: "View movements",
+      treasuryBalanceAction: "Balance",
+      treasuryMovementTitle: "New treasury movement",
+      treasuryMovementType: "Type",
+      treasuryMovementAmount: "Amount",
+      treasuryMovementDate: "Date",
+      treasuryMovementAccount: "G/L account",
+      treasuryMovementAccountPlaceholder: "Search account by description",
+      treasuryMovementSelectTypeFirst: "Select the type first",
+      treasuryMovementAccountRequired: "The G/L account is required.",
+      treasuryMovementAccountTypeMismatch:
+        "The G/L account does not match the movement type.",
+      treasuryMovementNoAccounts:
+        "There are no G/L accounts available for movements.",
+      treasuryMovementNoExpenseAccounts:
+        "There are no available accounts in group 6: Expenses.",
+      treasuryMovementNoIncomeAccounts:
+        "There are no available accounts in group 7: Income.",
+      treasuryMovementPaidBy: "Paid by",
+      treasuryMovementPaidByRequired: "The paying member is required.",
+      treasuryMovementNoMembers:
+        "There are no members available. Create one in Settings.",
+      treasuryMovementComment: "Comment",
+      treasuryMovementCommentPlaceholder: "Optional comment",
+      treasuryMovementSaving: "Saving...",
+      treasuryMovementError: "Error creating treasury movement",
+      accept: "Accept",
+      close: "Close",
+
+      emptyList: "There are no general treasury records.",
+      errorReading: "Error reading general treasury",
+      noActiveCompanyDescription:
+        "There is no active company. Select a company to view general treasury.",
+    },
+
+    treasuryBalance: {
+      title: "Treasury balance",
+      backToTreasuryGeneral: "Back to general treasury",
+      helpText:
+        "Actual and expected income are added together. Within each account, actual expenses offset expected expenses and only the difference affects the balance.",
+      date: "Date",
+      accountNo: "Account",
+      accountDescription: "Description",
+      incomeGroup: "Income",
+      expenseGroup: "Expenses",
+      realShort: "Actual",
+      expectedShort: "Expected",
+      differenceShort: "Difference",
+      realIncome: "Actual income",
+      expectedIncome: "Expected income",
+      realExpense: "Actual expenses",
+      expectedExpense: "Expected expenses",
+      expenseDifference: "Expense difference",
+      balance: "Balance",
+      total: "Grand total",
+      emptyList: "There are no movements for the selected period.",
+      errorReading: "Error reading treasury balance",
+      noActiveCompanyDescription:
+        "There is no active company. Select a company to view the balance.",
+    },
+
+    treasuryGeneralMovements: {
+      title: "Treasury movements",
+      backToTreasuryGeneral: "Back to general treasury",
+      movementDate: "Date",
+      treasuryType: "Type",
+      accountDescription: "G/L account",
+      paidBy: "Paid by",
+      amount: "Amount",
+      comment: "Comment",
+      treasuryTypeRealIncome: "Actual income",
+      treasuryTypeExpectedIncome: "Expected income",
+      treasuryTypeRealExpense: "Actual expenses",
+      treasuryTypeExpectedExpense: "Expected expenses",
+      treasuryMovementEditAction: "Modify data",
+      treasuryMovementEditTitle: "Modify treasury movement",
+      treasuryMovementType: "Type",
+      treasuryMovementAmount: "Amount",
+      treasuryMovementDate: "Date",
+      treasuryMovementAccount: "G/L account",
+      treasuryMovementAccountPlaceholder: "Search account by description",
+      treasuryMovementSelectTypeFirst: "Select the type first",
+      treasuryMovementAccountRequired: "The G/L account is required.",
+      treasuryMovementAccountTypeMismatch:
+        "The G/L account does not match the movement type.",
+      treasuryMovementNoAccounts:
+        "There are no G/L accounts available for movements.",
+      treasuryMovementNoExpenseAccounts:
+        "There are no available accounts in group 6: Expenses.",
+      treasuryMovementNoIncomeAccounts:
+        "There are no available accounts in group 7: Income.",
+      treasuryMovementPaidBy: "Paid by",
+      treasuryMovementPaidByRequired: "The paying member is required.",
+      treasuryMovementNoMembers:
+        "There are no members available. Create one in Settings.",
+      treasuryMovementComment: "Comment",
+      treasuryMovementCommentPlaceholder: "Optional comment",
+      treasuryMovementUpdate: "Modify",
+      treasuryMovementUpdating: "Updating...",
+      treasuryMovementUpdateError: "Error updating treasury movement",
+      close: "Close",
+      emptyList: "There are no treasury movements.",
+      listHelpText:
+        "Review registered movements and use the filters to find income or expenses.",
+      errorReading: "Error reading treasury movements",
+      noActiveCompanyDescription:
+        "There is no active company. Select a company to view movements.",
+      selectRecordToDelete: "Select a movement to delete.",
+      confirmDelete:
+        "Are you sure you want to delete the movement for \"{name}\"?",
+      deleteError: "Error deleting treasury movement",
+      noRowsDeleted: "No treasury movement was deleted.",
+      recordDeleted: "Treasury movement deleted successfully.",
+    },
+
+    treasuryMembers: {
+      title: "Members",
+      firstName: "First name",
+      lastName: "Last name",
+      isDefault: "Default",
+      emptyList: "There are no members.",
+      errorReading: "Error reading members",
+      errorRefreshing: "Error refreshing members",
+      noActiveCompanyDescription:
+        "There is no active company. Select a company to manage members.",
+      grid: {
+        deleteSelected: "Delete selected",
+        selectedSuffix: "selected",
+        helpText:
+          "Edit members directly in the list. Only one member can be the default.",
+        createRequiredFields:
+          "Enter First name and Last name to create a member.",
+        requiredFields: "First name and Last name are required.",
+        saveError: "Error saving member",
+        createError: "Error creating member",
+        deleteError: "Error deleting members",
+        recordCreated: "Member created successfully.",
+        changeSaved: "Member updated successfully.",
+        selectAtLeastOneToDelete:
+          "Select at least one member to delete.",
+        confirmDelete: "Are you sure you want to delete {count} member(s)?",
+        noRowsDeleted: "No members were deleted.",
+        recordsDeleted: "Members deleted successfully.",
       },
     },
 
@@ -1576,6 +1843,7 @@ export const dictionaries = {
       paymentChannel: "Payment channel",
       portalDefaultLineType: "Default portal type",
       portalDefaultLineNo: "Default portal no.",
+      pricesIncludeVat: "Prices include VAT",
       purchaseLineTypeItem: "Item",
       purchaseLineTypeAccount: "Account",
       tenant: "Tenant",
@@ -1792,58 +2060,6 @@ export const dictionaries = {
       confirmDelete:
         "You are about to delete this attachment. This action cannot be undone. Do you want to continue?",
       error: "Error",
-    },
-
-    salesInvoices: {
-      title: "Sales invoices",
-      invoiceNo: "Invoice no.",
-      customerName: "Customer",
-      postingDate: "Posting date",
-      totalBaseAmount: "Total base amount",
-      status: "Status",
-      emptyList: "There are no sales invoices.",
-      errorReading: "Error reading sales invoices",
-      errorRefreshing: "Error refreshing sales invoices",
-
-      sectionGeneral: "General",
-
-      grid: {
-        deleteSelected: "Delete selected",
-        selectedSuffix: "selected",
-        helpText:
-          "Edit the data directly in the list. The last row is used to create a new invoice.",
-        createRequiredFields:
-          "To create an invoice, enter Invoice no. and Customer.",
-        requiredFields: "Invoice no. and Customer are required.",
-        saveError: "Error saving",
-        createError: "Error creating invoice",
-        deleteError: "Error deleting invoices",
-        recordCreated: "Invoice created successfully.",
-        changeSaved: "Change saved successfully.",
-        selectAtLeastOneToDelete:
-          "Select at least one invoice to delete.",
-        confirmDelete: "Are you sure you want to delete {count} invoice(s)?",
-        noRowsDeleted: "No invoice was deleted.",
-        recordsDeleted: "Invoices deleted successfully.",
-      },
-    },
-
-    salesInvoiceLines: {
-      title: "Lines",
-      baseAmount: "Base amount",
-      addLine: "Add line",
-      deleteLine: "Delete",
-      empty: "There are no lines.",
-      deleteSelectedLine: "Delete",
-      deleteAllLines: "Delete all",
-      selectLineToDelete: "Select a line to delete.",
-      confirmDeleteAll:
-        "You are about to delete all lines. This action cannot be undone. Do you want to continue?",
-      recordsDeleted: "Lines deleted successfully.",
-      saveError: "Error saving line",
-      deleteError: "Error deleting line",
-      recordSaved: "Line saved successfully.",
-      confirmDelete: "Are you sure you want to delete this line?",
     },
 
     emailConfigurations: {

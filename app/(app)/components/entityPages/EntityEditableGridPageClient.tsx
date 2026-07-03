@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import type { EntityFieldDefinition } from "@/lib/entityFields/types";
 import type {
   EditableGridEntityDefinition,
@@ -476,6 +477,8 @@ export default function EntityEditableGridPageClient({
   viewActions,
   minWidthClass = "min-w-[620px]",
 }: EntityEditableGridPageClientProps) {
+  const router = useRouter();
+
   async function refreshRecords() {
     const result = await refreshEntityGridAction({
       entityKey: entity.key,
@@ -505,6 +508,10 @@ export default function EntityEditableGridPageClient({
       return result;
     }
 
+    if (entity.key === "treasuryMembers" && payload.is_default === true) {
+      router.refresh();
+    }
+
     return {
       ok: true,
       data: {
@@ -528,6 +535,10 @@ export default function EntityEditableGridPageClient({
 
     if (!result.ok) {
       return result;
+    }
+
+    if (entity.key === "treasuryMembers" && payload.is_default === true) {
+      router.refresh();
     }
 
     return {

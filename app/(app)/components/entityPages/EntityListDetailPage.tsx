@@ -1,5 +1,6 @@
 import { requireCompanyContext } from "@/lib/company/requireCompanyContext";
 import { requireTenant } from "@/lib/auth/requireTenant";
+import Link from "next/link";
 import type { ListDetailEntityDefinition } from "@/lib/entities/core/entityDefinition";
 import {
   castEntityRecords,
@@ -22,6 +23,10 @@ import {
 import { getFieldsForList } from "@/lib/entityFields/helpers";
 import { applyFieldVisibilityPreferences } from "@/lib/preferences/fieldVisibilityPreferences";
 import { listFieldVisibilityPreferences } from "@/lib/repositories/fieldVisibilityPreferencesRepository";
+import type {
+  TreasuryAccountOption,
+  TreasuryMemberOption,
+} from "../../treasury-general/TreasuryMovementModal";
 
 import FilterBar from "../FilterBar";
 import EntityListDetailPageClient from "./EntityListDetailPageClient";
@@ -30,6 +35,12 @@ type EntityListDetailPageProps = {
   entity: ListDetailEntityDefinition;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
   minWidthClass?: string;
+  treasuryAccountOptions?: TreasuryAccountOption[];
+  treasuryMemberOptions?: TreasuryMemberOption[];
+  defaultTreasuryMemberId?: string;
+  backHref?: string;
+  backLabel?: string;
+  initiallyShowSecondaryFilters?: boolean;
 };
 
 type EntityListPageContext = {
@@ -378,6 +389,12 @@ export default async function EntityListDetailPage({
   entity,
   searchParams,
   minWidthClass,
+  treasuryAccountOptions,
+  treasuryMemberOptions,
+  defaultTreasuryMemberId,
+  backHref,
+  backLabel,
+  initiallyShowSecondaryFilters,
 }: EntityListDetailPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const { dict } = await getDictionary();
@@ -442,6 +459,12 @@ export default async function EntityListDetailPage({
     <section className="space-y-3">
       <div className="sticky top-14 z-[90] -mx-4 bg-app px-4 pb-1 pt-0 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div className="space-y-1 bg-app pb-0.5">
+          {backHref && backLabel ? (
+            <Link href={backHref} className="link-app inline-block text-sm">
+              ← {backLabel}
+            </Link>
+          ) : null}
+
           <h1 className="text-base font-semibold leading-tight text-primary-app">
             {getString(entityLabels, "title", entity.key)}
           </h1>
@@ -450,6 +473,7 @@ export default async function EntityListDetailPage({
             primaryFields={primaryFilterFields}
             secondaryFields={secondaryFilterFields}
             initialValues={initialFilterValues}
+            initiallyShowSecondaryFilters={initiallyShowSecondaryFilters}
             labels={{
               apply: getString(commonLabels, "apply", "Aplicar"),
               clear: getString(commonLabels, "clear", "Limpiar"),
@@ -482,6 +506,9 @@ export default async function EntityListDetailPage({
         listActions={entity.listActions}
         minWidthClass={minWidthClass}
         scopeAvailable={scopeAvailable}
+        treasuryAccountOptions={treasuryAccountOptions}
+        treasuryMemberOptions={treasuryMemberOptions}
+        defaultTreasuryMemberId={defaultTreasuryMemberId}
       />
     </section>
   );

@@ -13,7 +13,7 @@ export type EntityOrderByDefinition = {
 export type EntityStaticFilterDefinition = {
   column: string;
   value: string | number | boolean | null;
-  operator?: "eq";
+  operator?: "eq" | "neq";
 };
 export type EntityGridColumnLayout = {
   flex?: number;

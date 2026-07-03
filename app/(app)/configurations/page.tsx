@@ -110,14 +110,14 @@ export default async function ConfigurationsPage() {
     },
   ];
 
-  const salesLinks: ConfigurationLink[] = [
+  const susarrosLinks: ConfigurationLink[] = [
     {
-      href: "/items",
-      label: dict.items.title,
+      href: "/treasury-general",
+      label: dict.treasuryGeneral.title,
     },
     {
-      href: "/sales-invoices",
-      label: dict.salesInvoices.title,
+      href: "/treasury-members",
+      label: dict.treasuryMembers.title,
     },
   ];
 
@@ -131,8 +131,8 @@ export default async function ConfigurationsPage() {
       links: purchasingLinks,
     },
     {
-      title: dict.configurations.groups.sales.title,
-      links: salesLinks,
+      title: "SUSARROS",
+      links: susarrosLinks,
     },
   ];
 

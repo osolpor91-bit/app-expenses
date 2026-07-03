@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useState } from "react";
 
 import type { EntityFieldDefinition } from "@/lib/entityFields/types";
 import type {
@@ -23,6 +24,11 @@ import SelectableEntityList, {
 import { deleteListDetailRecordAction } from "../../actions/entityActions";
 import { getEntityDefinition } from "@/lib/entities/core/entityRegistry";
 import InventoryAdjustmentModal from "../../items/components/InventoryAdjustmentModal";
+import TreasuryMovementModal, {
+  type TreasuryAccountOption,
+  type TreasuryMovementEditRecord,
+  type TreasuryMemberOption,
+} from "../../treasury-general/TreasuryMovementModal";
 
 type GenericListDetailRecord = EntityRecord & SelectableEntityRecord;
 
@@ -56,6 +62,9 @@ type EntityListDetailPageClientProps = {
   listActions?: EntityListActionsDefinition;
   minWidthClass?: string;
   scopeAvailable?: boolean;
+  treasuryAccountOptions?: TreasuryAccountOption[];
+  treasuryMemberOptions?: TreasuryMemberOption[];
+  defaultTreasuryMemberId?: string;
 };
 
 function getListFields({
@@ -262,10 +271,19 @@ export default function EntityListDetailPageClient({
   listActions,
   minWidthClass,
   scopeAvailable = true,
+  treasuryAccountOptions = [],
+  treasuryMemberOptions = [],
+  defaultTreasuryMemberId = "",
 }: EntityListDetailPageClientProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isTreasuryMovementModalOpen, setIsTreasuryMovementModalOpen] =
+    useState(false);
+  const [defaultTreasuryMovementType, setDefaultTreasuryMovementType] =
+    useState("");
+  const [treasuryMovementToEdit, setTreasuryMovementToEdit] =
+    useState<TreasuryMovementEditRecord | null>(null);
 
   const returnTo = getReturnToPath({
     pathname,
@@ -313,6 +331,89 @@ export default function EntityListDetailPageClient({
         minWidthClass={minWidthClass}
         primaryFieldDbName={entity.primaryFieldDbName}
         autoSelectFirstRecord
+        renderToolbarContent={(selectedRecord) => {
+          if (entity.key === "treasuryGeneralMovements") {
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  if (!selectedRecord) {
+                    return;
+                  }
+
+                  setTreasuryMovementToEdit({
+                    id: selectedRecord.id,
+                    treasury_type: selectedRecord.treasury_type,
+                    amount: selectedRecord.amount,
+                    movement_date: selectedRecord.movement_date,
+                    account_id: selectedRecord.account_id,
+                    paid_by_member_id: selectedRecord.paid_by_member_id,
+                    entry_description: selectedRecord.entry_description,
+                  });
+                }}
+                disabled={!selectedRecord}
+                className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.treasuryMovementEditAction ?? "Modificar datos"}
+              </button>
+            );
+          }
+
+          if (entity.key !== "treasuryGeneral") {
+            return null;
+          }
+
+          const selectedTreasuryType = String(
+            selectedRecord?.treasury_type ?? ""
+          ).trim();
+          const canViewMovements = Boolean(selectedTreasuryType);
+
+          return (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setDefaultTreasuryMovementType(selectedTreasuryType);
+                  setIsTreasuryMovementModalOpen(true);
+                }}
+                disabled={!scopeAvailable}
+                className="btn-primary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.treasuryMovementAction ?? "Añadir movimiento"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!canViewMovements) {
+                    return;
+                  }
+
+                  const params = new URLSearchParams({
+                    type: selectedTreasuryType,
+                  });
+
+                  router.push(
+                    `/treasury-general/movements?${params.toString()}`
+                  );
+                }}
+                disabled={!canViewMovements}
+                className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.treasuryMovementsAction ?? "Ver movimientos"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push("/treasury-general/balance")}
+                disabled={!scopeAvailable}
+                className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.treasuryBalanceAction ?? "Balance"}
+              </button>
+            </>
+          );
+        }}
         actionsContent={getEntityActionsContent(entity)}
         scopeAvailable={scopeAvailable}
         deleteRecordAction={deleteRecord}
@@ -347,6 +448,31 @@ export default function EntityListDetailPageClient({
           item={inventoryAdjustmentItem}
           labels={labels}
           onClose={closeInventoryAdjustmentModal}
+        />
+      ) : null}
+
+      {entity.key === "treasuryGeneral" && isTreasuryMovementModalOpen ? (
+        <TreasuryMovementModal
+          accountOptions={treasuryAccountOptions}
+          memberOptions={treasuryMemberOptions}
+          defaultMemberId={defaultTreasuryMemberId}
+          defaultTreasuryType={defaultTreasuryMovementType}
+          labels={labels}
+          onClose={() => {
+            setIsTreasuryMovementModalOpen(false);
+            setDefaultTreasuryMovementType("");
+          }}
+        />
+      ) : null}
+
+      {entity.key === "treasuryGeneralMovements" && treasuryMovementToEdit ? (
+        <TreasuryMovementModal
+          accountOptions={treasuryAccountOptions}
+          memberOptions={treasuryMemberOptions}
+          defaultMemberId={defaultTreasuryMemberId}
+          movement={treasuryMovementToEdit}
+          labels={labels}
+          onClose={() => setTreasuryMovementToEdit(null)}
         />
       ) : null}
     </>

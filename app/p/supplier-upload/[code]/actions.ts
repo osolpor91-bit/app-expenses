@@ -705,7 +705,11 @@ export async function uploadSupplierInvoiceFromPortalAction(
     return entityOperationError(dict.supplierUpload.errors.invalidInvoiceDate);
   }
 
-  if (confirmationEmail && !isValidEmail(confirmationEmail)) {
+  if (!confirmationEmail) {
+    return entityOperationError("Email is missing.");
+  }
+
+  if (!isValidEmail(confirmationEmail)) {
     return entityOperationError(
       dict.supplierUpload.errors.invalidConfirmationEmail
     );
