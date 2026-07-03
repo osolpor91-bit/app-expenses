@@ -89,7 +89,7 @@ export default async function TreasuryBalancePage({
   const totals = getTreasuryBalanceTotals(rows);
 
   return (
-    <section className="max-w-[1040px] space-y-3">
+    <section className="max-w-[600px] space-y-3">
       <div className="space-y-1">
         <Link href="/treasury-general" className="link-app inline-block text-sm">
           ← {dict.treasuryBalance.backToTreasuryGeneral}
@@ -135,50 +135,56 @@ export default async function TreasuryBalancePage({
           {dict.treasuryBalance.emptyList}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-primary-app">
-          <table className="min-w-[800px] w-full border-collapse text-[11px]">
+        <div className="w-fit max-w-full overflow-x-auto rounded-xl border border-primary-app">
+          <table className="w-[527px] table-fixed border-collapse text-[10px]">
+            <colgroup>
+              <col style={{ width: "180px" }} />
+              <col style={{ width: "68px" }} />
+              <col style={{ width: "68px" }} />
+              <col style={{ width: "68px" }} />
+              <col style={{ width: "68px" }} />
+              <col style={{ width: "75px" }} />
+            </colgroup>
+
             <thead className="bg-app-soft text-left text-primary-app">
               <tr>
                 <th
                   rowSpan={2}
-                  className="w-[280px] px-2.5 py-1.5 font-semibold"
+                  className="px-1.5 py-1 font-semibold"
                 >
-                  {dict.treasuryBalance.accountNo}
+                  {dict.treasuryBalance.accountDescription}
                 </th>
                 <th
                   colSpan={2}
-                  className="border-l border-app-border px-2 py-1 text-center font-semibold"
+                  className="border-l border-app-border px-1 py-0.5 text-center font-semibold"
                 >
                   {dict.treasuryBalance.incomeGroup}
                 </th>
                 <th
-                  colSpan={3}
-                  className="border-l border-app-border px-2 py-1 text-center font-semibold"
+                  colSpan={2}
+                  className="border-l border-app-border px-1 py-0.5 text-center font-semibold"
                 >
                   {dict.treasuryBalance.expenseGroup}
                 </th>
                 <th
                   rowSpan={2}
-                  className="w-[100px] border-l border-app-border px-2.5 py-1.5 text-right font-semibold"
+                  className="border-l border-app-border px-1.5 py-1 text-right font-semibold"
                 >
                   {dict.treasuryBalance.balance}
                 </th>
               </tr>
               <tr className="border-t border-app-border">
-                <th className="w-[90px] border-l border-app-border px-2 py-1 text-right font-medium">
+                <th className="border-l border-app-border px-1 py-0.5 text-right font-medium">
                   {dict.treasuryBalance.realShort}
                 </th>
-                <th className="w-[90px] px-2 py-1 text-right font-medium">
+                <th className="px-1 py-0.5 text-right font-medium">
                   {dict.treasuryBalance.expectedShort}
                 </th>
-                <th className="w-[90px] border-l border-app-border px-2 py-1 text-right font-medium">
+                <th className="border-l border-app-border px-1 py-0.5 text-right font-medium">
                   {dict.treasuryBalance.realShort}
                 </th>
-                <th className="w-[90px] px-2 py-1 text-right font-medium">
+                <th className="px-1 py-0.5 text-right font-medium">
                   {dict.treasuryBalance.expectedShort}
-                </th>
-                <th className="w-[90px] px-2 py-1 text-right font-medium">
-                  {dict.treasuryBalance.differenceShort}
                 </th>
               </tr>
             </thead>
@@ -189,31 +195,28 @@ export default async function TreasuryBalancePage({
                   key={row.accountId || row.accountNo}
                   className="border-t border-app-border bg-white"
                 >
-                  <td className="px-2.5 py-1.5">
-                    <span className="font-semibold text-primary-app">
-                      {row.accountNo || "-"}
-                    </span>
-                    <span className="ml-2 text-app-muted">
+                  <td
+                    className="px-1.5 py-1 text-app-muted"
+                    title={row.accountDescription || undefined}
+                  >
+                    <span className="block truncate">
                       {row.accountDescription || "-"}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap border-l border-app-border px-2 py-1.5 text-right tabular-nums">
+                  <td className="whitespace-nowrap border-l border-app-border px-1 py-1 text-right tabular-nums">
                     {formatDecimalValue(row.realIncome)}
                   </td>
-                  <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">
+                  <td className="whitespace-nowrap px-1 py-1 text-right tabular-nums">
                     {formatDecimalValue(row.expectedIncome)}
                   </td>
-                  <td className="whitespace-nowrap border-l border-app-border px-2 py-1.5 text-right tabular-nums">
+                  <td className="whitespace-nowrap border-l border-app-border px-1 py-1 text-right tabular-nums">
                     {formatDecimalValue(row.realExpense)}
                   </td>
-                  <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">
+                  <td className="whitespace-nowrap px-1 py-1 text-right tabular-nums">
                     {formatDecimalValue(row.expectedExpense)}
                   </td>
-                  <td className="whitespace-nowrap px-2 py-1.5 text-right font-medium tabular-nums">
-                    {formatDecimalValue(row.expenseDifference)}
-                  </td>
                   <td
-                    className={`whitespace-nowrap border-l border-app-border px-2.5 py-1.5 text-right font-bold tabular-nums ${getBalanceTextClass(
+                    className={`whitespace-nowrap border-l border-app-border px-1.5 py-1 text-right font-bold tabular-nums ${getBalanceTextClass(
                       row.balance
                     )}`}
                   >
@@ -225,26 +228,23 @@ export default async function TreasuryBalancePage({
 
             <tfoot className="border-t-2 border-primary-app bg-app-soft font-bold text-primary-app">
               <tr>
-                <td className="px-2.5 py-1.5">
+                <td className="px-1.5 py-1">
                   {dict.treasuryBalance.total}
                 </td>
-                <td className="whitespace-nowrap border-l border-app-border px-2 py-1.5 text-right tabular-nums">
+                <td className="whitespace-nowrap border-l border-app-border px-1 py-1 text-right tabular-nums">
                   {formatDecimalValue(totals.realIncome)}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">
+                <td className="whitespace-nowrap px-1 py-1 text-right tabular-nums">
                   {formatDecimalValue(totals.expectedIncome)}
                 </td>
-                <td className="whitespace-nowrap border-l border-app-border px-2 py-1.5 text-right tabular-nums">
+                <td className="whitespace-nowrap border-l border-app-border px-1 py-1 text-right tabular-nums">
                   {formatDecimalValue(totals.realExpense)}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">
+                <td className="whitespace-nowrap px-1 py-1 text-right tabular-nums">
                   {formatDecimalValue(totals.expectedExpense)}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">
-                  {formatDecimalValue(totals.expenseDifference)}
-                </td>
                 <td
-                  className={`whitespace-nowrap border-l border-app-border px-2.5 py-1.5 text-right tabular-nums ${getBalanceTextClass(
+                  className={`whitespace-nowrap border-l border-app-border px-1.5 py-1 text-right tabular-nums ${getBalanceTextClass(
                     totals.balance
                   )}`}
                 >

@@ -21,7 +21,9 @@ export default async function TreasuryGeneralMovementsPage({
     <EntityListDetailPage
       entity={treasuryGeneralMovementEntity}
       searchParams={searchParams}
-      minWidthClass="min-w-[880px]"
+      minWidthClass="min-w-[740px]"
+      contentClassName="max-w-[820px]"
+      compactTable
       treasuryAccountOptions={accountOptions}
       treasuryMemberOptions={memberOptions}
       defaultTreasuryMemberId={defaultMemberId}

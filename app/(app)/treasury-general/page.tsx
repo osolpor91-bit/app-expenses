@@ -20,7 +20,9 @@ export default async function TreasuryGeneralPage({
     <EntityListDetailPage
       entity={treasuryGeneralEntity}
       searchParams={searchParams}
-      minWidthClass="min-w-[520px]"
+      contentClassName="max-w-[390px]"
+      compactList
+      showFilterBar={false}
       treasuryAccountOptions={accountOptions}
       treasuryMemberOptions={memberOptions}
       defaultTreasuryMemberId={defaultMemberId}

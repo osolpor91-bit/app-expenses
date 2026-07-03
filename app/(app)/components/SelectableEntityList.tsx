@@ -83,6 +83,8 @@ type SelectableEntityListProps<TRecord extends SelectableEntityRecord> = {
   labels: SelectableEntityListLabels;
   newHref: string;
   minWidthClass?: string;
+  compact?: boolean;
+  compactTable?: boolean;
   primaryFieldDbName: string;
   renderToolbarContent?: (selectedRecord: TRecord | null) => ReactNode;
   actionsContent?: ReactNode;
@@ -104,8 +106,13 @@ type SelectableEntityListProps<TRecord extends SelectableEntityRecord> = {
   ) => string | null;
 };
 
-function getBodyCellClassName(field: EntityFieldDefinition) {
-  const baseClassName = "px-3 py-1.5 align-middle";
+function getBodyCellClassName(
+  field: EntityFieldDefinition,
+  compact: boolean
+) {
+  const baseClassName = compact
+    ? "px-2 py-1 align-middle"
+    : "px-3 py-1.5 align-middle";
 
   if (field.calculated) {
     return `${baseClassName} font-semibold text-primary-app`;
@@ -488,6 +495,8 @@ export default function SelectableEntityList<
   labels,
   newHref,
   minWidthClass = "",
+  compact = false,
+  compactTable = compact,
   primaryFieldDbName,
   renderToolbarContent,
   actionsContent = null,
@@ -847,7 +856,13 @@ export default function SelectableEntityList<
 
   const listContent = (
     <section>
-      <div className="sticky top-[168px] z-[80] -mx-4 bg-app px-4 pb-1 pt-0 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <div
+        className={
+          compact
+            ? "sticky top-[84px] z-[80] bg-app pb-1 pt-0"
+            : "sticky top-[168px] z-[80] -mx-4 bg-app px-4 pb-1 pt-0 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+        }
+      >
         <h2 className="sr-only">{labels.title}</h2>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -918,7 +933,9 @@ export default function SelectableEntityList<
 
       <div className="mt-1 max-h-[calc(100vh-255px)] overflow-auto rounded-xl border border-app-border bg-app">
         <table
-          className={`table-app table-fixed ${minWidthClass} text-xs sm:text-sm`}
+          className={`table-app table-fixed ${minWidthClass} text-xs ${
+            compactTable ? "" : "sm:text-sm"
+          }`}
           style={{ width: `max(100%, ${totalColumnWidth}px)` }}
         >
           <colgroup>
@@ -940,7 +957,9 @@ export default function SelectableEntityList<
               {fields.map((field) => (
                 <th
                   key={field.key}
-                  className="sticky top-0 z-20 bg-app-soft px-3 py-1.5 pr-4 text-left align-middle font-semibold"
+                  className={`sticky top-0 z-20 bg-app-soft text-left align-middle font-semibold ${
+                    compactTable ? "px-2 py-1 pr-3" : "px-3 py-1.5 pr-4"
+                  }`}
                 >
                   <button
                     type="button"
@@ -990,7 +1009,11 @@ export default function SelectableEntityList<
                       return (
                         <td
                           key={field.key}
-                          className="px-3 py-1.5 align-middle font-medium"
+                          className={
+                            compactTable
+                              ? "px-2 py-1 align-middle font-medium"
+                              : "px-3 py-1.5 align-middle font-medium"
+                          }
                           title={getCellTitle(getRecordName(record))}
                         >
                           {canEdit ? (
@@ -1016,7 +1039,7 @@ export default function SelectableEntityList<
                     return (
                       <td
                         key={field.key}
-                        className={getBodyCellClassName(field)}
+                        className={getBodyCellClassName(field, compactTable)}
                         title={getCellTitle(cellValue)}
                       >
                         {cellHref ? (
@@ -1048,7 +1071,11 @@ export default function SelectableEntityList<
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-app-muted">{labels.listHelpText}</p>
+      <p
+        className={`${compactTable ? "mt-2" : "mt-3"} text-xs text-app-muted`}
+      >
+        {labels.listHelpText}
+      </p>
     </section>
   );
 

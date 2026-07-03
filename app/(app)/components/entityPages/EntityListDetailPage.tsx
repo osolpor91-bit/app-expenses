@@ -41,6 +41,10 @@ type EntityListDetailPageProps = {
   backHref?: string;
   backLabel?: string;
   initiallyShowSecondaryFilters?: boolean;
+  showFilterBar?: boolean;
+  contentClassName?: string;
+  compactList?: boolean;
+  compactTable?: boolean;
 };
 
 type EntityListPageContext = {
@@ -395,6 +399,10 @@ export default async function EntityListDetailPage({
   backHref,
   backLabel,
   initiallyShowSecondaryFilters,
+  showFilterBar = true,
+  contentClassName = "",
+  compactList = false,
+  compactTable = false,
 }: EntityListDetailPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const { dict } = await getDictionary();
@@ -456,7 +464,7 @@ export default async function EntityListDetailPage({
   );
 
   return (
-    <section className="space-y-3">
+    <section className={`space-y-3 ${contentClassName}`.trim()}>
       <div className="sticky top-14 z-[90] -mx-4 bg-app px-4 pb-1 pt-0 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div className="space-y-1 bg-app pb-0.5">
           {backHref && backLabel ? (
@@ -469,27 +477,29 @@ export default async function EntityListDetailPage({
             {getString(entityLabels, "title", entity.key)}
           </h1>
 
-          <FilterBar
-            primaryFields={primaryFilterFields}
-            secondaryFields={secondaryFilterFields}
-            initialValues={initialFilterValues}
-            initiallyShowSecondaryFilters={initiallyShowSecondaryFilters}
-            labels={{
-              apply: getString(commonLabels, "apply", "Aplicar"),
-              clear: getString(commonLabels, "clear", "Limpiar"),
-              filters: getString(commonLabels, "filters", "Filtros"),
-              hideFilters: getString(
-                commonLabels,
-                "hideFilters",
-                "Ocultar filtros"
-              ),
-              invalidDateRange: getString(
-                commonLabels,
-                "invalidDateRange",
-                "Formato de fecha no válido. Usa 01/01/2026..31/01/2026."
-              ),
-            }}
-          />
+          {showFilterBar ? (
+            <FilterBar
+              primaryFields={primaryFilterFields}
+              secondaryFields={secondaryFilterFields}
+              initialValues={initialFilterValues}
+              initiallyShowSecondaryFilters={initiallyShowSecondaryFilters}
+              labels={{
+                apply: getString(commonLabels, "apply", "Aplicar"),
+                clear: getString(commonLabels, "clear", "Limpiar"),
+                filters: getString(commonLabels, "filters", "Filtros"),
+                hideFilters: getString(
+                  commonLabels,
+                  "hideFilters",
+                  "Ocultar filtros"
+                ),
+                invalidDateRange: getString(
+                  commonLabels,
+                  "invalidDateRange",
+                  "Formato de fecha no válido. Usa 01/01/2026..31/01/2026."
+                ),
+              }}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -505,6 +515,8 @@ export default async function EntityListDetailPage({
         })}
         listActions={entity.listActions}
         minWidthClass={minWidthClass}
+        compactList={compactList}
+        compactTable={compactTable}
         scopeAvailable={scopeAvailable}
         treasuryAccountOptions={treasuryAccountOptions}
         treasuryMemberOptions={treasuryMemberOptions}

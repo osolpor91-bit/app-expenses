@@ -61,6 +61,8 @@ type EntityListDetailPageClientProps = {
   labels: EntityListDetailPageClientLabels;
   listActions?: EntityListActionsDefinition;
   minWidthClass?: string;
+  compactList?: boolean;
+  compactTable?: boolean;
   scopeAvailable?: boolean;
   treasuryAccountOptions?: TreasuryAccountOption[];
   treasuryMemberOptions?: TreasuryMemberOption[];
@@ -270,6 +272,8 @@ export default function EntityListDetailPageClient({
   labels,
   listActions,
   minWidthClass,
+  compactList = false,
+  compactTable = false,
   scopeAvailable = true,
   treasuryAccountOptions = [],
   treasuryMemberOptions = [],
@@ -329,6 +333,8 @@ export default function EntityListDetailPageClient({
         newHref={entity.newRoute}
         listActions={listActions}
         minWidthClass={minWidthClass}
+        compact={compactList}
+        compactTable={compactTable}
         primaryFieldDbName={entity.primaryFieldDbName}
         autoSelectFirstRecord
         renderToolbarContent={(selectedRecord) => {

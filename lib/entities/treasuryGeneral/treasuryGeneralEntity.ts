@@ -2,7 +2,6 @@ import { treasuryGeneralTypeOptions } from "@/lib/entityFields/commonOptions";
 import { getDbColumnsFromFields } from "@/lib/entityFields/helpers";
 import type { EntityFieldDefinition } from "@/lib/entityFields/types";
 import type { ListDetailEntityDefinition } from "@/lib/entities/core/entityDefinition";
-import type { EntityFilterDefinition } from "@/lib/search/databaseFilters";
 
 export const treasuryGeneralFields: readonly EntityFieldDefinition[] = [
     {
@@ -30,18 +29,6 @@ export const treasuryGeneralFields: readonly EntityFieldDefinition[] = [
     },
 ];
 
-export const treasuryGeneralSearchColumns = ["treasury_type"] as const;
-
-export const treasuryGeneralFilters: readonly EntityFilterDefinition[] = [
-    {
-        paramName: "type",
-        column: "treasury_type",
-        labelKey: "treasuryType",
-        type: "text",
-        operator: "eq",
-    },
-];
-
 export const treasuryGeneralSelectColumns = getDbColumnsFromFields(
     treasuryGeneralFields,
     ["id", "tenant_id", "company_id", "sort_order", "created_at", "updated_at"]
@@ -62,8 +49,6 @@ export const treasuryGeneralEntity = {
     selectColumns: treasuryGeneralSelectColumns,
     updatedAtColumn: "updated_at",
 
-    searchColumns: treasuryGeneralSearchColumns,
-    filters: treasuryGeneralFilters,
     staticFilters: [
         {
             column: "treasury_type",
