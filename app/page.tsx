@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import PublicLanguageSwitcher from "@/app/components/PublicLanguageSwitcher";
@@ -79,44 +80,29 @@ export default async function HomePage() {
           </div>
 
           <div
-            role="img"
-            aria-label={labels.photoAriaLabel}
-            className="relative min-h-[340px] overflow-hidden rounded-[2rem] border border-[#cabe9d] bg-[#3f4f24] p-5 shadow-[0_24px_60px_rgba(63,79,36,0.22)] sm:min-h-[440px] sm:p-7"
+            className="relative min-h-[340px] overflow-hidden rounded-[2rem] border border-[#cabe9d] bg-[#3f4f24] shadow-[0_24px_60px_rgba(63,79,36,0.22)] sm:min-h-[440px]"
           >
+            <Image
+              src="/images/susarros/foto-grupo-susarros-2025.jpeg"
+              alt={labels.photoAriaLabel}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+
             <div
               aria-hidden="true"
-              className="absolute -right-16 -top-20 size-56 rounded-full border-[28px] border-white/5"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute -bottom-24 -left-16 size-64 rounded-full border-[34px] border-[#d7c28a]/10"
+              className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10"
             />
 
-            <div className="relative flex h-full min-h-[300px] flex-col justify-between rounded-[1.4rem] border border-white/20 bg-[linear-gradient(145deg,rgba(255,255,255,0.10),rgba(255,255,255,0.02))] p-6 text-white sm:min-h-[384px] sm:p-8">
-              <span className="w-fit rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em]">
-                {labels.photoBadge}
-              </span>
+            <span className="absolute left-7 top-7 rounded-full border border-white/30 bg-black/25 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+              {labels.photoBadge}
+            </span>
 
-              <div className="text-center">
-                <div
-                  aria-hidden="true"
-                  className="mx-auto flex size-24 items-center justify-center rounded-full border-2 border-[#d7c28a] text-5xl font-black text-[#ead9a8] sm:size-28"
-                >
-                  S
-                </div>
-
-                <p className="mt-5 text-xl font-bold">
-                  {labels.photoPlaceholderTitle}
-                </p>
-                <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-white/75">
-                  {labels.photoPlaceholderDescription}
-                </p>
-              </div>
-
-              <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#ead9a8]">
-                {labels.astorga}
-              </p>
-            </div>
+            <p className="absolute bottom-7 left-0 right-0 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white">
+              {labels.astorga}
+            </p>
           </div>
         </div>
       </section>

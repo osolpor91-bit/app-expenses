@@ -1160,7 +1160,7 @@ export const dictionaries = {
       seeMore: "Qué ver",
       aboutAction: "Sobre SUSARROS",
       photoAriaLabel: "Espacio reservado para una fotografía del grupo SUSARROS",
-      photoBadge: "Foto del grupo",
+      photoBadge: "Susarros 2025",
       photoPlaceholderTitle: "Aquí irá nuestra fotografía",
       photoPlaceholderDescription:
         "Este espacio está preparado para mostrar una imagen de SUSARROS cuando esté disponible.",
