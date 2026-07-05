@@ -818,6 +818,9 @@ export const dictionaries = {
       deleting: "Eliminando...",
       confirmDelete:
         "Vas a eliminar este adjunto. Esta acción no se puede deshacer. ¿Quieres continuar?",
+      fileTooLarge: "El archivo no puede superar los 10 MB.",
+      uploadError:
+        "No se pudo subir el archivo. Comprueba la conexión e inténtalo de nuevo.",
       error: "Error",
     },
 
@@ -2205,6 +2208,9 @@ export const dictionaries = {
       deleting: "Deleting...",
       confirmDelete:
         "You are about to delete this attachment. This action cannot be undone. Do you want to continue?",
+      fileTooLarge: "The file cannot exceed 10 MB.",
+      uploadError:
+        "The file could not be uploaded. Check your connection and try again.",
       error: "Error",
     },
 

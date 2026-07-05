@@ -22,6 +22,8 @@ export type EntityDocumentFactBoxLabels = {
   delete: string;
   deleting: string;
   confirmDelete: string;
+  fileTooLarge: string;
+  uploadError: string;
   error: string;
 };
 
@@ -43,6 +45,8 @@ type EntityDocumentFactBoxProps = {
   labels: EntityDocumentFactBoxLabels;
   onDocumentCountChange?: (count: number) => void;
 };
+
+const maxAttachmentFileSizeBytes = 10 * 1024 * 1024;
 
 function formatFileSize(sizeBytes: number | null) {
   if (sizeBytes === null || sizeBytes === undefined) {
@@ -134,9 +138,16 @@ export default function EntityDocumentFactBox({
   }
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const fileInput = event.currentTarget;
     const selectedFile = event.target.files?.[0];
 
     if (!selectedFile || !recordId) {
+      return;
+    }
+
+    if (selectedFile.size > maxAttachmentFileSizeBytes) {
+      setErrorMessage(labels.fileTooLarge);
+      fileInput.value = "";
       return;
     }
 
@@ -146,24 +157,28 @@ export default function EntityDocumentFactBox({
     setIsUploading(true);
     setErrorMessage("");
 
-    const result = await uploadEntityDocumentFactBoxAction(
-      {
-        entityKey,
-        recordId,
-        factBoxKey,
-      },
-      formData
-    );
+    try {
+      const result = await uploadEntityDocumentFactBoxAction(
+        {
+          entityKey,
+          recordId,
+          factBoxKey,
+        },
+        formData
+      );
 
-    setIsUploading(false);
-    event.target.value = "";
+      if (!result.ok) {
+        setErrorMessage(result.error);
+        return;
+      }
 
-    if (!result.ok) {
-      setErrorMessage(result.error);
-      return;
+      await loadDocuments();
+    } catch {
+      setErrorMessage(labels.uploadError);
+    } finally {
+      setIsUploading(false);
+      fileInput.value = "";
     }
-
-    await loadDocuments();
   }
 
   async function handleDeleteDocument(documentId: string) {

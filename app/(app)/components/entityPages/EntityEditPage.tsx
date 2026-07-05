@@ -75,6 +75,8 @@ type DocumentFactBoxLabels = {
   delete: string;
   deleting: string;
   confirmDelete: string;
+  fileTooLarge: string;
+  uploadError: string;
   error: string;
 };
 
@@ -372,6 +374,16 @@ function buildDocumentFactBoxLabels(
       documentFactBoxLabels,
       "confirmDelete",
       "Vas a eliminar este adjunto. Esta acción no se puede deshacer. ¿Quieres continuar?"
+    ),
+    fileTooLarge: getString(
+      documentFactBoxLabels,
+      "fileTooLarge",
+      "El archivo no puede superar los 10 MB."
+    ),
+    uploadError: getString(
+      documentFactBoxLabels,
+      "uploadError",
+      "No se pudo subir el archivo. Comprueba la conexión e inténtalo de nuevo."
     ),
     error: getString(documentFactBoxLabels, "error", "Error"),
   };
