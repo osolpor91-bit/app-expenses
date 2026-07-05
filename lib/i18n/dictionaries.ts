@@ -104,12 +104,15 @@ export const dictionaries = {
       quickAction: "Acción rápida",
       newSupplier: "Nuevo proveedor",
       treasury: "Tesorería",
+      treasuryGeneral: "Tesorería general",
       registerExpense: "Registrar gasto",
       totalBalance: "Balance previsto",
       realBalance: "Balance real",
+      payments: "Pagos",
       settlements: "Liquidaciones",
       pendingSettlements: "Liquidaciones pendientes",
       settlePayments: "Liquidar pagos",
+      susarros: "SUSARROS",
       members: "Miembros",
       guests: "Invitados",
       membersReadError: "Error contando miembros",
@@ -389,6 +392,9 @@ export const dictionaries = {
       treasuryMovementUpdate: "Modificar",
       treasuryMovementUpdating: "Modificando...",
       treasuryMovementUpdateError: "Error al modificar el movimiento",
+      attachmentsChecking: "Comprobando los adjuntos del movimiento...",
+      attachmentsLockMessage:
+        "Este movimiento tiene adjuntos. Elimínalos antes de modificarlo o eliminarlo.",
       close: "Cerrar",
       emptyList: "No hay movimientos de tesorería.",
       listHelpText:
@@ -1131,31 +1137,44 @@ export const dictionaries = {
 
     publicHome: {
       tagline: "Soluciones digitales para gestión empresarial",
-      login: "Entrar",
-      register: "Regístrate",
-      badge: "Portal de proveedores/clientes · Facturación con VeriFactu",
-      title: "App gastos susarros",
+      boardAccess: "Acceso Junta",
+      groupType: "Grupo de Astures y Romanos",
+      title: "SUSARROS",
+      subtitle: "Grupo de Astures y Romanos de Astorga",
       description:
-        "Centraliza la comunicación con clientes y proveedores, organiza documentos y prepara tu facturación en un entorno moderno, seguro y multiempresa.",
-      portalTitle: "Portal clientes/proveedores",
-      portalDescription:
-        "Un espacio privado para compartir documentos, gestionar comunicaciones y ordenar la relación con tus clientes o proveedores desde un único entorno.",
-      invoicingTitle: "Facturación con VeriFactu",
-      invoicingDescription:
-        "Una solución de facturación sencilla, pensada para emitir, consultar y organizar facturas, con una base preparada para adaptarse a los requisitos de VeriFactu.",
-      offersTitle: "Qué ofrece la plataforma",
-      secureAccessTitle: "Acceso seguro por usuario",
-      secureAccessDescription:
-        "Cada organización accede a su propio entorno privado con usuarios y permisos separados.",
-      multiCompanyTitle: "Multiempresa",
-      multiCompanyDescription:
-        "Dentro de una misma cuenta puedes trabajar con varias empresas internas y mantener sus datos organizados.",
-      roleBasedAccessTitle: "Acceso por roles",
-      roleBasedAccessDescription:
-        "Cada usuario accede a las áreas permitidas por su rol dentro del tenant.",
+        "Este es el espacio de SUSARROS para compartir la vida del grupo, nuestras actividades y todo lo que nos une alrededor de las fiestas de Astures y Romanos de Astorga.",
+      seeMore: "Qué ver",
+      aboutAction: "Sobre SUSARROS",
+      photoAriaLabel: "Espacio reservado para una fotografía del grupo SUSARROS",
+      photoBadge: "Foto del grupo",
+      photoPlaceholderTitle: "Aquí irá nuestra fotografía",
+      photoPlaceholderDescription:
+        "Este espacio está preparado para mostrar una imagen de SUSARROS cuando esté disponible.",
+      astorga: "Astorga · León",
+      publicSpace: "Espacio público",
+      whatToSeeTitle: "Qué ver",
+      whatToSeeDescription:
+        "Esta zona estará abierta para miembros, amigos y visitantes, aunque no tengan acceso al área privada de gestión.",
       inDevelopment: "En desarrollo",
-      inDevelopmentDescription:
-        "Estamos construyendo una base común para compartir usuarios, empresas y seguridad, evitando duplicidades y facilitando el crecimiento de la aplicación.",
+      developmentTitle: "Estamos preparando este espacio",
+      developmentDescription:
+        "Poco a poco iremos publicando aquí actividades, avisos, fotografías y contenidos relacionados con SUSARROS. De momento, la web pública está dando sus primeros pasos.",
+      comingSoon: "Próximamente",
+      activitiesTitle: "Próximas actividades",
+      activitiesDescription:
+        "Un lugar para consultar encuentros, preparativos y fechas importantes del grupo.",
+      newsTitle: "Avisos y novedades",
+      newsDescription:
+        "Información útil para estar al día de todo lo que ocurre en SUSARROS.",
+      galleryTitle: "Galería del grupo",
+      galleryDescription:
+        "Fotografías de fiestas, reuniones y momentos compartidos por el grupo.",
+      aboutEyebrow: "Nuestra identidad",
+      aboutTitle: "Sobre SUSARROS",
+      aboutDescription:
+        "SUSARROS forma parte de la celebración de Astures y Romanos de Astorga. Esta web será nuestro punto de encuentro público y el acceso a las herramientas internas de la Junta.",
+      footerGroup: "SUSARROS · Astures y Romanos de Astorga",
+      developedBy: "Sitio desarrollado por Osolpor",
     },
 
     auth: {
@@ -1474,12 +1493,15 @@ export const dictionaries = {
       quickAction: "Quick action",
       newSupplier: "New supplier",
       treasury: "Treasury",
+      treasuryGeneral: "General treasury",
       registerExpense: "Register expense",
       totalBalance: "Expected balance",
       realBalance: "Actual balance",
+      payments: "Payments",
       settlements: "Settlements",
       pendingSettlements: "Pending settlements",
       settlePayments: "Settle payments",
+      susarros: "SUSARROS",
       members: "Members",
       guests: "Guests",
       membersReadError: "Error counting members",
@@ -1757,6 +1779,9 @@ export const dictionaries = {
       treasuryMovementUpdate: "Modify",
       treasuryMovementUpdating: "Updating...",
       treasuryMovementUpdateError: "Error updating treasury movement",
+      attachmentsChecking: "Checking the movement attachments...",
+      attachmentsLockMessage:
+        "This movement has attachments. Delete them before modifying or deleting it.",
       close: "Close",
       emptyList: "There are no treasury movements.",
       listHelpText:
@@ -2496,31 +2521,44 @@ export const dictionaries = {
 
     publicHome: {
       tagline: "Digital solutions for business management",
-      login: "Log in",
-      register: "Sign up",
-      badge: "Supplier/customer portal · VeriFactu invoicing",
-      title: "App gastos susarros",
+      boardAccess: "Board access",
+      groupType: "Astures and Romans group",
+      title: "SUSARROS",
+      subtitle: "Astures and Romans group from Astorga",
       description:
-        "Centralize communication with customers and suppliers, organize documents and prepare your invoicing in a modern, secure, multi-company environment.",
-      portalTitle: "Customer/supplier portal",
-      portalDescription:
-        "A private space to share documents, manage communications and organize the relationship with your customers or suppliers from a single environment.",
-      invoicingTitle: "VeriFactu invoicing",
-      invoicingDescription:
-        "A simple invoicing solution designed to issue, review and organize invoices, with a base prepared to adapt to VeriFactu requirements.",
-      offersTitle: "What the platform offers",
-      secureAccessTitle: "Secure user access",
-      secureAccessDescription:
-        "Each organization accesses its own private environment with separate users and permissions.",
-      multiCompanyTitle: "Multi-company",
-      multiCompanyDescription:
-        "Within the same account you can work with several internal companies and keep their data organized.",
-      roleBasedAccessTitle: "Role-based access",
-      roleBasedAccessDescription:
-        "Each user accesses the areas allowed by their role within the tenant.",
+        "This is the SUSARROS space for sharing group life, our activities and everything that brings us together around Astorga's Astures and Romans festivities.",
+      seeMore: "What to see",
+      aboutAction: "About SUSARROS",
+      photoAriaLabel: "Reserved space for a photograph of the SUSARROS group",
+      photoBadge: "Group photo",
+      photoPlaceholderTitle: "Our photograph will go here",
+      photoPlaceholderDescription:
+        "This space is ready to display a SUSARROS image when one becomes available.",
+      astorga: "Astorga · León",
+      publicSpace: "Public space",
+      whatToSeeTitle: "What to see",
+      whatToSeeDescription:
+        "This area will be open to members, friends and visitors, even if they do not have access to the private management area.",
       inDevelopment: "In development",
-      inDevelopmentDescription:
-        "We are building a common base for shared users, companies and security, avoiding duplication and making the application easier to scale.",
+      developmentTitle: "We are preparing this space",
+      developmentDescription:
+        "We will gradually publish activities, notices, photographs and SUSARROS content here. For now, the public website is taking its first steps.",
+      comingSoon: "Coming soon",
+      activitiesTitle: "Upcoming activities",
+      activitiesDescription:
+        "A place to check meetings, preparations and important group dates.",
+      newsTitle: "Notices and news",
+      newsDescription:
+        "Useful information to keep up with everything happening at SUSARROS.",
+      galleryTitle: "Group gallery",
+      galleryDescription:
+        "Photographs of festivities, meetings and moments shared by the group.",
+      aboutEyebrow: "Our identity",
+      aboutTitle: "About SUSARROS",
+      aboutDescription:
+        "SUSARROS is part of Astorga's Astures and Romans celebration. This website will be our public meeting point and the gateway to the Board's internal tools.",
+      footerGroup: "SUSARROS · Astures and Romans of Astorga",
+      developedBy: "Site developed by Osolpor",
     },
 
     auth: {

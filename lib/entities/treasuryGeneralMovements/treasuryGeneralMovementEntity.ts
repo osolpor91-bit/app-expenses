@@ -156,6 +156,32 @@ export const treasuryGeneralMovementEntity = {
   ],
   filters: treasuryGeneralMovementFilters,
 
+  factBoxes: [
+    {
+      key: "attachments",
+      type: "document",
+      table: "entity_attachments",
+      entityTableDbName: "entity_table",
+      parentIdDbName: "record_id",
+
+      storageProviderDbName: "storage_provider",
+
+      supabaseBucketDbName: "storage_bucket",
+      supabasePathDbName: "file_path",
+
+      sharepointWebUrlDbName: "external_url",
+
+      originalFileNameDbName: "file_name",
+      contentTypeDbName: "mime_type",
+      sizeBytesDbName: "file_size",
+
+      orderBy: {
+        column: "created_at",
+        ascending: false,
+      },
+    },
+  ],
+
   orderBy: {
     column: "movement_date",
     ascending: false,

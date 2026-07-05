@@ -77,6 +77,19 @@ export default async function DashboardPage() {
 
         <div className="mt-4 flex flex-wrap gap-4">
           <Link
+            href="/treasury-general"
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.quickAction}
+            </p>
+
+            <p className="text-2xl font-bold text-primary-app">
+              {dict.dashboard.treasuryGeneral}
+            </p>
+          </Link>
+
+          <Link
             href={{
               pathname: "/treasury-general",
               query: {
@@ -131,7 +144,15 @@ export default async function DashboardPage() {
               {formatDecimalValue(balanceTotals.realBalance)}
             </p>
           </Link>
+        </div>
+      </div>
 
+      <div>
+        <h2 className="text-xl font-semibold text-primary-app">
+          {dict.dashboard.payments}
+        </h2>
+
+        <div className="mt-4 flex flex-wrap gap-4">
           <Link
             href="/treasury-general/pending-settlements"
             className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
@@ -157,7 +178,15 @@ export default async function DashboardPage() {
               {dict.dashboard.settlePayments}
             </p>
           </Link>
+        </div>
+      </div>
 
+      <div>
+        <h2 className="text-xl font-semibold text-primary-app">
+          {dict.dashboard.susarros}
+        </h2>
+
+        <div className="mt-4 flex flex-wrap gap-4">
           <Link
             href={{
               pathname: "/treasury-members",

@@ -256,20 +256,26 @@ function isPurchaseHeaderEntity(entity: EntityDefinition) {
   return entity.table === "purchases_header";
 }
 
-async function validatePurchaseInvoiceHasNoAttachmentsBeforeDelete({
+async function validateEntityHasNoAttachmentsBeforeDelete({
   supabase,
   context,
   id,
+  entityTable,
+  readErrorPrefix,
+  blockedError,
 }: {
   supabase: SupabaseServerClient;
   context: EntityScopeContext;
   id: string;
+  entityTable: string;
+  readErrorPrefix: string;
+  blockedError: string;
 }): Promise<EntityOperationResult<null>> {
   let query = supabase
     .from("entity_attachments")
     .select("id")
     .eq("tenant_id", context.tenantId)
-    .eq("entity_table", "purchases_header")
+    .eq("entity_table", entityTable)
     .eq("record_id", id);
 
   if (context.companyId) {
@@ -280,14 +286,12 @@ async function validatePurchaseInvoiceHasNoAttachmentsBeforeDelete({
 
   if (error) {
     return entityOperationError(
-      `No se han podido comprobar los adjuntos de la factura: ${error.message}`
+      `${readErrorPrefix}: ${error.message}`
     );
   }
 
   if ((data ?? []).length > 0) {
-    return entityOperationError(
-      "No se puede eliminar la factura porque tiene adjuntos. Elimina primero los adjuntos de la factura."
-    );
+    return entityOperationError(blockedError);
   }
 
   return entityOperationOk(null);
@@ -1335,10 +1339,33 @@ export async function deleteListDetailRecordAction({
 
   if (entity.key === "purchaseInvoices") {
     const attachmentsValidationResult =
-      await validatePurchaseInvoiceHasNoAttachmentsBeforeDelete({
+      await validateEntityHasNoAttachmentsBeforeDelete({
         supabase,
         context,
         id,
+        entityTable: "purchases_header",
+        readErrorPrefix:
+          "No se han podido comprobar los adjuntos de la factura",
+        blockedError:
+          "No se puede eliminar la factura porque tiene adjuntos. Elimina primero los adjuntos de la factura.",
+      });
+
+    if (!attachmentsValidationResult.ok) {
+      return attachmentsValidationResult;
+    }
+  }
+
+  if (entity.key === "treasuryGeneralMovements") {
+    const attachmentsValidationResult =
+      await validateEntityHasNoAttachmentsBeforeDelete({
+        supabase,
+        context,
+        id,
+        entityTable: "treasury_general_movements",
+        readErrorPrefix:
+          "No se han podido comprobar los adjuntos del movimiento",
+        blockedError:
+          "No se puede eliminar el movimiento porque tiene adjuntos. Elimina primero todos sus adjuntos.",
       });
 
     if (!attachmentsValidationResult.ok) {

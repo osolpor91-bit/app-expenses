@@ -22,7 +22,7 @@ export default async function TreasuryGeneralMovementsPage({
       entity={treasuryGeneralMovementEntity}
       searchParams={searchParams}
       minWidthClass="min-w-[740px]"
-      contentClassName="max-w-[820px]"
+      contentClassName="max-w-[1220px]"
       compactTable
       treasuryAccountOptions={accountOptions}
       treasuryMemberOptions={memberOptions}

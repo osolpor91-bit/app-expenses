@@ -96,6 +96,29 @@ async function saveTreasuryMovement({
     );
   }
 
+  if (movementId) {
+    const { data: attachments, error: attachmentsError } = await supabase
+      .from("entity_attachments")
+      .select("id")
+      .eq("tenant_id", tenant.id)
+      .eq("company_id", activeCompany.id)
+      .eq("entity_table", "treasury_general_movements")
+      .eq("record_id", movementId)
+      .limit(1);
+
+    if (attachmentsError) {
+      return entityOperationError(
+        `No se han podido comprobar los adjuntos del movimiento: ${attachmentsError.message}`
+      );
+    }
+
+    if ((attachments ?? []).length > 0) {
+      return entityOperationError(
+        "No se puede modificar el movimiento porque tiene adjuntos. Elimina primero todos sus adjuntos."
+      );
+    }
+  }
+
   const { data: account, error: accountError } = await supabase
     .from("chart_of_accounts")
     .select("id, code, description, account_group")

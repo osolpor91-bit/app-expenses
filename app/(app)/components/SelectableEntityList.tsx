@@ -89,6 +89,7 @@ type SelectableEntityListProps<TRecord extends SelectableEntityRecord> = {
   renderToolbarContent?: (selectedRecord: TRecord | null) => ReactNode;
   actionsContent?: ReactNode;
   listActions?: SelectableEntityListActionsDefinition;
+  getDeleteDisabledReason?: (selectedRecord: TRecord) => string | null;
   scopeAvailable?: boolean;
   autoSelectFirstRecord?: boolean;
   renderSidePanel?: (selectedRecord: TRecord | null) => ReactNode;
@@ -501,6 +502,7 @@ export default function SelectableEntityList<
   renderToolbarContent,
   actionsContent = null,
   listActions,
+  getDeleteDisabledReason,
   scopeAvailable = true,
   autoSelectFirstRecord = false,
   renderSidePanel,
@@ -696,6 +698,9 @@ export default function SelectableEntityList<
   const canEdit = resolvedListActions.edit !== false;
   const canDelete = resolvedListActions.delete !== false;
   const recordActions = resolvedListActions.recordActions ?? [];
+  const deleteDisabledReason = selectedRecord
+    ? getDeleteDisabledReason?.(selectedRecord) ?? null
+    : null;
 
   function getRecordActionLabel(
     action: SelectableEntityListRecordActionDefinition
@@ -819,6 +824,11 @@ export default function SelectableEntityList<
       return;
     }
 
+    if (deleteDisabledReason) {
+      setMessage(deleteDisabledReason);
+      return;
+    }
+
     const confirmed = window.confirm(
       labels.confirmDelete.replace("{name}", getRecordName(selectedRecord))
     );
@@ -905,7 +915,10 @@ export default function SelectableEntityList<
             <button
               type="button"
               onClick={handleDelete}
-              disabled={!selectedRecordId || isDeleting}
+              disabled={
+                !selectedRecordId || isDeleting || Boolean(deleteDisabledReason)
+              }
+              title={deleteDisabledReason ?? undefined}
               className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isDeleting ? labels.deleting : labels.delete}

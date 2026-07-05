@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { EntityFieldDefinition } from "@/lib/entityFields/types";
 import type {
@@ -22,6 +22,9 @@ import { isTreasuryMovementType } from "@/lib/treasury/treasuryGeneral";
 import SelectableEntityList, {
   type SelectableEntityRecord,
 } from "../SelectableEntityList";
+import EntityDocumentFactBox, {
+  type EntityDocumentFactBoxLabels,
+} from "../EntityDocumentFactBox";
 import { deleteListDetailRecordAction } from "../../actions/entityActions";
 import { getEntityDefinition } from "@/lib/entities/core/entityRegistry";
 import InventoryAdjustmentModal from "../../items/components/InventoryAdjustmentModal";
@@ -60,6 +63,7 @@ type EntityListDetailPageClientProps = {
   fieldLabels: Record<string, string>;
   visibleListFieldKeys?: string[];
   labels: EntityListDetailPageClientLabels;
+  documentFactBoxLabels: EntityDocumentFactBoxLabels;
   listActions?: EntityListActionsDefinition;
   minWidthClass?: string;
   compactList?: boolean;
@@ -271,6 +275,7 @@ export default function EntityListDetailPageClient({
   fieldLabels,
   visibleListFieldKeys,
   labels,
+  documentFactBoxLabels,
   listActions,
   minWidthClass,
   compactList = false,
@@ -298,6 +303,8 @@ export default function EntityListDetailPageClient({
     useState(requestedTreasuryMovementType);
   const [treasuryMovementToEdit, setTreasuryMovementToEdit] =
     useState<TreasuryMovementEditRecord | null>(null);
+  const [treasuryMovementAttachmentCounts, setTreasuryMovementAttachmentCounts] =
+    useState<Record<string, number>>({});
 
   const returnTo = getReturnToPath({
     pathname,
@@ -336,6 +343,48 @@ export default function EntityListDetailPageClient({
     router.replace(queryString ? `${pathname}?${queryString}` : pathname);
   }
 
+  const handleTreasuryMovementDocumentCountChange = useCallback(
+    (recordId: string, count: number) => {
+      setTreasuryMovementAttachmentCounts((currentCounts) => {
+        if (currentCounts[recordId] === count) {
+          return currentCounts;
+        }
+
+        return {
+          ...currentCounts,
+          [recordId]: count,
+        };
+      });
+    },
+    []
+  );
+
+  function getTreasuryMovementChangeDisabledReason(
+    record: GenericListDetailRecord
+  ) {
+    if (entity.key !== "treasuryGeneralMovements") {
+      return null;
+    }
+
+    const attachmentCount = treasuryMovementAttachmentCounts[record.id];
+
+    if (attachmentCount === undefined) {
+      return (
+        labels.attachmentsChecking ??
+        "Comprobando los adjuntos del movimiento..."
+      );
+    }
+
+    if (attachmentCount > 0) {
+      return (
+        labels.attachmentsLockMessage ??
+        "Este movimiento tiene adjuntos. Elimínalos antes de modificarlo o eliminarlo."
+      );
+    }
+
+    return null;
+  }
+
   async function deleteRecord(
     id: string
   ): Promise<EntityOperationResult<{ id: string }>> {
@@ -364,29 +413,45 @@ export default function EntityListDetailPageClient({
         autoSelectFirstRecord
         renderToolbarContent={(selectedRecord) => {
           if (entity.key === "treasuryGeneralMovements") {
-            return (
-              <button
-                type="button"
-                onClick={() => {
-                  if (!selectedRecord) {
-                    return;
-                  }
+            const changeDisabledReason = selectedRecord
+              ? getTreasuryMovementChangeDisabledReason(selectedRecord)
+              : null;
+            const hasAttachments = selectedRecord
+              ? (treasuryMovementAttachmentCounts[selectedRecord.id] ?? 0) > 0
+              : false;
 
-                  setTreasuryMovementToEdit({
-                    id: selectedRecord.id,
-                    treasury_type: selectedRecord.treasury_type,
-                    amount: selectedRecord.amount,
-                    movement_date: selectedRecord.movement_date,
-                    account_id: selectedRecord.account_id,
-                    paid_by_member_id: selectedRecord.paid_by_member_id,
-                    entry_description: selectedRecord.entry_description,
-                  });
-                }}
-                disabled={!selectedRecord}
-                className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {labels.treasuryMovementEditAction ?? "Modificar datos"}
-              </button>
+            return (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!selectedRecord || changeDisabledReason) {
+                      return;
+                    }
+
+                    setTreasuryMovementToEdit({
+                      id: selectedRecord.id,
+                      treasury_type: selectedRecord.treasury_type,
+                      amount: selectedRecord.amount,
+                      movement_date: selectedRecord.movement_date,
+                      account_id: selectedRecord.account_id,
+                      paid_by_member_id: selectedRecord.paid_by_member_id,
+                      entry_description: selectedRecord.entry_description,
+                    });
+                  }}
+                  disabled={!selectedRecord || Boolean(changeDisabledReason)}
+                  title={changeDisabledReason ?? undefined}
+                  className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {labels.treasuryMovementEditAction ?? "Modificar datos"}
+                </button>
+
+                {hasAttachments ? (
+                  <span className="text-xs font-medium text-amber-700">
+                    {labels.attachmentsLockMessage}
+                  </span>
+                ) : null}
+              </>
             );
           }
 
@@ -469,6 +534,7 @@ export default function EntityListDetailPageClient({
           );
         }}
         actionsContent={getEntityActionsContent(entity)}
+        getDeleteDisabledReason={getTreasuryMovementChangeDisabledReason}
         scopeAvailable={scopeAvailable}
         deleteRecordAction={deleteRecord}
         getRecordHref={(record) => getRecordHref(entity, record)}
@@ -494,6 +560,28 @@ export default function EntityListDetailPageClient({
             field,
             returnTo,
           })
+        }
+        renderSidePanel={
+          entity.key === "treasuryGeneralMovements"
+            ? (selectedRecord) => (
+                <EntityDocumentFactBox
+                  entityKey={entity.key}
+                  recordId={selectedRecord?.id ?? null}
+                  factBoxKey="attachments"
+                  labels={documentFactBoxLabels}
+                  onDocumentCountChange={(count) => {
+                    if (!selectedRecord) {
+                      return;
+                    }
+
+                    handleTreasuryMovementDocumentCountChange(
+                      selectedRecord.id,
+                      count
+                    );
+                  }}
+                />
+              )
+            : undefined
         }
       />
 

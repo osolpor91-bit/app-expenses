@@ -10,7 +10,7 @@ import {
 } from "../actions/entityDocumentFactBoxActions";
 import EntityFactBox from "./EntityFactBox";
 
-type EntityDocumentFactBoxLabels = {
+export type EntityDocumentFactBoxLabels = {
   title: string;
   selectRecord: string;
   loading: string;
@@ -41,6 +41,7 @@ type EntityDocumentFactBoxProps = {
   recordId: string | null;
   factBoxKey?: string;
   labels: EntityDocumentFactBoxLabels;
+  onDocumentCountChange?: (count: number) => void;
 };
 
 function formatFileSize(sizeBytes: number | null) {
@@ -73,8 +74,10 @@ export default function EntityDocumentFactBox({
   recordId,
   factBoxKey,
   labels,
+  onDocumentCountChange,
 }: EntityDocumentFactBoxProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const onDocumentCountChangeRef = useRef(onDocumentCountChange);
   const [documents, setDocuments] = useState<EntityDocumentFactBoxDocument[]>(
     []
   );
@@ -85,6 +88,10 @@ export default function EntityDocumentFactBox({
   );
   const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    onDocumentCountChangeRef.current = onDocumentCountChange;
+  }, [onDocumentCountChange]);
+
   const loadDocuments = useCallback(async () => {
     if (!recordId) {
       setDocuments([]);
@@ -93,6 +100,7 @@ export default function EntityDocumentFactBox({
     }
 
     setIsLoading(true);
+    setDocuments([]);
     setErrorMessage("");
 
     const result = await getEntityDocumentFactBoxAction({
@@ -110,6 +118,7 @@ export default function EntityDocumentFactBox({
     }
 
     setDocuments(result.data.documents);
+    onDocumentCountChangeRef.current?.(result.data.documents.length);
   }, [entityKey, recordId, factBoxKey]);
 
   useEffect(() => {

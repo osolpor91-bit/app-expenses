@@ -29,6 +29,7 @@ import type {
 } from "../../treasury-general/TreasuryMovementModal";
 
 import FilterBar from "../FilterBar";
+import type { EntityDocumentFactBoxLabels } from "../EntityDocumentFactBox";
 import EntityListDetailPageClient from "./EntityListDetailPageClient";
 
 type EntityListDetailPageProps = {
@@ -317,6 +318,41 @@ function buildClientLabels({
   };
 }
 
+function buildDocumentFactBoxLabels(
+  documentFactBoxLabels: Record<string, unknown>
+): EntityDocumentFactBoxLabels {
+  return {
+    title: getString(documentFactBoxLabels, "title", "Adjuntos"),
+    selectRecord: getString(
+      documentFactBoxLabels,
+      "selectRecord",
+      "Selecciona un registro para ver sus adjuntos."
+    ),
+    loading: getString(
+      documentFactBoxLabels,
+      "loading",
+      "Cargando adjuntos..."
+    ),
+    empty: getString(
+      documentFactBoxLabels,
+      "empty",
+      "Este registro no tiene adjuntos."
+    ),
+    open: getString(documentFactBoxLabels, "open", "Abrir"),
+    download: getString(documentFactBoxLabels, "download", "Descargar"),
+    upload: getString(documentFactBoxLabels, "upload", "Cargar"),
+    uploading: getString(documentFactBoxLabels, "uploading", "Cargando..."),
+    delete: getString(documentFactBoxLabels, "delete", "Eliminar"),
+    deleting: getString(documentFactBoxLabels, "deleting", "Eliminando..."),
+    confirmDelete: getString(
+      documentFactBoxLabels,
+      "confirmDelete",
+      "Vas a eliminar este adjunto. Esta acción no se puede deshacer. ¿Quieres continuar?"
+    ),
+    error: getString(documentFactBoxLabels, "error", "Error"),
+  };
+}
+
 async function getVisibleListFieldKeys({
   entity,
   supabase,
@@ -410,6 +446,9 @@ export default async function EntityListDetailPage({
   const entityLabels = getEntityDictionarySection(entity, dict);
   const fieldLabels = getEntityFieldLabels(entity, dict);
   const commonLabels = getSection(dict, "common");
+  const documentFactBoxLabels = buildDocumentFactBoxLabels(
+    getSection(dict, "documentFactBox")
+  );
 
   const { supabase, context, userId, scopeAvailable } =
     await getEntityListPageContext(entity);
@@ -513,6 +552,7 @@ export default async function EntityListDetailPage({
           entityLabels,
           commonLabels,
         })}
+        documentFactBoxLabels={documentFactBoxLabels}
         listActions={entity.listActions}
         minWidthClass={minWidthClass}
         compactList={compactList}
