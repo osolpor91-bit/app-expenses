@@ -272,6 +272,17 @@ export const dictionaries = {
       treasuryMovementCommentPlaceholder: "Comentario opcional",
       treasuryMovementSaving: "Guardando...",
       treasuryMovementError: "Error al crear el movimiento",
+      treasuryMovementAttachmentAction: "Adjuntar",
+      treasuryMovementAttachmentSelected: "Adjunto",
+      treasuryMovementAttachmentRemove: "Quitar",
+      treasuryMovementAttachmentTooLarge:
+        "El archivo no puede superar los 10 MB.",
+      treasuryMovementAttachmentUploading: "Subiendo adjunto...",
+      treasuryMovementAttachmentRetry: "Reintentar adjunto",
+      treasuryMovementCreatedAttachmentPending:
+        "El movimiento se ha creado, pero el adjunto no se ha podido subir.",
+      treasuryMovementAttachmentUploadError:
+        "Puedes volver a intentarlo sin crear otro movimiento.",
       accept: "Aceptar",
       close: "Cerrar",
 
@@ -1664,6 +1675,17 @@ export const dictionaries = {
       treasuryMovementCommentPlaceholder: "Optional comment",
       treasuryMovementSaving: "Saving...",
       treasuryMovementError: "Error creating treasury movement",
+      treasuryMovementAttachmentAction: "Attach",
+      treasuryMovementAttachmentSelected: "Attachment",
+      treasuryMovementAttachmentRemove: "Remove",
+      treasuryMovementAttachmentTooLarge:
+        "The file cannot exceed 10 MB.",
+      treasuryMovementAttachmentUploading: "Uploading attachment...",
+      treasuryMovementAttachmentRetry: "Retry attachment",
+      treasuryMovementCreatedAttachmentPending:
+        "The movement was created, but the attachment could not be uploaded.",
+      treasuryMovementAttachmentUploadError:
+        "You can try again without creating another movement.",
       accept: "Accept",
       close: "Close",
 

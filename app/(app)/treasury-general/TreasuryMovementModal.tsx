@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import AutocompleteInput from "../components/AutocompleteInput";
@@ -14,6 +19,7 @@ import {
   type CreateTreasuryMovementInput,
   updateTreasuryMovementAction,
 } from "./actions";
+import { uploadEntityDocumentFactBoxAction } from "../actions/entityDocumentFactBoxActions";
 
 export type TreasuryAccountOption = {
   value: string;
@@ -59,6 +65,8 @@ const treasuryTypeLabelKeys: Record<TreasuryMovementType, string> = {
   "Gastos Previstos": "treasuryTypeExpectedExpense",
 };
 
+const maxAttachmentFileSizeBytes = 10 * 1024 * 1024;
+
 function getRequiredAccountGroup(
   treasuryType: string
 ): TreasuryAccountOption["accountGroup"] | null {
@@ -98,6 +106,7 @@ export default function TreasuryMovementModal({
   onClose,
 }: TreasuryMovementModalProps) {
   const router = useRouter();
+  const attachmentInputRef = useRef<HTMLInputElement | null>(null);
   const isEditing = Boolean(movement?.id);
   const [treasuryType, setTreasuryType] = useState(() =>
     String(movement?.treasury_type ?? defaultTreasuryType)
@@ -117,8 +126,13 @@ export default function TreasuryMovementModal({
   const [comment, setComment] = useState(() =>
     String(movement?.entry_description ?? "")
   );
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const [createdMovementId, setCreatedMovementId] = useState<string | null>(
+    null
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const formLockedAfterCreate = !isEditing && Boolean(createdMovementId);
   const requiredAccountGroup = getRequiredAccountGroup(treasuryType);
   const filteredAccountOptions = requiredAccountGroup
     ? accountOptions.filter(
@@ -139,6 +153,48 @@ export default function TreasuryMovementModal({
 
     if (accountId && !currentAccountIsValid) {
       setAccountId("");
+    }
+  }
+
+  function handleAttachmentButtonClick() {
+    if (isSubmitting) {
+      return;
+    }
+
+    attachmentInputRef.current?.click();
+  }
+
+  function handleAttachmentChange(event: ChangeEvent<HTMLInputElement>) {
+    const fileInput = event.currentTarget;
+    const selectedFile = fileInput.files?.[0];
+
+    if (!selectedFile) {
+      return;
+    }
+
+    if (selectedFile.size > maxAttachmentFileSizeBytes) {
+      setAttachmentFile(null);
+      setErrorMessage(
+        getLabel(
+          labels,
+          "treasuryMovementAttachmentTooLarge",
+          "El archivo no puede superar los 10 MB."
+        )
+      );
+      fileInput.value = "";
+      return;
+    }
+
+    setAttachmentFile(selectedFile);
+    setErrorMessage(null);
+  }
+
+  function handleRemoveAttachment() {
+    setAttachmentFile(null);
+    setErrorMessage(null);
+
+    if (attachmentInputRef.current) {
+      attachmentInputRef.current.value = "";
     }
   }
 
@@ -193,32 +249,99 @@ export default function TreasuryMovementModal({
       comment,
     };
 
-    const result = movement?.id
-      ? await updateTreasuryMovementAction({
+    let savedMovementId = movement?.id ?? createdMovementId;
+
+    try {
+      if (movement?.id) {
+        const updateResult = await updateTreasuryMovementAction({
           id: movement.id,
           ...input,
-        })
-      : await createTreasuryMovementAction(input);
+        });
 
-    setIsSubmitting(false);
+        if (!updateResult.ok) {
+          setErrorMessage(
+            `${getLabel(
+              labels,
+              "treasuryMovementUpdateError",
+              "Error al modificar el movimiento"
+            )}: ${updateResult.error}`
+          );
+          return;
+        }
+      } else if (!savedMovementId) {
+        const createResult = await createTreasuryMovementAction(input);
 
-    if (!result.ok) {
+        if (!createResult.ok) {
+          setErrorMessage(
+            `${getLabel(
+              labels,
+              "treasuryMovementError",
+              "Error al crear el movimiento"
+            )}: ${createResult.error}`
+          );
+          return;
+        }
+
+        savedMovementId = createResult.data.id;
+        setCreatedMovementId(savedMovementId);
+      }
+
+      if (!isEditing && attachmentFile && savedMovementId) {
+        const formData = new FormData();
+        formData.append("file", attachmentFile);
+
+        const uploadResult = await uploadEntityDocumentFactBoxAction(
+          {
+            entityKey: "treasuryGeneralMovements",
+            recordId: savedMovementId,
+            factBoxKey: "attachments",
+          },
+          formData
+        );
+
+        if (!uploadResult.ok) {
+          setErrorMessage(
+            `${getLabel(
+              labels,
+              "treasuryMovementCreatedAttachmentPending",
+              "El movimiento se ha creado, pero el adjunto no se ha podido subir."
+            )} ${getLabel(
+              labels,
+              "treasuryMovementAttachmentUploadError",
+              "Puedes volver a intentarlo sin crear otro movimiento."
+            )}: ${uploadResult.error}`
+          );
+          return;
+        }
+      }
+
+      onClose();
+      router.refresh();
+    } catch {
       setErrorMessage(
-        `${getLabel(
-          labels,
-          isEditing
-            ? "treasuryMovementUpdateError"
-            : "treasuryMovementError",
-          isEditing
-            ? "Error al modificar el movimiento"
-            : "Error al crear el movimiento"
-        )}: ${result.error}`
+        !isEditing && savedMovementId
+          ? `${getLabel(
+              labels,
+              "treasuryMovementCreatedAttachmentPending",
+              "El movimiento se ha creado, pero el adjunto no se ha podido subir."
+            )} ${getLabel(
+              labels,
+              "treasuryMovementAttachmentUploadError",
+              "Puedes volver a intentarlo sin crear otro movimiento."
+            )}`
+          : getLabel(
+              labels,
+              isEditing
+                ? "treasuryMovementUpdateError"
+                : "treasuryMovementError",
+              isEditing
+                ? "Error al modificar el movimiento"
+                : "Error al crear el movimiento"
+            )
       );
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    onClose();
-    router.refresh();
   }
 
   return (
@@ -259,6 +382,7 @@ export default function TreasuryMovementModal({
                   }
                   className="input-app mt-1 px-3 py-2 text-sm"
                   required
+                  disabled={isSubmitting || formLockedAfterCreate}
                 >
                   <option value="">-</option>
                   {treasuryMovementTypes.map((type) => (
@@ -278,6 +402,7 @@ export default function TreasuryMovementModal({
                   inputMode="decimal"
                   placeholder="0,00"
                   required
+                  disabled={isSubmitting || formLockedAfterCreate}
                 />
               </label>
             </div>
@@ -290,6 +415,7 @@ export default function TreasuryMovementModal({
                 onChange={(event) => setMovementDate(event.target.value)}
                 className="input-app mt-1 px-3 py-2 text-sm"
                 required
+                disabled={isSubmitting || formLockedAfterCreate}
               />
             </label>
 
@@ -313,7 +439,8 @@ export default function TreasuryMovementModal({
                 disabled={
                   !requiredAccountGroup ||
                   filteredAccountOptions.length === 0 ||
-                  isSubmitting
+                  isSubmitting ||
+                  formLockedAfterCreate
                 }
               />
             </label>
@@ -345,7 +472,11 @@ export default function TreasuryMovementModal({
                   "Buscar miembro por nombre o apellidos"
                 )}
                 required
-                disabled={memberOptions.length === 0 || isSubmitting}
+                disabled={
+                  memberOptions.length === 0 ||
+                  isSubmitting ||
+                  formLockedAfterCreate
+                }
               />
             </label>
 
@@ -371,8 +502,47 @@ export default function TreasuryMovementModal({
                   "treasuryMovementCommentPlaceholder",
                   "Comentario opcional"
                 )}
+                disabled={isSubmitting || formLockedAfterCreate}
               />
             </label>
+
+            {!isEditing ? (
+              <input
+                ref={attachmentInputRef}
+                type="file"
+                className="hidden"
+                onChange={handleAttachmentChange}
+              />
+            ) : null}
+
+            {!isEditing && attachmentFile ? (
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-app-border bg-app-soft px-3 py-2">
+                <p className="min-w-0 truncate text-xs text-app-muted">
+                  <span className="font-semibold text-primary-app">
+                    {getLabel(
+                      labels,
+                      "treasuryMovementAttachmentSelected",
+                      "Adjunto"
+                    )}
+                    :
+                  </span>{" "}
+                  {attachmentFile.name}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleRemoveAttachment}
+                  className="shrink-0 text-xs font-semibold text-red-700 hover:underline"
+                  disabled={isSubmitting}
+                >
+                  {getLabel(
+                    labels,
+                    "treasuryMovementAttachmentRemove",
+                    "Quitar"
+                  )}
+                </button>
+              </div>
+            ) : null}
 
             {errorMessage ? (
               <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
@@ -381,14 +551,29 @@ export default function TreasuryMovementModal({
             ) : null}
 
             <div className="flex justify-end gap-2 pt-1">
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn-secondary-app px-4 py-2 text-sm"
-                disabled={isSubmitting}
-              >
-                {getLabel(labels, "close", "Cerrar")}
-              </button>
+              {isEditing ? (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-secondary-app px-4 py-2 text-sm"
+                  disabled={isSubmitting}
+                >
+                  {getLabel(labels, "close", "Cerrar")}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAttachmentButtonClick}
+                  className="btn-secondary-app px-4 py-2 text-sm"
+                  disabled={isSubmitting}
+                >
+                  {getLabel(
+                    labels,
+                    "treasuryMovementAttachmentAction",
+                    "Adjuntar"
+                  )}
+                </button>
+              )}
 
               <button
                 type="submit"
@@ -397,7 +582,8 @@ export default function TreasuryMovementModal({
                   isSubmitting ||
                   !requiredAccountGroup ||
                   filteredAccountOptions.length === 0 ||
-                  memberOptions.length === 0
+                  memberOptions.length === 0 ||
+                  (formLockedAfterCreate && !attachmentFile)
                 }
               >
                 {isSubmitting
@@ -405,13 +591,27 @@ export default function TreasuryMovementModal({
                       labels,
                       isEditing
                         ? "treasuryMovementUpdating"
-                        : "treasuryMovementSaving",
-                      isEditing ? "Modificando..." : "Guardando..."
+                        : createdMovementId
+                          ? "treasuryMovementAttachmentUploading"
+                          : "treasuryMovementSaving",
+                      isEditing
+                        ? "Modificando..."
+                        : createdMovementId
+                          ? "Subiendo adjunto..."
+                          : "Guardando..."
                     )
                   : getLabel(
                       labels,
-                      isEditing ? "treasuryMovementUpdate" : "accept",
-                      isEditing ? "Modificar" : "Aceptar"
+                      isEditing
+                        ? "treasuryMovementUpdate"
+                        : createdMovementId
+                          ? "treasuryMovementAttachmentRetry"
+                          : "accept",
+                      isEditing
+                        ? "Modificar"
+                        : createdMovementId
+                          ? "Reintentar adjunto"
+                          : "Aceptar"
                     )}
               </button>
             </div>
