@@ -67,12 +67,12 @@ function TreasuryBalanceSection({
       </h2>
 
       <div className="max-w-full overflow-x-auto rounded-xl border border-primary-app">
-        <table className="w-[365px] table-fixed border-collapse text-[10px]">
+        <table className="w-[330px] table-fixed border-collapse text-[10px] sm:w-[365px]">
           <colgroup>
-            <col style={{ width: "160px" }} />
-            <col style={{ width: "65px" }} />
-            <col style={{ width: "65px" }} />
-            <col style={{ width: "75px" }} />
+            <col className="w-[125px] sm:w-[160px]" />
+            <col className="w-[65px]" />
+            <col className="w-[65px]" />
+            <col className="w-[75px]" />
           </colgroup>
 
           <thead className="bg-app-soft text-primary-app">
@@ -278,7 +278,7 @@ export default async function TreasuryBalancePage({
 
           <div
             id="real-balance"
-            className="grid w-[365px] max-w-full grid-cols-[1fr_65px_65px_75px] items-center rounded-xl border border-primary-app bg-app-soft py-1.5 text-xs font-bold text-primary-app"
+            className="grid w-[330px] max-w-full grid-cols-[125px_65px_65px_75px] items-center rounded-xl border border-primary-app bg-app-soft py-1.5 text-xs font-bold text-primary-app sm:w-[365px] sm:grid-cols-[160px_65px_65px_75px]"
           >
             <span className="px-1.5">
               {dict.treasuryBalance.totalBalance}
