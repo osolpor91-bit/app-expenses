@@ -1386,6 +1386,9 @@ export async function deleteListDetailRecordAction({
 
     if (entity.key === "treasuryGeneralMovements") {
       revalidatePath("/treasury-general");
+      revalidatePath("/treasury-general/balance");
+      revalidatePath("/treasury-general/detailed-balance");
+      revalidatePath("/dashboard");
     }
   }
 

@@ -13,6 +13,7 @@ export type TreasuryBalanceMovement = {
   movement_date?: unknown;
   entry_description?: unknown;
   treasury_members?: unknown;
+  is_expense_closed?: unknown;
 };
 
 export type TreasuryBalanceRow = {
@@ -26,11 +27,12 @@ export type TreasuryBalanceRow = {
   plannedExpense: number;
   plannedBalance: number;
   realBalance: number;
+  isExpenseClosed: boolean;
 };
 
 export type TreasuryBalanceTotals = Omit<
   TreasuryBalanceRow,
-  "accountId" | "accountNo" | "accountDescription"
+  "accountId" | "accountNo" | "accountDescription" | "isExpenseClosed"
 >;
 
 function getAmount(value: unknown) {
@@ -67,6 +69,18 @@ function addMovementAmount(
   }
 }
 
+function isExpenseClosed(value: unknown) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return value === 1;
+  }
+
+  return String(value ?? "").trim().toLowerCase() === "true";
+}
+
 export function buildTreasuryBalanceRows(
   movements: readonly TreasuryBalanceMovement[]
 ) {
@@ -96,6 +110,7 @@ export function buildTreasuryBalanceRows(
         plannedExpense: 0,
         plannedBalance: 0,
         realBalance: 0,
+        isExpenseClosed: false,
       } satisfies TreasuryBalanceRow);
 
     addMovementAmount(
@@ -104,15 +119,21 @@ export function buildTreasuryBalanceRows(
       getAmount(movement.amount)
     );
 
+    if (
+      treasuryType === "Gastos Reales" &&
+      isExpenseClosed(movement.is_expense_closed)
+    ) {
+      row.isExpenseClosed = true;
+    }
+
     rowsByAccount.set(accountKey, row);
   });
 
   return Array.from(rowsByAccount.values())
     .map((row) => {
-      const plannedExpense = Math.max(
-        row.expectedExpense,
-        row.realExpense
-      );
+      const plannedExpense = row.isExpenseClosed
+        ? row.realExpense
+        : Math.max(row.expectedExpense, row.realExpense);
 
       return {
         ...row,

@@ -93,6 +93,17 @@ export const treasuryGeneralMovementFields: readonly EntityFieldDefinition[] = [
     showInList: true,
     showInForm: false,
   },
+  {
+    key: "is_expense_closed",
+    dbName: "is_expense_closed",
+    labelKey: "expenseClosed",
+    type: "boolean",
+    required: false,
+    editable: false,
+    newRowDefaultValue: false,
+    showInList: true,
+    showInForm: false,
+  },
 ];
 
 export const treasuryGeneralMovementFilters: readonly EntityFilterDefinition[] =

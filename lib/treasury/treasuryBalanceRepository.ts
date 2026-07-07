@@ -23,7 +23,7 @@ export async function listTreasuryBalanceMovements({
     let query = supabase
       .from("treasury_general_movements")
       .select(
-        "id, account_id, account_no, account_description, treasury_type, amount, movement_date, entry_description, treasury_members:paid_by_member_id(id, first_name, last_name)"
+        "id, account_id, account_no, account_description, treasury_type, amount, movement_date, entry_description, is_expense_closed, treasury_members:paid_by_member_id(id, first_name, last_name)"
       )
       .eq("tenant_id", tenantId)
       .eq("company_id", companyId)

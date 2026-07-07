@@ -21,6 +21,7 @@ export type CreateTreasuryMovementInput = {
   accountId: string;
   paidByMemberId: string;
   comment: string;
+  isExpenseClosed: boolean;
 };
 
 export type UpdateTreasuryMovementInput = CreateTreasuryMovementInput & {
@@ -54,6 +55,8 @@ async function saveTreasuryMovement({
   const accountId = String(input.accountId ?? "").trim();
   const paidByMemberId = String(input.paidByMemberId ?? "").trim();
   const comment = String(input.comment ?? "").trim();
+  const isExpenseClosed =
+    treasuryType === "Gastos Reales" && input.isExpenseClosed === true;
   const normalizedAmount = normalizeDecimalField(input.amount);
 
   if (!isTreasuryMovementType(treasuryType)) {
@@ -186,6 +189,7 @@ async function saveTreasuryMovement({
     amount: normalizedAmount,
     movement_date: movementDate,
     paid_by_member_id: member.id,
+    is_expense_closed: isExpenseClosed,
   };
 
   const mutation = movementId
@@ -217,6 +221,8 @@ async function saveTreasuryMovement({
 
   revalidatePath("/treasury-general");
   revalidatePath("/treasury-general/movements");
+  revalidatePath("/treasury-general/balance");
+  revalidatePath("/treasury-general/detailed-balance");
   revalidatePath("/dashboard");
 
   return entityOperationOk({
@@ -402,6 +408,8 @@ export async function settleTreasuryMovementsAction(
 
   revalidatePath("/treasury-general");
   revalidatePath("/treasury-general/movements");
+  revalidatePath("/treasury-general/balance");
+  revalidatePath("/treasury-general/detailed-balance");
   revalidatePath("/treasury-general/pending-settlements");
   revalidatePath("/treasury-general/settle-payments");
   revalidatePath("/dashboard");

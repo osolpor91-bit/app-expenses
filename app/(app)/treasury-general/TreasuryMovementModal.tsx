@@ -44,6 +44,7 @@ export type TreasuryMovementEditRecord = {
   account_id?: unknown;
   paid_by_member_id?: unknown;
   entry_description?: unknown;
+  is_expense_closed?: unknown;
 };
 
 type TreasuryMovementModalLabels = Record<string, string | undefined>;
@@ -96,6 +97,18 @@ function getTodayInputValue() {
   return localDate.toISOString().slice(0, 10);
 }
 
+function parseBooleanValue(value: unknown) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return value === 1;
+  }
+
+  return String(value ?? "").trim().toLowerCase() === "true";
+}
+
 export default function TreasuryMovementModal({
   accountOptions,
   memberOptions,
@@ -126,6 +139,9 @@ export default function TreasuryMovementModal({
   const [comment, setComment] = useState(() =>
     String(movement?.entry_description ?? "")
   );
+  const [isExpenseClosed, setIsExpenseClosed] = useState(() =>
+    parseBooleanValue(movement?.is_expense_closed)
+  );
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [createdMovementId, setCreatedMovementId] = useState<string | null>(
     null
@@ -139,10 +155,15 @@ export default function TreasuryMovementModal({
         (account) => account.accountGroup === requiredAccountGroup
       )
     : [];
+  const canCloseExpense = treasuryType === "Gastos Reales";
 
   function handleTreasuryTypeChange(nextTreasuryType: string) {
     setTreasuryType(nextTreasuryType);
     setErrorMessage(null);
+
+    if (nextTreasuryType !== "Gastos Reales") {
+      setIsExpenseClosed(false);
+    }
 
     const nextAccountGroup = getRequiredAccountGroup(nextTreasuryType);
     const currentAccountIsValid = accountOptions.some(
@@ -247,6 +268,7 @@ export default function TreasuryMovementModal({
       accountId,
       paidByMemberId,
       comment,
+      isExpenseClosed: canCloseExpense && isExpenseClosed,
     };
 
     let savedMovementId = movement?.id ?? createdMovementId;
@@ -505,6 +527,25 @@ export default function TreasuryMovementModal({
                 disabled={isSubmitting || formLockedAfterCreate}
               />
             </label>
+
+            {canCloseExpense ? (
+              <label className="flex items-center gap-2 text-xs font-semibold text-app">
+                <input
+                  type="checkbox"
+                  checked={isExpenseClosed}
+                  onChange={(event) =>
+                    setIsExpenseClosed(event.target.checked)
+                  }
+                  className="h-4 w-4 accent-primary-app"
+                  disabled={isSubmitting || formLockedAfterCreate}
+                />
+                {getLabel(
+                  labels,
+                  "treasuryMovementExpenseClosed",
+                  "Gasto cerrado"
+                )}
+              </label>
+            ) : null}
 
             {!isEditing ? (
               <input

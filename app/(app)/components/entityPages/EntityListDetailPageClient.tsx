@@ -437,6 +437,7 @@ export default function EntityListDetailPageClient({
                       account_id: selectedRecord.account_id,
                       paid_by_member_id: selectedRecord.paid_by_member_id,
                       entry_description: selectedRecord.entry_description,
+                      is_expense_closed: selectedRecord.is_expense_closed,
                     });
                   }}
                   disabled={!selectedRecord || Boolean(changeDisabledReason)}
