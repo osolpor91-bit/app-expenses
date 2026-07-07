@@ -4,11 +4,15 @@ import {
 } from "./treasuryGeneral";
 
 export type TreasuryBalanceMovement = {
+  id?: unknown;
   account_id?: unknown;
   account_no?: unknown;
   account_description?: unknown;
   treasury_type?: unknown;
   amount?: unknown;
+  movement_date?: unknown;
+  entry_description?: unknown;
+  treasury_members?: unknown;
 };
 
 export type TreasuryBalanceRow = {
@@ -35,7 +39,9 @@ function getAmount(value: unknown) {
   return Number.isFinite(amount) ? amount : 0;
 }
 
-function getMovementAccountKey(movement: TreasuryBalanceMovement) {
+export function getTreasuryBalanceMovementAccountKey(
+  movement: TreasuryBalanceMovement
+) {
   const accountId = String(movement.account_id ?? "").trim();
   const accountNo = String(movement.account_no ?? "").trim();
   const accountDescription = String(
@@ -67,7 +73,7 @@ export function buildTreasuryBalanceRows(
   const rowsByAccount = new Map<string, TreasuryBalanceRow>();
 
   movements.forEach((movement) => {
-    const accountKey = getMovementAccountKey(movement);
+    const accountKey = getTreasuryBalanceMovementAccountKey(movement);
     const treasuryType = String(movement.treasury_type ?? "").trim();
 
     if (!accountKey || !isTreasuryMovementType(treasuryType)) {

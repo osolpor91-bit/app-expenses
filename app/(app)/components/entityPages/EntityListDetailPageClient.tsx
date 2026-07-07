@@ -511,6 +511,18 @@ export default function EntityListDetailPageClient({
               <button
                 type="button"
                 onClick={() =>
+                  router.push("/treasury-general/detailed-balance")
+                }
+                disabled={!scopeAvailable}
+                className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.treasuryDetailedBalanceAction ??
+                  "Balance detallado"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
                   router.push("/treasury-general/pending-settlements")
                 }
                 disabled={!scopeAvailable}

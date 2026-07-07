@@ -108,6 +108,7 @@ export const dictionaries = {
       registerExpense: "Registrar gasto",
       totalBalance: "Balance previsto",
       realBalance: "Balance real",
+      detailedBalance: "Balance detallado",
       payments: "Pagos",
       settlements: "Liquidaciones",
       pendingSettlements: "Liquidaciones pendientes",
@@ -243,6 +244,7 @@ export const dictionaries = {
       treasuryMovementAction: "Añadir movimiento",
       treasuryMovementsAction: "Ver movimientos",
       treasuryBalanceAction: "Balances",
+      treasuryDetailedBalanceAction: "Balance detallado",
       treasuryPendingSettlementsAction: "Liquidaciones pendientes",
       treasurySettlePaymentsAction: "Liquidar pagos",
       treasuryMovementTitle: "Nuevo movimiento de tesorería",
@@ -294,9 +296,12 @@ export const dictionaries = {
 
     treasuryBalance: {
       title: "Balance de tesorería",
+      detailedTitle: "Balance detallado",
       backToTreasuryGeneral: "Volver a tesorería general",
       helpText:
         "Los ingresos reales y previstos se suman. En cada cuenta de gastos se utiliza el mayor importe entre el real y el previsto.",
+      detailedHelpText:
+        "Muestra el mismo balance con los movimientos que componen cada cuenta.",
       date: "Fecha",
       accountNo: "Cuenta",
       accountDescription: "Descripción",
@@ -1511,6 +1516,7 @@ export const dictionaries = {
       registerExpense: "Register expense",
       totalBalance: "Expected balance",
       realBalance: "Actual balance",
+      detailedBalance: "Detailed balance",
       payments: "Payments",
       settlements: "Settlements",
       pendingSettlements: "Pending settlements",
@@ -1647,6 +1653,7 @@ export const dictionaries = {
       treasuryMovementAction: "Add movement",
       treasuryMovementsAction: "View movements",
       treasuryBalanceAction: "Balances",
+      treasuryDetailedBalanceAction: "Detailed balance",
       treasuryPendingSettlementsAction: "Pending settlements",
       treasurySettlePaymentsAction: "Settle payments",
       treasuryMovementTitle: "New treasury movement",
@@ -1697,9 +1704,12 @@ export const dictionaries = {
 
     treasuryBalance: {
       title: "Treasury balance",
+      detailedTitle: "Detailed balance",
       backToTreasuryGeneral: "Back to general treasury",
       helpText:
         "Actual and expected income are added together. For each expense account, the greater of the actual and expected amount is used.",
+      detailedHelpText:
+        "Shows the same balance with the movements that make up each account.",
       date: "Date",
       accountNo: "Account",
       accountDescription: "Description",
