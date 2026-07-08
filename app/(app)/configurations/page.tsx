@@ -119,6 +119,10 @@ export default async function ConfigurationsPage() {
       href: "/treasury-members",
       label: dict.treasuryMembers.title,
     },
+    {
+      href: "/reports",
+      label: dict.reports.title,
+    },
   ];
 
   const groups: ConfigurationGroup[] = [

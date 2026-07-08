@@ -93,6 +93,37 @@ export const dictionaries = {
       },
     },
 
+    reports: {
+      title: "Informes",
+      backToConfigurations: "Volver a configuraciones",
+      treasuryBalance: "Balance",
+      treasuryBalanceDescription:
+        "Consulta el balance de tesorería por cuentas.",
+      treasuryDetailedBalance: "Balance detallado",
+      treasuryDetailedBalanceDescription:
+        "Consulta el balance con los movimientos que componen cada cuenta.",
+      incomeDistribution: "Distribución de ingresos",
+      incomeDistributionDescription:
+        "Consulta el peso de cada cuenta sobre el total de ingresos.",
+      expenseDistribution: "Distribución de gastos",
+      backToReports: "Volver a informes",
+      summaryView: "Resumen",
+      detailView: "Detalle",
+      date: "Fecha",
+      totalIncome: "Total ingresos",
+      totalExpense: "Total gastos",
+      emptyIncomeDistribution:
+        "No hay ingresos para el periodo seleccionado.",
+      emptyExpenseDistribution:
+        "No hay gastos para el periodo seleccionado.",
+      incomeDistributionReadError:
+        "Error leyendo la distribución de ingresos",
+      expenseDistributionReadError:
+        "Error leyendo la distribución de gastos",
+      noActiveCompanyDescription:
+        "No hay una empresa activa. Selecciona una empresa para consultar informes.",
+    },
+
     list: {
       editList: "Editar lista",
       viewList: "Ver lista",
@@ -1502,6 +1533,34 @@ export const dictionaries = {
           title: "Purchasing",
         },
       },
+    },
+
+    reports: {
+      title: "Reports",
+      backToConfigurations: "Back to settings",
+      treasuryBalance: "Balance",
+      treasuryBalanceDescription: "View the treasury balance by account.",
+      treasuryDetailedBalance: "Detailed balance",
+      treasuryDetailedBalanceDescription:
+        "View the balance with the movements that make up each account.",
+      incomeDistribution: "Income distribution",
+      incomeDistributionDescription:
+        "View each account's weight over total income.",
+      expenseDistribution: "Expense distribution",
+      backToReports: "Back to reports",
+      summaryView: "Summary",
+      detailView: "Detail",
+      date: "Date",
+      totalIncome: "Total income",
+      totalExpense: "Total expenses",
+      emptyIncomeDistribution:
+        "There is no income for the selected period.",
+      emptyExpenseDistribution:
+        "There are no expenses for the selected period.",
+      incomeDistributionReadError: "Error reading income distribution",
+      expenseDistributionReadError: "Error reading expense distribution",
+      noActiveCompanyDescription:
+        "There is no active company. Select a company to view reports.",
     },
 
     list: {

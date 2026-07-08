@@ -8,6 +8,10 @@ function getCurrentYear() {
   return String(new Date().getFullYear());
 }
 
+function getCurrentMonth() {
+  return String(new Date().getMonth() + 1);
+}
+
 function isValidCalendarDate(year: string, month: string, day: string) {
   const numericYear = Number(year);
   const numericMonth = Number(month);
@@ -106,6 +110,18 @@ function parseDateValue(value: string): string | null {
     return toIsoDate({
       year,
       month,
+      day,
+    });
+  }
+
+  const dayOnlyMatch = trimmedValue.match(/^(\d{1,2})$/);
+
+  if (dayOnlyMatch) {
+    const [, day] = dayOnlyMatch;
+
+    return toIsoDate({
+      year: getCurrentYear(),
+      month: getCurrentMonth(),
       day,
     });
   }
