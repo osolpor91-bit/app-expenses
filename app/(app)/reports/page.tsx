@@ -42,6 +42,10 @@ export default async function ReportsPage() {
       href: "/reports/expense-distribution",
       title: dict.reports.expenseDistribution,
     },
+    {
+      href: "/reports/inventory-by-product",
+      title: dict.reports.inventoryByProduct,
+    },
   ];
 
   return (

@@ -106,20 +106,29 @@ export const dictionaries = {
       incomeDistributionDescription:
         "Consulta el peso de cada cuenta sobre el total de ingresos.",
       expenseDistribution: "Distribución de gastos",
+      inventoryByProduct: "Inventario por producto",
       backToReports: "Volver a informes",
       summaryView: "Resumen",
       detailView: "Detalle",
       date: "Fecha",
       totalIncome: "Total ingresos",
       totalExpense: "Total gastos",
+      totalInventory: "Total inventario",
+      inventoryQuantity: "Inventario",
+      unit: "Unidad",
       emptyIncomeDistribution:
         "No hay ingresos para el periodo seleccionado.",
       emptyExpenseDistribution:
         "No hay gastos para el periodo seleccionado.",
+      emptyInventoryByProduct:
+        "No hay productos activos para mostrar en el inventario.",
+      emptyInventoryMovements: "Sin movimientos.",
       incomeDistributionReadError:
         "Error leyendo la distribución de ingresos",
       expenseDistributionReadError:
         "Error leyendo la distribución de gastos",
+      inventoryByProductReadError:
+        "Error leyendo el inventario por producto",
       noActiveCompanyDescription:
         "No hay una empresa activa. Selecciona una empresa para consultar informes.",
     },
@@ -554,7 +563,7 @@ export const dictionaries = {
 
       balanceAction: "Historial",
       inventoryAdjustmentAction: "Añadir movimiento",
-      bulkInventoryAdjustmentAction: "Inventario",
+      bulkInventoryAdjustmentAction: "Ajustar inventario",
       inventoryAdjustmentTitle: "Ajuste inventario",
       bulkInventoryAdjustmentTitle: "Ajustar inventario",
       bulkInventoryAdjustmentCalculated: "Calculado",
@@ -1559,18 +1568,27 @@ export const dictionaries = {
       incomeDistributionDescription:
         "View each account's weight over total income.",
       expenseDistribution: "Expense distribution",
+      inventoryByProduct: "Inventory by product",
       backToReports: "Back to reports",
       summaryView: "Summary",
       detailView: "Detail",
       date: "Date",
       totalIncome: "Total income",
       totalExpense: "Total expenses",
+      totalInventory: "Total inventory",
+      inventoryQuantity: "Inventory",
+      unit: "Unit",
       emptyIncomeDistribution:
         "There is no income for the selected period.",
       emptyExpenseDistribution:
         "There are no expenses for the selected period.",
+      emptyInventoryByProduct:
+        "There are no active products to show in inventory.",
+      emptyInventoryMovements: "No movements.",
       incomeDistributionReadError: "Error reading income distribution",
       expenseDistributionReadError: "Error reading expense distribution",
+      inventoryByProductReadError:
+        "Error reading inventory by product",
       noActiveCompanyDescription:
         "There is no active company. Select a company to view reports.",
     },
@@ -2003,7 +2021,7 @@ export const dictionaries = {
 
       balanceAction: "History",
       inventoryAdjustmentAction: "Add movement",
-      bulkInventoryAdjustmentAction: "Inventory",
+      bulkInventoryAdjustmentAction: "Adjust inventory",
       inventoryAdjustmentTitle: "Inventory adjustment",
       bulkInventoryAdjustmentTitle: "Adjust inventory",
       bulkInventoryAdjustmentCalculated: "Calculated",
