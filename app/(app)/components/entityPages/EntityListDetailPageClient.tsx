@@ -27,6 +27,7 @@ import EntityDocumentFactBox, {
 } from "../EntityDocumentFactBox";
 import { deleteListDetailRecordAction } from "../../actions/entityActions";
 import { getEntityDefinition } from "@/lib/entities/core/entityRegistry";
+import BulkInventoryAdjustmentModal from "../../items/components/BulkInventoryAdjustmentModal";
 import InventoryAdjustmentModal from "../../items/components/InventoryAdjustmentModal";
 import TreasuryMovementModal, {
   type TreasuryAccountOption,
@@ -72,6 +73,7 @@ type EntityListDetailPageClientProps = {
   treasuryAccountOptions?: TreasuryAccountOption[];
   treasuryMemberOptions?: TreasuryMemberOption[];
   defaultTreasuryMemberId?: string;
+  bulkInventoryAdjustmentItems?: GenericListDetailRecord[];
 };
 
 function getListFields({
@@ -284,6 +286,7 @@ export default function EntityListDetailPageClient({
   treasuryAccountOptions = [],
   treasuryMemberOptions = [],
   defaultTreasuryMemberId = "",
+  bulkInventoryAdjustmentItems = [],
 }: EntityListDetailPageClientProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -305,6 +308,12 @@ export default function EntityListDetailPageClient({
     useState<TreasuryMovementEditRecord | null>(null);
   const [treasuryMovementAttachmentCounts, setTreasuryMovementAttachmentCounts] =
     useState<Record<string, number>>({});
+  const [
+    isBulkInventoryAdjustmentModalOpen,
+    setIsBulkInventoryAdjustmentModalOpen,
+  ] = useState(
+    entity.key === "items" && searchParams.get("adjustInventory") === "true"
+  );
 
   const returnTo = getReturnToPath({
     pathname,
@@ -326,6 +335,22 @@ export default function EntityListDetailPageClient({
     const queryString = params.toString();
 
     router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  }
+
+  function closeBulkInventoryAdjustmentModal() {
+    setIsBulkInventoryAdjustmentModalOpen(false);
+
+    if (!searchParams.has("adjustInventory")) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.delete("adjustInventory");
+
+    const queryString = params.toString();
+
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname);
   }
 
   function closeTreasuryMovementModal() {
@@ -412,6 +437,19 @@ export default function EntityListDetailPageClient({
         primaryFieldDbName={entity.primaryFieldDbName}
         autoSelectFirstRecord
         renderToolbarContent={(selectedRecord) => {
+          if (entity.key === "items") {
+            return (
+              <button
+                type="button"
+                onClick={() => setIsBulkInventoryAdjustmentModalOpen(true)}
+                disabled={!scopeAvailable}
+                className="btn-primary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.bulkInventoryAdjustmentAction ?? "Ajustar inventario"}
+              </button>
+            );
+          }
+
           if (entity.key === "treasuryGeneralMovements") {
             const changeDisabledReason = selectedRecord
               ? getTreasuryMovementChangeDisabledReason(selectedRecord)
@@ -600,9 +638,19 @@ export default function EntityListDetailPageClient({
 
       {entity.key === "items" && inventoryAdjustmentItemId ? (
         <InventoryAdjustmentModal
+          key={inventoryAdjustmentItemId}
           item={inventoryAdjustmentItem}
           labels={labels}
           onClose={closeInventoryAdjustmentModal}
+        />
+      ) : null}
+
+      {entity.key === "items" && isBulkInventoryAdjustmentModalOpen ? (
+        <BulkInventoryAdjustmentModal
+          key={bulkInventoryAdjustmentItems.map((item) => item.id).join("|")}
+          items={bulkInventoryAdjustmentItems}
+          labels={labels}
+          onClose={closeBulkInventoryAdjustmentModal}
         />
       ) : null}
 

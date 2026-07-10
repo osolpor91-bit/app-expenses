@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -35,6 +35,8 @@ type InventoryAdjustmentModalLabels = Record<string, string | undefined> & {
     unitH?: string;
     unitBox?: string;
     unitPack?: string;
+    comment?: string;
+    commentPlaceholder?: string;
     accept?: string;
     adjusting?: string;
     close?: string;
@@ -98,6 +100,7 @@ export default function InventoryAdjustmentModal({
     const [entryType, setEntryType] = useState("");
     const [documentNo, setDocumentNo] = useState("");
     const [quantity, setQuantity] = useState("");
+    const [comment, setComment] = useState("");
     const [unitOfMeasure, setUnitOfMeasure] = useState(() =>
         getDefaultUnitOfMeasure(item)
     );
@@ -110,16 +113,6 @@ export default function InventoryAdjustmentModal({
         () => getStringValue(item?.description),
         [item]
     );
-
-    useEffect(() => {
-        setPostingDate(getTodayInputValue());
-        setEntryType("");
-        setDocumentNo("");
-        setQuantity("");
-        setUnitOfMeasure(getDefaultUnitOfMeasure(item));
-        setMessage(null);
-        setErrorMessage(null);
-    }, [item]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -142,6 +135,7 @@ export default function InventoryAdjustmentModal({
             documentNo,
             quantity,
             unitOfMeasure,
+            comment,
         };
 
         const result = await createInventoryAdjustmentAction(payload);
@@ -158,13 +152,14 @@ export default function InventoryAdjustmentModal({
 
         setDocumentNo("");
         setQuantity("");
+        setComment("");
         onClose();
         router.refresh();
     }
 
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/35 px-4 py-6">
-            <div className="w-full max-w-lg rounded-3xl border-4 border-primary-app bg-white p-1 shadow-[8px_8px_0_rgba(63,79,36,0.28)]">
+            <div className="w-full max-w-2xl rounded-3xl border-4 border-primary-app bg-white p-1 shadow-[8px_8px_0_rgba(63,79,36,0.28)]">
                 <div className="rounded-[1.25rem] border border-app-border bg-app p-4">
                     <div className="mb-4 flex items-start justify-between gap-3">
                         <div>
@@ -187,52 +182,13 @@ export default function InventoryAdjustmentModal({
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-3">
-                        <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-3 sm:grid-cols-3">
                             <label className="block text-xs font-semibold text-app">
                                 {getLabel(labels, "selectedItem", "Artículo")}
                                 <input
                                     value={itemCode}
                                     readOnly
                                     className="input-app mt-1 cursor-not-allowed bg-app-soft px-3 py-2 text-sm"
-                                />
-                            </label>
-
-                            <label className="block text-xs font-semibold text-app">
-                                {getLabel(labels, "unitOfMeasure", "Unidad de medida")}
-                                <select
-                                    value={unitOfMeasure}
-                                    onChange={(event) => setUnitOfMeasure(event.target.value)}
-                                    className="input-app mt-1 cursor-not-allowed bg-app-soft px-3 py-2 text-sm text-app-muted"
-                                    disabled
-                                    required
-                                >
-                                    {unitOptions.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {getLabel(labels, option.labelKey, option.value)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                        </div>
-
-                        <label className="block text-xs font-semibold text-app">
-                            {getLabel(labels, "selectedItemDescription", "Descripción")}
-                            <input
-                                value={itemDescription}
-                                readOnly
-                                className="input-app mt-1 cursor-not-allowed bg-app-soft px-3 py-2 text-sm"
-                            />
-                        </label>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-xs font-semibold text-app">
-                                {getLabel(labels, "postingDate", "Fecha de registro")}
-                                <input
-                                    type="date"
-                                    value={postingDate}
-                                    onChange={(event) => setPostingDate(event.target.value)}
-                                    className="input-app mt-1 px-3 py-2 text-sm"
-                                    required
                                 />
                             </label>
 
@@ -253,16 +209,32 @@ export default function InventoryAdjustmentModal({
                                     </option>
                                 </select>
                             </label>
+
+                            <label className="block text-xs font-semibold text-app">
+                                {getLabel(labels, "unitOfMeasure", "Unidad de medida")}
+                                <select
+                                    value={unitOfMeasure}
+                                    onChange={(event) => setUnitOfMeasure(event.target.value)}
+                                    className="input-app mt-1 cursor-not-allowed bg-app-soft px-3 py-2 text-sm text-app-muted"
+                                    disabled
+                                    required
+                                >
+                                    {unitOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {getLabel(labels, option.labelKey, option.value)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
                         </div>
 
-                        <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(8rem,1fr)]">
                             <label className="block text-xs font-semibold text-app">
-                                {getLabel(labels, "documentNo", "Nº documento")}
+                                {getLabel(labels, "selectedItemDescription", "Descripción")}
                                 <input
-                                    value={documentNo}
-                                    onChange={(event) => setDocumentNo(event.target.value)}
-                                    className="input-app mt-1 px-3 py-2 text-sm"
-                                    required
+                                    value={itemDescription}
+                                    readOnly
+                                    className="input-app mt-1 cursor-not-allowed bg-app-soft px-3 py-2 text-sm"
                                 />
                             </label>
 
@@ -277,6 +249,43 @@ export default function InventoryAdjustmentModal({
                                 />
                             </label>
                         </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="block text-xs font-semibold text-app">
+                                {getLabel(labels, "postingDate", "Fecha de registro")}
+                                <input
+                                    type="date"
+                                    value={postingDate}
+                                    onChange={(event) => setPostingDate(event.target.value)}
+                                    className="input-app mt-1 px-3 py-2 text-sm"
+                                    required
+                                />
+                            </label>
+
+                            <label className="block text-xs font-semibold text-app">
+                                {getLabel(labels, "documentNo", "Nº documento")}
+                                <input
+                                    value={documentNo}
+                                    onChange={(event) => setDocumentNo(event.target.value)}
+                                    className="input-app mt-1 px-3 py-2 text-sm"
+                                    required
+                                />
+                            </label>
+                        </div>
+
+                        <label className="block text-xs font-semibold text-app">
+                            {getLabel(labels, "comment", "Comentario")}
+                            <textarea
+                                value={comment}
+                                onChange={(event) => setComment(event.target.value)}
+                                className="input-app mt-1 min-h-24 px-3 py-2 text-sm"
+                                placeholder={getLabel(
+                                    labels,
+                                    "commentPlaceholder",
+                                    "Comentario libre"
+                                )}
+                            />
+                        </label>
 
                         {errorMessage ? (
                             <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">

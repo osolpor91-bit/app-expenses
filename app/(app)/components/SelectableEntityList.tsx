@@ -43,6 +43,14 @@ const maxAutoWidthSampleRecords = 100;
 const estimatedCharacterWidth = 7.2;
 const columnExtraWidth = 48;
 
+const gridColumnPreferredWidths = {
+  xs: 88,
+  sm: 128,
+  md: 176,
+  lg: 240,
+  xl: 340,
+} as const;
+
 type SelectableEntityListRecordActionDefinition = {
   key: string;
   labelKey: string;
@@ -136,6 +144,12 @@ function clampColumnWidth(width: number) {
   return Math.min(Math.max(width, minColumnWidth), maxColumnWidth);
 }
 
+function getGridPreferredColumnWidth(field: EntityFieldDefinition) {
+  const gridWidth = field.grid?.width;
+
+  return gridWidth ? gridColumnPreferredWidths[gridWidth] : null;
+}
+
 function clampAutoColumnWidth({
   width,
   headerWidth,
@@ -170,6 +184,12 @@ function getMinAutoColumnWidth({
   field: EntityFieldDefinition;
   primaryFieldDbName: string;
 }) {
+  const preferredWidth = getGridPreferredColumnWidth(field);
+
+  if (preferredWidth) {
+    return Math.max(minColumnWidth, Math.round(preferredWidth * 0.72));
+  }
+
   if (field.dbName === primaryFieldDbName) {
     return 120;
   }
@@ -200,6 +220,12 @@ function getMaxAutoColumnWidth({
   field: EntityFieldDefinition;
   primaryFieldDbName: string;
 }) {
+  const preferredWidth = getGridPreferredColumnWidth(field);
+
+  if (preferredWidth) {
+    return preferredWidth;
+  }
+
   if (field.dbName === primaryFieldDbName) {
     return 280;
   }
@@ -334,6 +360,30 @@ function getColumnWidth({
       primaryFieldDbName,
     })
   );
+}
+
+function getColumnWidthPercent({
+  field,
+  columnWidths,
+  primaryFieldDbName,
+  totalColumnWidth,
+}: {
+  field: EntityFieldDefinition;
+  columnWidths: Record<string, number>;
+  primaryFieldDbName: string;
+  totalColumnWidth: number;
+}) {
+  if (totalColumnWidth <= 0) {
+    return "auto";
+  }
+
+  const columnWidth = getColumnWidth({
+    field,
+    columnWidths,
+    primaryFieldDbName,
+  });
+
+  return `${((columnWidth / totalColumnWidth) * 100).toFixed(4)}%`;
 }
 
 function normalizeSortText(value: unknown) {
@@ -956,11 +1006,12 @@ export default function SelectableEntityList<
               <col
                 key={field.key}
                 style={{
-                  width: `${getColumnWidth({
+                  width: getColumnWidthPercent({
                     field,
                     columnWidths,
                     primaryFieldDbName,
-                  })}px`,
+                    totalColumnWidth,
+                  }),
                 }}
               />
             ))}

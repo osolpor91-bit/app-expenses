@@ -17,6 +17,7 @@ export default async function ItemBalanceEntriesPage({
       entity={itemBalanceEntryEntity}
       searchParams={searchParams}
       minWidthClass="min-w-[760px]"
+      initiallyShowSecondaryFilters={false}
     />
   );
 }

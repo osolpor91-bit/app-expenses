@@ -45,6 +45,17 @@ export const itemBalanceEntryFields: readonly EntityFieldDefinition[] = [
     showInForm: true,
   },
   {
+    key: "comment",
+    dbName: "comment",
+    labelKey: "comment",
+    type: "text",
+    required: false,
+    editable: false,
+    showInList: true,
+    showInForm: true,
+    formColSpan: "full",
+  },
+  {
     key: "origin",
     dbName: "origin",
     labelKey: "origin",
@@ -99,6 +110,7 @@ export const itemBalanceEntrySearchColumns = [
   "item_code",
   "item_description",
   "document_no",
+  "comment",
 ] as const;
 
 export const itemBalanceEntryFilters: readonly EntityFilterDefinition[] = [

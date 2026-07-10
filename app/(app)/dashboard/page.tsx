@@ -262,6 +262,37 @@ export default async function DashboardPage() {
               {guestsCount}
             </p>
           </Link>
+
+          <Link
+            href="/items"
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.quickAction}
+            </p>
+
+            <p className="text-2xl font-bold text-primary-app">
+              {dict.items.title}
+            </p>
+          </Link>
+
+          <Link
+            href={{
+              pathname: "/items",
+              query: {
+                adjustInventory: "true",
+              },
+            }}
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.quickAction}
+            </p>
+
+            <p className="text-2xl font-bold text-primary-app">
+              {dict.items.bulkInventoryAdjustmentAction}
+            </p>
+          </Link>
         </div>
       </div>
     </section>

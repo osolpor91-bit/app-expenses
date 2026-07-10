@@ -485,6 +485,26 @@ export default async function EntityListDetailPage({
     recordsWithCalculatedInventory
   );
 
+  const bulkInventoryAdjustmentRecords =
+    entity.key === "items"
+      ? mapEntityRecordsRelations(
+          entity,
+          await applyBaseUnitInventoryToItems({
+            records: await getEntityRecords({
+              entity,
+              supabase,
+              context,
+              searchParams: {
+                isActive: "true",
+              },
+              scopeAvailable,
+            }),
+            supabase,
+            context,
+          })
+        )
+      : [];
+
   const visibleListFieldKeys = await getVisibleListFieldKeys({
     entity,
     supabase,
@@ -571,6 +591,7 @@ export default async function EntityListDetailPage({
         treasuryAccountOptions={treasuryAccountOptions}
         treasuryMemberOptions={treasuryMemberOptions}
         defaultTreasuryMemberId={defaultTreasuryMemberId}
+        bulkInventoryAdjustmentItems={bulkInventoryAdjustmentRecords}
       />
     </section>
   );
