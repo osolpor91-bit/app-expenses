@@ -171,7 +171,7 @@ export default function BulkInventoryAdjustmentModal({
             className="flex min-h-0 flex-1 flex-col gap-2"
           >
             <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-app-border bg-app">
-              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1fr)_3.25rem_4.75rem_3rem] items-center gap-1.5 border-b border-app-border bg-app-soft px-2 py-1.5 text-[10px] font-semibold uppercase text-app-muted sm:grid-cols-[1fr_2fr_0.85fr_0.85fr_0.8fr] sm:gap-2 sm:px-3 sm:py-2 sm:text-[11px]">
+              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1fr)_2.25rem_4.5rem_2.75rem] items-center gap-1 border-b border-app-border bg-app-soft px-2 py-1.5 text-[10px] font-semibold uppercase text-app-muted sm:grid-cols-[1fr_1.15fr_0.8fr_0.85fr_0.9fr] sm:gap-2 sm:px-3 sm:py-2 sm:text-[11px]">
                 <span className="sm:hidden">Artículo</span>
                 <span className="hidden sm:block">
                   {getLabel(labels, "code", "Código")}
@@ -179,14 +179,17 @@ export default function BulkInventoryAdjustmentModal({
                 <span className="hidden sm:block">
                   {getLabel(labels, "description", "Descripción")}
                 </span>
-                <span>
+                <span className="text-right sm:text-left">
+                  <span className="sm:hidden">Calc.</span>
+                  <span className="hidden sm:inline">
                   {getLabel(
                     labels,
                     "bulkInventoryAdjustmentCalculated",
                     "Calculado"
                   )}
+                  </span>
                 </span>
-                <span>
+                <span className="text-right sm:text-left">
                   {getLabel(labels, "bulkInventoryAdjustmentReal", "Real")}
                 </span>
                 <span className="text-right sm:text-left">
@@ -217,7 +220,7 @@ export default function BulkInventoryAdjustmentModal({
                     return (
                       <div
                         key={item.id}
-                        className="grid grid-cols-[minmax(0,1fr)_3.25rem_4.75rem_3rem] items-center gap-1.5 px-2 py-1.5 text-xs sm:grid-cols-[1fr_2fr_0.85fr_0.85fr_0.8fr] sm:gap-2 sm:px-3 sm:py-2 sm:text-sm"
+                        className="grid grid-cols-[minmax(0,1fr)_2.25rem_4.5rem_2.75rem] items-center gap-1 px-2 py-1.5 text-xs sm:grid-cols-[1fr_1.15fr_0.8fr_0.85fr_0.9fr] sm:gap-2 sm:px-3 sm:py-2 sm:text-sm"
                       >
                         <div className="min-w-0">
                           <div className="truncate font-semibold leading-tight text-primary-app">
@@ -258,7 +261,7 @@ export default function BulkInventoryAdjustmentModal({
                             onChange={(event) =>
                               updateActualQuantity(item.id, event.target.value)
                             }
-                            className="input-app h-8 px-2 py-1 text-right text-sm font-semibold sm:text-left"
+                            className="input-app h-8 px-1.5 py-1 text-right text-sm font-semibold sm:px-2 sm:text-left"
                             inputMode="decimal"
                             required
                           />

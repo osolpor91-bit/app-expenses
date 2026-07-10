@@ -24,7 +24,6 @@ type InventoryAdjustmentModalLabels = Record<string, string | undefined> & {
     adjustmentEntryType?: string;
     adjustmentEntryTypeIn?: string;
     adjustmentEntryTypeOut?: string;
-    documentNo?: string;
     quantity?: string;
     unitOfMeasure?: string;
     unitUnd?: string;
@@ -98,7 +97,6 @@ export default function InventoryAdjustmentModal({
 
     const [postingDate, setPostingDate] = useState(getTodayInputValue);
     const [entryType, setEntryType] = useState("");
-    const [documentNo, setDocumentNo] = useState("");
     const [quantity, setQuantity] = useState("");
     const [comment, setComment] = useState("");
     const [unitOfMeasure, setUnitOfMeasure] = useState(() =>
@@ -132,7 +130,6 @@ export default function InventoryAdjustmentModal({
             itemId: item.id,
             postingDate,
             entryType: entryType as CreateInventoryAdjustmentInput["entryType"],
-            documentNo,
             quantity,
             unitOfMeasure,
             comment,
@@ -150,7 +147,6 @@ export default function InventoryAdjustmentModal({
             return;
         }
 
-        setDocumentNo("");
         setQuantity("");
         setComment("");
         onClose();
@@ -250,28 +246,16 @@ export default function InventoryAdjustmentModal({
                             </label>
                         </div>
 
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-xs font-semibold text-app">
-                                {getLabel(labels, "postingDate", "Fecha de registro")}
-                                <input
-                                    type="date"
-                                    value={postingDate}
-                                    onChange={(event) => setPostingDate(event.target.value)}
-                                    className="input-app mt-1 px-3 py-2 text-sm"
-                                    required
-                                />
-                            </label>
-
-                            <label className="block text-xs font-semibold text-app">
-                                {getLabel(labels, "documentNo", "Nº documento")}
-                                <input
-                                    value={documentNo}
-                                    onChange={(event) => setDocumentNo(event.target.value)}
-                                    className="input-app mt-1 px-3 py-2 text-sm"
-                                    required
-                                />
-                            </label>
-                        </div>
+                        <label className="block text-xs font-semibold text-app">
+                            {getLabel(labels, "postingDate", "Fecha de registro")}
+                            <input
+                                type="date"
+                                value={postingDate}
+                                onChange={(event) => setPostingDate(event.target.value)}
+                                className="input-app mt-1 px-3 py-2 text-sm"
+                                required
+                            />
+                        </label>
 
                         <label className="block text-xs font-semibold text-app">
                             {getLabel(labels, "comment", "Comentario")}

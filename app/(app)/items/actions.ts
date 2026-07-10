@@ -16,7 +16,6 @@ export type CreateInventoryAdjustmentInput = {
   itemId: string;
   postingDate: string;
   entryType: InventoryAdjustmentEntryType;
-  documentNo: string;
   quantity: string;
   unitOfMeasure: string;
   comment?: string;
@@ -76,7 +75,7 @@ export async function createInventoryAdjustmentAction(
   const itemId = input.itemId.trim();
   const postingDate = input.postingDate.trim();
   const entryType = input.entryType.trim();
-  const documentNo = input.documentNo.trim();
+  const documentNo = "AJUSTE";
   const comment = input.comment?.trim() ?? "";
   const normalizedQuantity = normalizeDecimalField(input.quantity);
 
@@ -90,10 +89,6 @@ export async function createInventoryAdjustmentAction(
 
   if (!isValidEntryType(entryType)) {
     return entityOperationError("El tipo de ajuste es obligatorio.");
-  }
-
-  if (!documentNo) {
-    return entityOperationError("El Nº documento es obligatorio.");
   }
 
   if (!normalizedQuantity) {

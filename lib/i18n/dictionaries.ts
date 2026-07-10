@@ -553,7 +553,7 @@ export const dictionaries = {
         "Aquí podremos mostrar stock, movimientos, precios, trazabilidad o actividad reciente.",
 
       balanceAction: "Historial",
-      inventoryAdjustmentAction: "Añadir",
+      inventoryAdjustmentAction: "Añadir movimiento",
       bulkInventoryAdjustmentAction: "Inventario",
       inventoryAdjustmentTitle: "Ajuste inventario",
       bulkInventoryAdjustmentTitle: "Ajustar inventario",
@@ -2002,7 +2002,7 @@ export const dictionaries = {
         "Here we will be able to show stock, movements, prices, traceability or recent activity.",
 
       balanceAction: "History",
-      inventoryAdjustmentAction: "Add",
+      inventoryAdjustmentAction: "Add movement",
       bulkInventoryAdjustmentAction: "Inventory",
       inventoryAdjustmentTitle: "Inventory adjustment",
       bulkInventoryAdjustmentTitle: "Adjust inventory",
