@@ -81,7 +81,10 @@ export default function BulkInventoryAdjustmentModal({
         String(actualQuantities[item.id] ?? "").replace(",", ".")
       );
 
-      if (!Number.isFinite(calculatedQuantity) || !Number.isFinite(actualQuantity)) {
+      if (
+        !Number.isFinite(calculatedQuantity) ||
+        !Number.isFinite(actualQuantity)
+      ) {
         return count;
       }
 
@@ -144,9 +147,9 @@ export default function BulkInventoryAdjustmentModal({
   return (
     <div className="fixed inset-0 z-[120] flex items-stretch justify-center bg-black/35 p-0 sm:items-center sm:px-4 sm:py-6">
       <div className="flex h-full w-full flex-col border-0 border-primary-app bg-white shadow-[8px_8px_0_rgba(63,79,36,0.28)] sm:h-auto sm:max-h-[90vh] sm:max-w-5xl sm:rounded-3xl sm:border-4 sm:p-1">
-        <div className="flex min-h-0 flex-1 flex-col bg-app p-3 sm:rounded-[1.25rem] sm:border sm:border-app-border sm:p-4">
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <h2 className="text-lg font-black uppercase tracking-tight text-primary-app">
+        <div className="flex min-h-0 flex-1 flex-col bg-app p-2 sm:rounded-[1.25rem] sm:border sm:border-app-border sm:p-4">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <h2 className="text-base font-black uppercase tracking-tight text-primary-app sm:text-lg">
               {getLabel(
                 labels,
                 "bulkInventoryAdjustmentTitle",
@@ -157,32 +160,25 @@ export default function BulkInventoryAdjustmentModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full border border-app-border px-3 py-1 text-xs font-semibold text-primary-app transition hover:bg-app-soft"
+              className="rounded-full border border-app-border px-2.5 py-1 text-xs font-semibold text-primary-app transition hover:bg-app-soft"
             >
               {getLabel(labels, "close", "Cerrar")}
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-3">
-            <label className="block text-xs font-semibold text-app">
-              {getLabel(labels, "comment", "Comentario")}
-              <textarea
-                value={comment}
-                onChange={(event) => setComment(event.target.value)}
-                className="input-app mt-1 min-h-20 px-3 py-2 text-sm"
-                placeholder={getLabel(
-                  labels,
-                  "commentPlaceholder",
-                  "Comentario libre"
-                )}
-                required
-              />
-            </label>
-
-            <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-app-border bg-app">
-              <div className="sticky top-0 z-10 hidden grid-cols-[1fr_2fr_0.85fr_0.85fr_0.8fr] gap-2 border-b border-app-border bg-app-soft px-3 py-2 text-[11px] font-semibold uppercase text-app-muted sm:grid">
-                <span>{getLabel(labels, "code", "Código")}</span>
-                <span>{getLabel(labels, "description", "Descripción")}</span>
+          <form
+            onSubmit={handleSubmit}
+            className="flex min-h-0 flex-1 flex-col gap-2"
+          >
+            <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-app-border bg-app">
+              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1fr)_3.25rem_4.75rem_3rem] items-center gap-1.5 border-b border-app-border bg-app-soft px-2 py-1.5 text-[10px] font-semibold uppercase text-app-muted sm:grid-cols-[1fr_2fr_0.85fr_0.85fr_0.8fr] sm:gap-2 sm:px-3 sm:py-2 sm:text-[11px]">
+                <span className="sm:hidden">Artículo</span>
+                <span className="hidden sm:block">
+                  {getLabel(labels, "code", "Código")}
+                </span>
+                <span className="hidden sm:block">
+                  {getLabel(labels, "description", "Descripción")}
+                </span>
                 <span>
                   {getLabel(
                     labels,
@@ -193,7 +189,9 @@ export default function BulkInventoryAdjustmentModal({
                 <span>
                   {getLabel(labels, "bulkInventoryAdjustmentReal", "Real")}
                 </span>
-                <span>{getLabel(labels, "unitOfMeasure", "Unidad")}</span>
+                <span className="text-right sm:text-left">
+                  {getLabel(labels, "unitOfMeasure", "Unidad")}
+                </span>
               </div>
 
               {items.length === 0 ? (
@@ -219,70 +217,54 @@ export default function BulkInventoryAdjustmentModal({
                     return (
                       <div
                         key={item.id}
-                        className="grid gap-2 px-3 py-3 text-sm sm:grid-cols-[1fr_2fr_0.85fr_0.85fr_0.8fr] sm:items-center sm:py-2"
+                        className="grid grid-cols-[minmax(0,1fr)_3.25rem_4.75rem_3rem] items-center gap-1.5 px-2 py-1.5 text-xs sm:grid-cols-[1fr_2fr_0.85fr_0.85fr_0.8fr] sm:gap-2 sm:px-3 sm:py-2 sm:text-sm"
                       >
-                        <div className="flex items-start justify-between gap-3 sm:block">
-                          <div>
-                            <div className="text-[10px] font-medium uppercase text-app-muted sm:hidden">
-                              {getLabel(labels, "code", "Código")}
-                            </div>
-                            <div className="font-semibold text-primary-app">
-                              {itemCode}
-                            </div>
+                        <div className="min-w-0">
+                          <div className="truncate font-semibold leading-tight text-primary-app">
+                            {itemCode}
                           </div>
-
-                          <div className="text-right sm:hidden">
-                            <div className="text-[10px] font-medium uppercase text-app-muted">
-                              {getLabel(labels, "unitOfMeasure", "Unidad")}
-                            </div>
-                            <div className="font-semibold text-app">
-                              {unitOfMeasure}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="text-[10px] font-medium uppercase text-app-muted sm:hidden">
-                            {getLabel(labels, "description", "Descripción")}
-                          </div>
-                          <div className="truncate text-app" title={itemDescription}>
+                          <div
+                            className="truncate text-[11px] leading-tight text-app-muted sm:hidden"
+                            title={itemDescription}
+                          >
                             {itemDescription}
                           </div>
                         </div>
 
-                        <div>
-                          <div className="text-[10px] font-medium uppercase text-app-muted sm:hidden">
-                            {getLabel(
-                              labels,
-                              "bulkInventoryAdjustmentCalculated",
-                              "Calculado"
-                            )}
-                          </div>
-                          <div className="font-semibold text-app">
-                            {calculatedQuantity}
+                        <div className="hidden min-w-0 sm:block">
+                          <div
+                            className="truncate text-app"
+                            title={itemDescription}
+                          >
+                            {itemDescription}
                           </div>
                         </div>
 
+                        <div className="text-right font-semibold text-app sm:text-left">
+                          {calculatedQuantity}
+                        </div>
+
                         <label className="block">
-                          <span className="text-[10px] font-medium uppercase text-app-muted sm:hidden">
+                          <span className="sr-only">
                             {getLabel(
                               labels,
                               "bulkInventoryAdjustmentReal",
                               "Real"
-                            )}
+                            )}{" "}
+                            {itemCode}
                           </span>
                           <input
                             value={actualQuantities[item.id] ?? ""}
                             onChange={(event) =>
                               updateActualQuantity(item.id, event.target.value)
                             }
-                            className="input-app mt-1 h-10 px-3 py-2 text-base font-semibold sm:mt-0 sm:h-8 sm:text-sm"
+                            className="input-app h-8 px-2 py-1 text-right text-sm font-semibold sm:text-left"
                             inputMode="decimal"
                             required
                           />
                         </label>
 
-                        <div className="hidden font-semibold text-app sm:block">
+                        <div className="truncate text-right font-semibold text-app sm:text-left">
                           {unitOfMeasure}
                         </div>
                       </div>
@@ -291,6 +273,21 @@ export default function BulkInventoryAdjustmentModal({
                 </div>
               )}
             </div>
+
+            <label className="block text-[11px] font-semibold text-app sm:text-xs">
+              {getLabel(labels, "comment", "Comentario")}
+              <input
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                className="input-app mt-1 h-9 px-3 py-1.5 text-sm"
+                placeholder={getLabel(
+                  labels,
+                  "commentPlaceholder",
+                  "Comentario libre"
+                )}
+                required
+              />
+            </label>
 
             {errorMessage ? (
               <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
@@ -304,7 +301,7 @@ export default function BulkInventoryAdjustmentModal({
               </div>
             ) : null}
 
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-medium text-app-muted">
                 {changedCount > 0
                   ? `${changedCount} movimiento(s)`
@@ -319,7 +316,7 @@ export default function BulkInventoryAdjustmentModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="btn-secondary-app px-4 py-2 text-sm"
+                  className="btn-secondary-app px-3 py-2 text-sm"
                   disabled={isSubmitting}
                 >
                   {getLabel(labels, "close", "Cerrar")}
@@ -327,7 +324,7 @@ export default function BulkInventoryAdjustmentModal({
 
                 <button
                   type="submit"
-                  className="btn-primary-app px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                  className="btn-primary-app px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={isSubmitting || items.length === 0}
                 >
                   {isSubmitting

@@ -12,7 +12,7 @@ export const itemFields: readonly EntityFieldDefinition[] = [
     normalization: "uppercase",
     required: true,
     grid: {
-      width: "sm",
+      width: "xs",
     },
     showInList: true,
     showInForm: true,
@@ -24,7 +24,7 @@ export const itemFields: readonly EntityFieldDefinition[] = [
     type: "text",
     required: true,
     grid: {
-      width: "xl",
+      width: "md",
     },
     showInList: true,
     showInForm: true,
