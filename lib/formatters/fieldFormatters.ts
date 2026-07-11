@@ -25,6 +25,42 @@ export function formatDateValue(value: unknown) {
   return rawValue;
 }
 
+export function formatDateTimeValue(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  const rawValue = String(value).trim();
+  const dateTimeMatch = rawValue.match(
+    /^(\d{4})-(\d{2})-(\d{2})(?:T| )(\d{2}):(\d{2})/
+  );
+
+  if (dateTimeMatch) {
+    const [, year, month, day, hour, minute] = dateTimeMatch;
+    return `${day}/${month}/${year} ${hour}:${minute}`;
+  }
+
+  return formatDateValue(rawValue);
+}
+
+export function formatDateTimeValueForInput(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+
+  const rawValue = String(value).trim();
+  const dateTimeMatch = rawValue.match(
+    /^(\d{4})-(\d{2})-(\d{2})(?:T| )(\d{2}):(\d{2})/
+  );
+
+  if (dateTimeMatch) {
+    const [, year, month, day, hour, minute] = dateTimeMatch;
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  }
+
+  return rawValue;
+}
+
 function parseDecimalValueForDisplay(value: unknown) {
   if (typeof value === "number") {
     return value;
@@ -87,6 +123,10 @@ export function formatFieldValueForDisplay(
     return formatDateValue(value);
   }
 
+  if (field.type === "datetime") {
+    return formatDateTimeValue(value);
+  }
+
   if (field.type === "decimal") {
     return formatDecimalValue(value, field.decimalScale ?? 2);
   }
@@ -109,6 +149,10 @@ export function formatFieldValueForInput(
   if (field.type === "decimal") {
     const formattedValue = formatDecimalValue(value, field.decimalScale ?? 2);
     return formattedValue === "-" ? "" : formattedValue;
+  }
+
+  if (field.type === "datetime") {
+    return formatDateTimeValueForInput(value);
   }
 
   return String(value);

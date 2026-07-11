@@ -5,6 +5,7 @@ import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 
 import EntityReadOnlyTable from "./EntityReadOnlyTable";
+import { EntitySelectionProvider } from "./EntitySelectionContext";
 import ListEditSwitcher from "./ListEditSwitcher";
 
 type EditableListPageLabels = {
@@ -30,6 +31,7 @@ type EditableListPageClientProps<TRecord extends { id: string }> = {
   fieldLabels: Record<string, string>;
   labels: EditableListPageLabels;
   viewActions?: ReactNode;
+  enableSelection?: boolean;
   minWidthClass?: string;
   primaryColumnDbName: string;
   sortRecords: (records: TRecord[]) => TRecord[];
@@ -54,6 +56,7 @@ export default function EditableListPageClient<
   fieldLabels,
   labels,
   viewActions,
+  enableSelection = false,
   minWidthClass,
   primaryColumnDbName,
   sortRecords,
@@ -65,11 +68,24 @@ export default function EditableListPageClient<
   const [currentRecords, setCurrentRecords] = useState<TRecord[]>(
     sortRecords(records)
   );
+  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    setCurrentRecords(sortRecords(records));
+    const sortedRecords = sortRecords(records);
+
+    // The list state must mirror fresh server records after router.refresh().
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentRecords(sortedRecords);
+    setSelectedRecordId((currentId) =>
+      currentId && sortedRecords.some((record) => record.id === currentId)
+        ? currentId
+        : null
+    );
   }, [records, sortRecords]);
+
+  const selectedRecord =
+    currentRecords.find((record) => record.id === selectedRecordId) ?? null;
 
   async function loadRecords() {
     setMessage(null);
@@ -94,33 +110,41 @@ export default function EditableListPageClient<
         </div>
       )}
 
-      <ListEditSwitcher
-        editButtonLabel={labels.editList}
-        viewButtonLabel={labels.viewList}
-        loadingLabel={labels.loading}
-        onBeforeOpenEdit={loadRecords}
-        onBeforeBackToView={loadRecords}
-        viewActions={viewActions}
-        viewContent={
-          <EntityReadOnlyTable
-            records={currentRecords}
-            fields={fields}
-            fieldLabels={fieldLabels}
-            emptyLabel={labels.emptyList}
-            minWidthClass={minWidthClass}
-            primaryColumnDbName={primaryColumnDbName}
-            getFieldLabel={getFieldLabel}
-            getCellValue={getCellValue}
-          />
-        }
-        renderEditContent={({ backButton }) =>
-          renderEditContent({
-            backButton,
-            records: currentRecords,
-            setRecords: setCurrentRecords,
-          })
-        }
-      />
+      <EntitySelectionProvider selectedRecord={selectedRecord}>
+        <ListEditSwitcher
+          editButtonLabel={labels.editList}
+          viewButtonLabel={labels.viewList}
+          loadingLabel={labels.loading}
+          onBeforeOpenEdit={loadRecords}
+          onBeforeBackToView={loadRecords}
+          viewActions={viewActions}
+          viewContent={
+            <EntityReadOnlyTable
+              records={currentRecords}
+              fields={fields}
+              fieldLabels={fieldLabels}
+              emptyLabel={labels.emptyList}
+              minWidthClass={minWidthClass}
+              primaryColumnDbName={primaryColumnDbName}
+              getFieldLabel={getFieldLabel}
+              getCellValue={getCellValue}
+              selectedRecordId={enableSelection ? selectedRecordId : null}
+              onSelectRecord={
+                enableSelection
+                  ? (record) => setSelectedRecordId(record.id)
+                  : undefined
+              }
+            />
+          }
+          renderEditContent={({ backButton }) =>
+            renderEditContent({
+              backButton,
+              records: currentRecords,
+              setRecords: setCurrentRecords,
+            })
+          }
+        />
+      </EntitySelectionProvider>
     </div>
   );
 }

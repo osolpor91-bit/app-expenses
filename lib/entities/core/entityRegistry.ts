@@ -17,6 +17,7 @@ import { taxConfigurationEntity } from "@/lib/entities/taxConfigurations/taxConf
 import { treasuryGeneralEntity } from "@/lib/entities/treasuryGeneral/treasuryGeneralEntity";
 import { treasuryGeneralMovementEntity } from "@/lib/entities/treasuryGeneralMovements/treasuryGeneralMovementEntity";
 import { treasuryMemberEntity } from "@/lib/entities/treasuryMembers/treasuryMemberEntity";
+import { workGroupEntity } from "@/lib/entities/workGroups/workGroupEntity";
 
 export const entityRegistry = {
   [countryEntity.key]: countryEntity,
@@ -35,6 +36,7 @@ export const entityRegistry = {
   [treasuryGeneralEntity.key]: treasuryGeneralEntity,
   [treasuryGeneralMovementEntity.key]: treasuryGeneralMovementEntity,
   [treasuryMemberEntity.key]: treasuryMemberEntity,
+  [workGroupEntity.key]: workGroupEntity,
 } satisfies Record<string, EntityDefinition>;
 
 export type RegisteredEntityKey = keyof typeof entityRegistry;

@@ -7,7 +7,8 @@ export type EntityFieldType =
   | "select"
   | "option"
   | "decimal"
-  | "date";
+  | "date"
+  | "datetime";
 
 export type EntityFieldNormalization = "uppercase";
 

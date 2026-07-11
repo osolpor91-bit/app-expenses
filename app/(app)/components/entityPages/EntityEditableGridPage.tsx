@@ -35,6 +35,7 @@ type EntityEditableGridPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
   viewActions?: ReactNode;
   minWidthClass?: string;
+  enableSelection?: boolean;
 };
 
 type EntityPageContext = {
@@ -248,6 +249,7 @@ export default async function EntityEditableGridPage({
   searchParams,
   viewActions,
   minWidthClass,
+  enableSelection = false,
 }: EntityEditableGridPageProps) {
   const { dict } = await getDictionary();
   const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -354,6 +356,7 @@ export default async function EntityEditableGridPage({
         labels={clientLabels}
         viewActions={viewActions}
         minWidthClass={minWidthClass}
+        enableSelection={enableSelection}
       />
     </section>
   );

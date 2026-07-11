@@ -131,6 +131,10 @@ export function getTextInputType(field: EntityFieldDefinition) {
     return "date";
   }
 
+  if (field.type === "datetime") {
+    return "datetime-local";
+  }
+
   return "text";
 }
 

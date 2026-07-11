@@ -46,6 +46,7 @@ import {
   refreshEntityGridAction,
   updateEntityGridRecordAction,
 } from "../../actions/entityActions";
+import { formatFieldValueForDisplay } from "@/lib/formatters/fieldFormatters";
 
 type GenericGridRecord = EntityRecord & EditableGridRecord;
 
@@ -99,6 +100,7 @@ type EntityEditableGridPageClientProps = {
   labels: EntityEditableGridLabels;
   viewActions?: ReactNode;
   minWidthClass?: string;
+  enableSelection?: boolean;
 };
 
 function getEntityListFields(entity: EditableGridEntityDefinition) {
@@ -228,28 +230,6 @@ function hasRequiredEntityValues({
 
       return String(row[field.dbName] ?? "").trim();
     });
-}
-
-function validateEntityFormats({
-  entity,
-  row,
-  validationMessages,
-  relationOptionsByField,
-}: {
-  entity: EditableGridEntityDefinition;
-  row: GenericGridRecord;
-  validationMessages: Record<string, unknown>;
-  relationOptionsByField: RelationOptionsByField;
-}) {
-  return validateGridPayload({
-    fields: getEntityGridFields(entity),
-    payload: buildEntityGridPayload({
-      entity,
-      row,
-      relationOptionsByField,
-    }),
-    validationMessages,
-  });
 }
 
 function getInvalidRelationField({
@@ -445,7 +425,7 @@ function getEntityCellValue(
     return "-";
   }
 
-  return String(value);
+  return formatFieldValueForDisplay(field, value);
 }
 
 function getCreatedMessage(labels: EntityEditableGridLabels) {
@@ -476,6 +456,7 @@ export default function EntityEditableGridPageClient({
   labels,
   viewActions,
   minWidthClass = "min-w-[620px]",
+  enableSelection = false,
 }: EntityEditableGridPageClientProps) {
   const router = useRouter();
 
@@ -575,6 +556,7 @@ export default function EntityEditableGridPageClient({
           {viewActions ?? null}
         </ActionsMenu>
       }
+      enableSelection={enableSelection}
       minWidthClass={minWidthClass}
       primaryColumnDbName={entity.primaryFieldDbName}
       sortRecords={(items) => sortEntityRecords(entity, items)}

@@ -19,6 +19,8 @@ type EntityReadOnlyTableProps<TRecord extends { id: string }> = {
     field: EntityFieldDefinition
   ) => string;
   getCellValue: (record: TRecord, field: EntityFieldDefinition) => string;
+  selectedRecordId?: string | null;
+  onSelectRecord?: (record: TRecord) => void;
 };
 
 type SortDirection = "asc" | "desc";
@@ -69,6 +71,8 @@ export default function EntityReadOnlyTable<TRecord extends { id: string }>({
   primaryColumnDbName,
   getFieldLabel,
   getCellValue,
+  selectedRecordId = null,
+  onSelectRecord,
 }: EntityReadOnlyTableProps<TRecord>) {
   const [sortState, setSortState] = useState<SortState | null>(null);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
@@ -220,11 +224,17 @@ export default function EntityReadOnlyTable<TRecord extends { id: string }>({
       .join(" ");
   }
 
-  function getBodyCellClassName(index: number, isPrimary: boolean) {
+  function getBodyCellClassName(
+    index: number,
+    isPrimary: boolean,
+    isSelected: boolean
+  ) {
     return [
       "px-3 py-1.5 align-middle",
       isPrimary ? "font-medium" : "text-app-muted",
-      index === 0 ? "sticky left-0 z-10 bg-app" : "",
+      index === 0
+        ? `sticky left-0 z-10 ${isSelected ? "bg-app-soft" : "bg-app"}`
+        : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -285,8 +295,21 @@ export default function EntityReadOnlyTable<TRecord extends { id: string }>({
         </thead>
 
         <tbody className="divide-y divide-[var(--color-border)] bg-app">
-          {displayedRecords.map((record) => (
-            <tr key={record.id} className="table-row-app">
+          {displayedRecords.map((record) => {
+            const isSelected = selectedRecordId === record.id;
+
+            return (
+            <tr
+              key={record.id}
+              className={[
+                "table-row-app",
+                onSelectRecord ? "cursor-pointer" : "",
+                isSelected ? "bg-app-soft outline outline-1 outline-primary-app" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => onSelectRecord?.(record)}
+            >
               {fields.map((field, index) => {
                 const value = getCellValue(record, field);
                 const isPrimary = field.dbName === primaryColumnDbName;
@@ -294,7 +317,11 @@ export default function EntityReadOnlyTable<TRecord extends { id: string }>({
                 return (
                   <td
                     key={field.key}
-                    className={getBodyCellClassName(index, isPrimary)}
+                    className={getBodyCellClassName(
+                      index,
+                      isPrimary,
+                      isSelected
+                    )}
                     title={getCellTitle(value)}
                   >
                     <span className={getCellContentClassName()}>{value}</span>
@@ -302,7 +329,8 @@ export default function EntityReadOnlyTable<TRecord extends { id: string }>({
                 );
               })}
             </tr>
-          ))}
+          );
+          })}
 
           {displayedRecords.length === 0 && (
             <tr>

@@ -3,10 +3,16 @@ import Link from "next/link";
 import { requireCompanyContext } from "@/lib/company/requireCompanyContext";
 import { getDictionary } from "@/lib/i18n/server";
 
-type ConfigurationLink = {
-  href: string;
-  label: string;
-};
+type ConfigurationLink =
+  | {
+      type?: "link";
+      href: string;
+      label: string;
+    }
+  | {
+      type: "label";
+      label: string;
+    };
 
 type ConfigurationGroup = {
   title: string;
@@ -21,18 +27,24 @@ function ConfigurationGroupCard({ group }: { group: ConfigurationGroup }) {
       {group.links.length > 0 && (
         <ul className="mt-3 space-y-0.5">
           {group.links.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="group flex items-center gap-3 rounded-lg px-2 py-1 text-sm font-medium text-app-muted transition hover:bg-app hover:text-primary-app"
-              >
-                <span
-                  aria-hidden="true"
-                  className="h-2 w-2 rounded-full bg-app-muted"
-                />
+            <li key={link.label}>
+              {link.type === "label" ? (
+                <div className="px-2 pb-1 pt-3 text-base font-bold text-primary-app">
+                  {link.label}
+                </div>
+              ) : (
+                <Link
+                  href={link.href}
+                  className="group flex items-center gap-3 rounded-lg px-2 py-1 text-sm font-medium text-app-muted transition hover:bg-app hover:text-primary-app"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="h-2 w-2 rounded-full bg-app-muted"
+                  />
 
-                <span>{link.label}</span>
-              </Link>
+                  <span>{link.label}</span>
+                </Link>
+              )}
             </li>
           ))}
         </ul>
@@ -122,6 +134,26 @@ export default async function ConfigurationsPage() {
     {
       href: "/reports",
       label: dict.reports.title,
+    },
+    {
+      type: "label",
+      label: "Grupos y asistencia",
+    },
+    {
+      href: "/work-groups",
+      label: dict.workGroups.title,
+    },
+    {
+      href: "/work-group-report",
+      label: dict.workGroups.reportTitle,
+    },
+    {
+      href: "/attendance-register",
+      label: dict.attendance.title,
+    },
+    {
+      href: "/attendance-report",
+      label: dict.attendance.reportTitle,
     },
   ];
 
