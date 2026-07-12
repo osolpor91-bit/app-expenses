@@ -37,6 +37,9 @@ import TreasuryMovementModal, {
 import WorkGroupActions, {
   type WorkGroupActionsData,
 } from "../../work-groups/WorkGroupActions";
+import ItemBalanceEntryEditModal, {
+  type ItemBalanceEntryEditRecord,
+} from "../../item-balance-entries/ItemBalanceEntryEditModal";
 
 type GenericListDetailRecord = EntityRecord & SelectableEntityRecord;
 
@@ -311,6 +314,8 @@ export default function EntityListDetailPageClient({
     useState(requestedTreasuryMovementType);
   const [treasuryMovementToEdit, setTreasuryMovementToEdit] =
     useState<TreasuryMovementEditRecord | null>(null);
+  const [itemBalanceEntryToEdit, setItemBalanceEntryToEdit] =
+    useState<ItemBalanceEntryEditRecord | null>(null);
   const [treasuryMovementAttachmentCounts, setTreasuryMovementAttachmentCounts] =
     useState<Record<string, number>>({});
   const [
@@ -496,6 +501,33 @@ export default function EntityListDetailPageClient({
                   </span>
                 ) : null}
               </>
+            );
+          }
+
+          if (entity.key === "itemBalanceEntries") {
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  if (!selectedRecord) {
+                    return;
+                  }
+
+                  setItemBalanceEntryToEdit({
+                    id: selectedRecord.id,
+                    item_code: selectedRecord.item_code,
+                    item_description: selectedRecord.item_description,
+                    created_at: selectedRecord.created_at,
+                    quantity: selectedRecord.quantity,
+                    comment: selectedRecord.comment,
+                    unit_of_measure: selectedRecord.unit_of_measure,
+                  });
+                }}
+                disabled={!selectedRecord}
+                className="btn-secondary-app px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {labels.modifyAction ?? "Modificar"}
+              </button>
             );
           }
 
@@ -687,6 +719,14 @@ export default function EntityListDetailPageClient({
           movement={treasuryMovementToEdit}
           labels={labels}
           onClose={() => setTreasuryMovementToEdit(null)}
+        />
+      ) : null}
+
+      {entity.key === "itemBalanceEntries" && itemBalanceEntryToEdit ? (
+        <ItemBalanceEntryEditModal
+          entry={itemBalanceEntryToEdit}
+          labels={labels}
+          onClose={() => setItemBalanceEntryToEdit(null)}
         />
       ) : null}
     </>
