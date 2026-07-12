@@ -39,12 +39,14 @@ export type AttendanceLabels = {
   saving: string;
   saved: string;
   saveError: string;
+  commentRequired: string;
 };
 
 type AttendanceRegisterClientProps = {
   members: AttendanceMember[];
   attendances: AttendanceRecord[];
   labels: AttendanceLabels;
+  mode?: "register" | "edit";
 };
 
 type AttendancePeriod = "morning" | "afternoon" | "full_day";
@@ -125,6 +127,7 @@ export default function AttendanceRegisterClient({
   members,
   attendances,
   labels,
+  mode = "register",
 }: AttendanceRegisterClientProps) {
   const router = useRouter();
   const [attendanceDate, setAttendanceDate] = useState(getTodayValue);
@@ -233,6 +236,14 @@ export default function AttendanceRegisterClient({
   }
 
   async function saveAttendance() {
+    const canDeleteAttendance = mode === "edit" && selectedMemberIds.length === 0;
+
+    if (!comment.trim() && !canDeleteAttendance) {
+      setMessage(null);
+      setErrorMessage(labels.commentRequired);
+      return;
+    }
+
     setIsSubmitting(true);
     setMessage(null);
     setErrorMessage(null);
@@ -242,6 +253,7 @@ export default function AttendanceRegisterClient({
       period,
       memberIds: selectedMemberIds,
       comment,
+      allowDeleteWithoutComment: canDeleteAttendance,
     });
 
     setIsSubmitting(false);
@@ -256,27 +268,27 @@ export default function AttendanceRegisterClient({
   }
 
   return (
-    <div className="max-w-2xl space-y-4">
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-        <label className="block text-sm font-semibold text-app">
+    <div className="max-w-xl space-y-3">
+      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <label className="block text-xs font-semibold text-app sm:text-sm">
           {labels.date}
           <input
             type="date"
             value={attendanceDate}
             onChange={(event) => changeAttendanceDate(event.target.value)}
-            className="input-app mt-1 h-11 px-3 py-2 text-base"
+            className="input-app mt-1 h-10 px-3 py-1.5 text-sm"
             disabled={isSubmitting}
           />
         </label>
 
-        <label className="block text-sm font-semibold text-app">
+        <label className="block text-xs font-semibold text-app sm:text-sm">
           {labels.period}
           <select
             value={period}
             onChange={(event) =>
               changePeriod(event.target.value as AttendancePeriod)
             }
-            className="input-app mt-1 h-11 px-3 py-2 text-base"
+            className="input-app mt-1 h-10 px-3 py-1.5 text-sm"
             disabled={isSubmitting}
           >
             <option value="morning">{labels.morning}</option>
@@ -286,39 +298,37 @@ export default function AttendanceRegisterClient({
         </label>
       </div>
 
-      <label className="block text-sm font-semibold text-app">
+      <label className="block text-xs font-semibold text-app sm:text-sm">
+        {labels.comment}
+        <textarea
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
+          className="input-app mt-1 min-h-14 px-3 py-2 text-sm"
+          placeholder={labels.commentPlaceholder}
+          disabled={isSubmitting}
+          required
+        />
+      </label>
+
+      <label className="block text-xs font-semibold text-app sm:text-sm">
         {labels.searchMember}
         <input
           value={searchText}
           onChange={(event) => setSearchText(event.target.value)}
-          className="input-app mt-1 h-11 px-3 py-2 text-base"
+          className="input-app mt-1 h-10 px-3 py-1.5 text-sm"
           placeholder={labels.searchMemberPlaceholder}
           disabled={isSubmitting}
           autoComplete="off"
         />
       </label>
 
-      <label className="block text-sm font-semibold text-app">
-        {labels.comment}
-        <textarea
-          value={comment}
-          onChange={(event) => setComment(event.target.value)}
-          className="input-app mt-1 min-h-20 px-3 py-2 text-base"
-          placeholder={labels.commentPlaceholder}
-          disabled={isSubmitting}
-        />
-      </label>
-
-      <div className="min-h-[4rem] rounded-lg border border-app-border bg-app-soft p-2">
-        <div className="px-2 pb-2 text-xs leading-snug text-app-muted">
-          {labels.incompatibleAttendanceHelp}
-        </div>
+      <div className="min-h-12 rounded-lg border border-app-border bg-app-soft p-2">
         {!normalizedSearchText ? (
-          <div className="px-2 py-3 text-sm text-app-muted">
+          <div className="px-2 py-2 text-sm text-app-muted">
             {labels.typeToSearchMembers}
           </div>
         ) : memberResults.length === 0 ? (
-          <div className="px-2 py-3 text-sm text-app-muted">
+          <div className="px-2 py-2 text-sm text-app-muted">
             {labels.noMemberResults}
           </div>
         ) : (
@@ -328,7 +338,7 @@ export default function AttendanceRegisterClient({
                 key={member.id}
                 type="button"
                 onClick={() => addMember(member.id)}
-                className="flex w-full items-center justify-between gap-3 rounded-md bg-app px-3 py-2 text-left text-sm font-semibold text-app transition hover:bg-white"
+                className="flex w-full items-center justify-between gap-3 rounded-md bg-app px-3 py-1.5 text-left text-sm font-semibold text-app transition hover:bg-white"
                 disabled={isSubmitting}
               >
                 <span>{getMemberName(member)}</span>
@@ -353,7 +363,7 @@ export default function AttendanceRegisterClient({
             {selectedMembers.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between gap-3 px-3 py-2"
+                className="flex items-center justify-between gap-3 px-3 py-1.5"
               >
                 <span className="text-sm font-semibold text-app">
                   {getMemberName(member)}
@@ -389,7 +399,11 @@ export default function AttendanceRegisterClient({
           type="button"
           onClick={saveAttendance}
           className="btn-primary-app px-5 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={isSubmitting || !attendanceDate}
+          disabled={
+            isSubmitting ||
+            !attendanceDate ||
+            (!comment.trim() && !(mode === "edit" && selectedMemberIds.length === 0))
+          }
         >
           {isSubmitting ? labels.saving : labels.accept}
         </button>

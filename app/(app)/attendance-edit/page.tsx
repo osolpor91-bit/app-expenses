@@ -9,7 +9,7 @@ import { getDictionary } from "@/lib/i18n/server";
 import AttendanceRegisterClient, {
   type AttendanceMember,
   type AttendanceRecord,
-} from "./AttendanceRegisterClient";
+} from "../attendance-register/AttendanceRegisterClient";
 
 function getStringValue(value: unknown) {
   return String(value ?? "").trim();
@@ -41,7 +41,7 @@ function getLabels(dict: Awaited<ReturnType<typeof getDictionary>>["dict"]) {
   };
 }
 
-export default async function AttendanceRegisterPage() {
+export default async function AttendanceEditPage() {
   const [{ supabase, tenant, activeCompany }, { dict }] = await Promise.all([
     requireCompanyContext(),
     getDictionary(),
@@ -101,7 +101,7 @@ export default async function AttendanceRegisterPage() {
         </Link>
 
         <h1 className="text-xl font-bold text-primary-app sm:text-3xl">
-          {dict.attendance.title}
+          {dict.attendance.editTitle}
         </h1>
       </div>
 
@@ -114,6 +114,7 @@ export default async function AttendanceRegisterPage() {
           members={members}
           attendances={attendances}
           labels={getLabels(dict)}
+          mode="edit"
         />
       )}
     </section>

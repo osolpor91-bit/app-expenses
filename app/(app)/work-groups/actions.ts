@@ -128,3 +128,29 @@ export async function saveWorkGroupAssignmentsAction({
 
   return entityOperationOk(null);
 }
+
+export async function deleteAllWorkGroupAssignmentsAction(): Promise<
+  EntityOperationResult<null>
+> {
+  const { supabase, tenant, activeCompany } = await requireCompanyContext();
+
+  if (!activeCompany) {
+    return entityOperationError("Selecciona una empresa activa.");
+  }
+
+  const { error } = await supabase
+    .from("work_group_assignments")
+    .delete()
+    .eq("tenant_id", tenant.id)
+    .eq("company_id", activeCompany.id);
+
+  if (error) {
+    return entityOperationError(error.message);
+  }
+
+  revalidatePath("/work-groups");
+  revalidatePath("/work-group-assignments");
+  revalidatePath("/work-group-report");
+
+  return entityOperationOk(null);
+}

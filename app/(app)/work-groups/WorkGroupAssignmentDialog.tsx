@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import { useSelectedEntityRecord } from "../components/EntitySelectionContext";
@@ -53,6 +54,7 @@ type WorkGroupAssignmentDialogProps = {
   members: WorkGroupAssignmentMember[];
   assignments: WorkGroupAssignmentRecord[];
   labels: WorkGroupAssignmentLabels;
+  selectedGroupId?: string;
 };
 
 function getMemberName(member: WorkGroupAssignmentMember) {
@@ -100,10 +102,14 @@ export default function WorkGroupAssignmentDialog({
   members,
   assignments,
   labels,
+  selectedGroupId,
 }: WorkGroupAssignmentDialogProps) {
   const router = useRouter();
   const selectedRecord = useSelectedEntityRecord();
-  const selectedGroup = groups.find((group) => group.id === selectedRecord?.id);
+  const effectiveSelectedGroupId = selectedGroupId ?? selectedRecord?.id ?? "";
+  const selectedGroup = groups.find(
+    (group) => group.id === effectiveSelectedGroupId
+  );
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeGroupId, setActiveGroupId] = useState("");
@@ -118,6 +124,20 @@ export default function WorkGroupAssignmentDialog({
     () => new Map(members.map((member) => [member.id, member])),
     [members]
   );
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
 
   const selectedMembers = selectedMemberIds
     .map((memberId) => membersById.get(memberId))
@@ -143,6 +163,8 @@ export default function WorkGroupAssignmentDialog({
   }, [members, normalizedSearchText, selectedMemberIds]);
 
   const activeGroup = groups.find((group) => group.id === activeGroupId) ?? null;
+  const portalTarget =
+    typeof document === "undefined" ? null : document.body;
 
   function openDialog() {
     if (!selectedGroup) {
@@ -231,6 +253,171 @@ export default function WorkGroupAssignmentDialog({
     router.refresh();
   }
 
+  const dialog = isOpen ? (
+    <div className="fixed inset-0 z-[300] flex items-stretch justify-center bg-black/35 p-0 sm:items-center sm:px-4 sm:py-6">
+      <div className="flex h-full w-full flex-col bg-app p-3 shadow-xl sm:h-auto sm:max-h-[88vh] sm:max-w-lg sm:rounded-2xl sm:border sm:border-primary-app sm:p-4">
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <h2 className="text-base font-black uppercase tracking-tight text-primary-app sm:text-lg">
+            {labels.assignGroupsTitle}
+          </h2>
+
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            className="rounded-full border border-app-border px-3 py-1 text-xs font-semibold text-primary-app"
+            disabled={isSubmitting}
+          >
+            {labels.close}
+          </button>
+        </div>
+
+        {!activeGroup ? (
+          <div className="rounded-xl border border-app-border bg-app-soft p-4 text-sm text-app-muted">
+            {groups.length === 0 ? labels.noWorkGroups : labels.selectWorkGroup}
+          </div>
+        ) : (
+          <div className="flex min-h-0 flex-1 flex-col gap-2 sm:gap-3">
+            <div className="rounded-lg border border-app-border bg-app-soft px-3 py-2">
+              <div className="text-[11px] font-semibold uppercase text-app-muted sm:text-xs">
+                {labels.workGroup}
+              </div>
+              <div className="mt-1 text-xs font-bold leading-tight text-primary-app sm:text-sm">
+                {getGroupLabel(activeGroup)}
+              </div>
+            </div>
+
+            <label className="block text-xs font-semibold text-app">
+              {labels.searchMember}
+              <input
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+                className="input-app mt-1 h-10 px-3 py-2 text-base sm:h-11"
+                placeholder={labels.searchMemberPlaceholder}
+                disabled={isSubmitting || hasDefaultMemberSelected}
+                autoComplete="off"
+              />
+            </label>
+
+            <div className="min-h-12 rounded-lg border border-app-border bg-app-soft p-2 sm:min-h-[4rem]">
+              {hasDefaultMemberSelected ? (
+                <div className="px-2 py-2 text-sm text-app-muted">
+                  {labels.noMemberResults}
+                </div>
+              ) : !normalizedSearchText ? (
+                <div className="px-2 py-2 text-sm text-app-muted">
+                  {labels.typeToSearchMembers}
+                </div>
+              ) : memberResults.length === 0 ? (
+                <div className="px-2 py-2 text-sm text-app-muted">
+                  {labels.noMemberResults}
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {memberResults.map((member) => (
+                    <button
+                      key={member.id}
+                      type="button"
+                      onClick={() => addMember(member.id)}
+                      className="flex w-full items-center justify-between gap-3 rounded-md bg-app px-3 py-2 text-left text-sm font-semibold text-app transition hover:bg-white"
+                      disabled={isSubmitting}
+                    >
+                      <span>{getMemberName(member)}</span>
+                      <span className="text-xs text-primary-app">
+                        {labels.add}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-app-border bg-app">
+              <div className="border-b border-app-border bg-app-soft px-3 py-2 text-xs font-semibold uppercase text-app-muted">
+                {labels.selectedMembers}
+              </div>
+
+              {selectedMembers.length === 0 ? (
+                <div className="p-3 text-sm text-app-muted">
+                  {labels.noSelectedMembers}
+                </div>
+              ) : (
+                <div className="divide-y divide-[var(--color-border)]">
+                  {selectedMembers.map((member) => (
+                    <div key={member.id} className="grid gap-2 px-3 py-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <span
+                          className={`text-sm font-semibold ${
+                            leadMemberId === member.id || member.isDefault
+                              ? "text-red-700"
+                              : "text-app"
+                          }`}
+                        >
+                          {getMemberName(member)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeMember(member.id)}
+                          className="rounded-full border border-app-border px-3 py-1 text-xs font-semibold text-primary-app"
+                          disabled={isSubmitting}
+                        >
+                          {labels.remove}
+                        </button>
+                      </div>
+                      <label className="flex items-center gap-2 text-xs font-semibold text-app-muted">
+                        <input
+                          type="radio"
+                          name="leadMember"
+                          checked={leadMemberId === member.id || member.isDefault}
+                          onChange={() => setLeadMemberId(member.id)}
+                          disabled={isSubmitting || member.isDefault}
+                        />
+                        {leadMemberId === member.id || member.isDefault
+                          ? labels.leadMember
+                          : labels.markAsLead}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {errorMessage ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                {errorMessage}
+              </div>
+            ) : null}
+
+            {message ? (
+              <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
+                {message}
+              </div>
+            ) : null}
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="btn-secondary-app px-4 py-2 text-sm"
+                disabled={isSubmitting}
+              >
+                {labels.close}
+              </button>
+
+              <button
+                type="button"
+                onClick={saveAssignments}
+                className="btn-primary-app px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isSubmitting || !activeGroupId}
+              >
+                {isSubmitting ? labels.saving : labels.accept}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <>
       <button
@@ -243,173 +430,7 @@ export default function WorkGroupAssignmentDialog({
         {labels.assignGroups}
       </button>
 
-      {isOpen ? (
-        <div className="fixed inset-0 z-[120] flex items-stretch justify-center bg-black/35 p-0 sm:items-center sm:px-4 sm:py-6">
-          <div className="flex h-full w-full flex-col bg-app p-4 shadow-xl sm:h-auto sm:max-h-[88vh] sm:max-w-lg sm:rounded-2xl sm:border sm:border-primary-app">
-            <div className="mb-3 flex items-start justify-between gap-3">
-              <h2 className="text-lg font-black uppercase tracking-tight text-primary-app">
-                {labels.assignGroupsTitle}
-              </h2>
-
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="rounded-full border border-app-border px-3 py-1 text-xs font-semibold text-primary-app"
-                disabled={isSubmitting}
-              >
-                {labels.close}
-              </button>
-            </div>
-
-            {!activeGroup ? (
-              <div className="rounded-xl border border-app-border bg-app-soft p-4 text-sm text-app-muted">
-                {groups.length === 0 ? labels.noWorkGroups : labels.selectWorkGroup}
-              </div>
-            ) : (
-              <div className="flex min-h-0 flex-1 flex-col gap-3">
-                <div className="rounded-lg border border-app-border bg-app-soft px-3 py-2">
-                  <div className="text-xs font-semibold uppercase text-app-muted">
-                  {labels.workGroup}
-                  </div>
-                  <div className="mt-1 text-sm font-bold text-primary-app">
-                    {getGroupLabel(activeGroup)}
-                  </div>
-                </div>
-
-                <label className="block text-xs font-semibold text-app">
-                  {labels.searchMember}
-                  <input
-                    value={searchText}
-                    onChange={(event) => setSearchText(event.target.value)}
-                    className="input-app mt-1 h-11 px-3 py-2 text-base"
-                    placeholder={labels.searchMemberPlaceholder}
-                    disabled={isSubmitting || hasDefaultMemberSelected}
-                    autoComplete="off"
-                  />
-                </label>
-
-                <div className="min-h-[4rem] rounded-lg border border-app-border bg-app-soft p-2">
-                  {hasDefaultMemberSelected ? (
-                    <div className="px-2 py-3 text-sm text-app-muted">
-                      {labels.noMemberResults}
-                    </div>
-                  ) : !normalizedSearchText ? (
-                    <div className="px-2 py-3 text-sm text-app-muted">
-                      {labels.typeToSearchMembers}
-                    </div>
-                  ) : memberResults.length === 0 ? (
-                    <div className="px-2 py-3 text-sm text-app-muted">
-                      {labels.noMemberResults}
-                    </div>
-                  ) : (
-                    <div className="space-y-1">
-                      {memberResults.map((member) => (
-                        <button
-                          key={member.id}
-                          type="button"
-                          onClick={() => addMember(member.id)}
-                          className="flex w-full items-center justify-between gap-3 rounded-md bg-app px-3 py-2 text-left text-sm font-semibold text-app transition hover:bg-white"
-                          disabled={isSubmitting}
-                        >
-                          <span>{getMemberName(member)}</span>
-                          <span className="text-xs text-primary-app">
-                            {labels.add}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-app-border bg-app">
-                  <div className="border-b border-app-border bg-app-soft px-3 py-2 text-xs font-semibold uppercase text-app-muted">
-                    {labels.selectedMembers}
-                  </div>
-
-                  {selectedMembers.length === 0 ? (
-                    <div className="p-3 text-sm text-app-muted">
-                      {labels.noSelectedMembers}
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-[var(--color-border)]">
-                      {selectedMembers.map((member) => (
-                        <div
-                          key={member.id}
-                          className="grid gap-2 px-3 py-2"
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <span
-                              className={`text-sm font-semibold ${
-                                leadMemberId === member.id || member.isDefault
-                                  ? "text-red-700"
-                                  : "text-app"
-                              }`}
-                            >
-                              {getMemberName(member)}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeMember(member.id)}
-                              className="rounded-full border border-app-border px-3 py-1 text-xs font-semibold text-primary-app"
-                              disabled={isSubmitting}
-                            >
-                              {labels.remove}
-                            </button>
-                          </div>
-                          <label className="flex items-center gap-2 text-xs font-semibold text-app-muted">
-                            <input
-                              type="radio"
-                              name="leadMember"
-                              checked={leadMemberId === member.id || member.isDefault}
-                              onChange={() => setLeadMemberId(member.id)}
-                              disabled={isSubmitting || member.isDefault}
-                            />
-                            {leadMemberId === member.id || member.isDefault
-                              ? labels.leadMember
-                              : labels.markAsLead}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {errorMessage ? (
-                  <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                    {errorMessage}
-                  </div>
-                ) : null}
-
-                {message ? (
-                  <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
-                    {message}
-                  </div>
-                ) : null}
-
-                <div className="flex justify-end gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setIsOpen(false)}
-                    className="btn-secondary-app px-4 py-2 text-sm"
-                    disabled={isSubmitting}
-                  >
-                    {labels.close}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={saveAssignments}
-                    className="btn-primary-app px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={isSubmitting || !activeGroupId}
-                  >
-                    {isSubmitting ? labels.saving : labels.accept}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
+      {dialog && portalTarget ? createPortal(dialog, portalTarget) : null}
     </>
   );
 }

@@ -34,6 +34,9 @@ import TreasuryMovementModal, {
   type TreasuryMovementEditRecord,
   type TreasuryMemberOption,
 } from "../../treasury-general/TreasuryMovementModal";
+import WorkGroupActions, {
+  type WorkGroupActionsData,
+} from "../../work-groups/WorkGroupActions";
 
 type GenericListDetailRecord = EntityRecord & SelectableEntityRecord;
 
@@ -74,6 +77,7 @@ type EntityListDetailPageClientProps = {
   treasuryMemberOptions?: TreasuryMemberOption[];
   defaultTreasuryMemberId?: string;
   bulkInventoryAdjustmentItems?: GenericListDetailRecord[];
+  workGroupActionsData?: WorkGroupActionsData;
 };
 
 function getListFields({
@@ -287,6 +291,7 @@ export default function EntityListDetailPageClient({
   treasuryMemberOptions = [],
   defaultTreasuryMemberId = "",
   bulkInventoryAdjustmentItems = [],
+  workGroupActionsData,
 }: EntityListDetailPageClientProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -491,6 +496,15 @@ export default function EntityListDetailPageClient({
                   </span>
                 ) : null}
               </>
+            );
+          }
+
+          if (entity.key === "workGroups" && workGroupActionsData) {
+            return (
+              <WorkGroupActions
+                {...workGroupActionsData}
+                selectedRecord={selectedRecord}
+              />
             );
           }
 

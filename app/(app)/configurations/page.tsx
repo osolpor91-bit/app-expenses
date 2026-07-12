@@ -152,6 +152,10 @@ export default async function ConfigurationsPage() {
       label: dict.attendance.title,
     },
     {
+      href: "/attendance-edit",
+      label: dict.attendance.editTitle,
+    },
+    {
       href: "/attendance-report",
       label: dict.attendance.reportTitle,
     },

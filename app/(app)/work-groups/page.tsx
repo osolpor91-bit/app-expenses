@@ -5,8 +5,7 @@ import { requireCompanyContext } from "@/lib/company/requireCompanyContext";
 import { workGroupEntity } from "@/lib/entities/workGroups/workGroupEntity";
 import { getDictionary } from "@/lib/i18n/server";
 
-import EntityEditableGridPage from "../components/entityPages/EntityEditableGridPage";
-import WorkGroupActions from "./WorkGroupActions";
+import EntityListDetailPage from "../components/entityPages/EntityListDetailPage";
 import {
   type WorkGroupAssignmentGroup,
   type WorkGroupAssignmentMember,
@@ -43,8 +42,13 @@ function getLabels(dict: Awaited<ReturnType<typeof getDictionary>>["dict"]) {
     assignmentsSaved: dict.workGroups.assignmentsSaved,
     assignmentsError: dict.workGroups.assignmentsError,
     noWorkGroups: dict.workGroups.noWorkGroups,
+    actions: dict.common.actions,
     viewAssignedGroups: dict.workGroups.viewAssignedGroups,
     viewAllGroups: dict.workGroups.viewAllGroups,
+    deleteAllAssignments: dict.workGroups.deleteAllAssignments,
+    confirmDeleteAllAssignments: dict.workGroups.confirmDeleteAllAssignments,
+    deleteAllAssignmentsError: dict.workGroups.deleteAllAssignmentsError,
+    assignmentsDeleted: dict.workGroups.assignmentsDeleted,
   };
 }
 
@@ -122,19 +126,16 @@ export default async function WorkGroupsPage({
   }
 
   return (
-    <EntityEditableGridPage
+    <EntityListDetailPage
       entity={workGroupEntity}
       searchParams={searchParams}
       minWidthClass="min-w-[720px]"
-      viewActions={
-        <WorkGroupActions
-          groups={groups}
-          members={members}
-          assignments={assignments}
-          labels={getLabels(dict)}
-        />
-      }
-      enableSelection
+      workGroupActionsData={{
+        groups,
+        members,
+        assignments,
+        labels: getLabels(dict),
+      }}
     />
   );
 }

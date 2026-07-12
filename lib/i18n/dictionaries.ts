@@ -509,6 +509,7 @@ export const dictionaries = {
       code: "Código",
       description: "Descripción",
       scheduledAt: "Fecha y hora de realización",
+      sectionGeneral: "General",
       workGroup: "Grupo de trabajo",
       assignGroups: "Asignar grupos",
       assignGroupsTitle: "Asignar grupos",
@@ -531,6 +532,11 @@ export const dictionaries = {
       remove: "Quitar",
       assignmentsSaved: "Asignación guardada correctamente.",
       assignmentsError: "Error al guardar la asignación",
+      deleteAllAssignments: "Eliminar todas las asignaciones",
+      confirmDeleteAllAssignments:
+        "¿Seguro que quieres eliminar todas las asignaciones de grupos de trabajo?",
+      deleteAllAssignmentsError: "Error al eliminar asignaciones",
+      assignmentsDeleted: "Asignaciones eliminadas correctamente.",
       noAssignedGroups: "Todavía no hay grupos asignados.",
       noWorkGroups: "Crea al menos un grupo de trabajo para asignar miembros.",
       emptyList: "No hay grupos de trabajo creados.",
@@ -565,6 +571,7 @@ export const dictionaries = {
 
     attendance: {
       title: "Registrar asistencia",
+      editTitle: "Modificar asistencia",
       reportTitle: "Informe asistencia",
       date: "Fecha",
       period: "Tramo",
@@ -577,6 +584,7 @@ export const dictionaries = {
       selectedMembers: "Miembros seleccionados",
       comment: "Comentario",
       commentPlaceholder: "Comentario libre",
+      commentRequired: "El comentario es obligatorio.",
       typeToSearchMembers: "Escribe para buscar miembros.",
       noMemberResults: "No hay miembros con esa búsqueda.",
       incompatibleAttendanceHelp:
@@ -2069,6 +2077,7 @@ export const dictionaries = {
       code: "Code",
       description: "Description",
       scheduledAt: "Scheduled date and time",
+      sectionGeneral: "General",
       workGroup: "Work group",
       assignGroups: "Assign groups",
       assignGroupsTitle: "Assign groups",
@@ -2091,6 +2100,11 @@ export const dictionaries = {
       remove: "Remove",
       assignmentsSaved: "Assignment saved successfully.",
       assignmentsError: "Error saving assignment",
+      deleteAllAssignments: "Delete all assignments",
+      confirmDeleteAllAssignments:
+        "Are you sure you want to delete all work group assignments?",
+      deleteAllAssignmentsError: "Error deleting assignments",
+      assignmentsDeleted: "Assignments deleted successfully.",
       noAssignedGroups: "There are no assigned groups yet.",
       noWorkGroups: "Create at least one work group to assign members.",
       emptyList: "There are no work groups.",
@@ -2125,6 +2139,7 @@ export const dictionaries = {
 
     attendance: {
       title: "Register attendance",
+      editTitle: "Edit attendance",
       reportTitle: "Attendance report",
       date: "Date",
       period: "Period",
@@ -2137,6 +2152,7 @@ export const dictionaries = {
       selectedMembers: "Selected members",
       comment: "Comment",
       commentPlaceholder: "Free comment",
+      commentRequired: "Comment is required.",
       typeToSearchMembers: "Type to search members.",
       noMemberResults: "No members match that search.",
       incompatibleAttendanceHelp:

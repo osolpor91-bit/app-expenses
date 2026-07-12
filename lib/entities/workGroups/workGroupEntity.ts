@@ -1,6 +1,6 @@
 import { getDbColumnsFromFields } from "@/lib/entityFields/helpers";
 import type { EntityFieldDefinition } from "@/lib/entityFields/types";
-import type { EditableGridEntityDefinition } from "@/lib/entities/core/entityDefinition";
+import type { ListDetailEntityDefinition } from "@/lib/entities/core/entityDefinition";
 import type { EntityFilterDefinition } from "@/lib/search/databaseFilters";
 
 export const workGroupFields: readonly EntityFieldDefinition[] = [
@@ -12,7 +12,7 @@ export const workGroupFields: readonly EntityFieldDefinition[] = [
     normalization: "uppercase",
     required: true,
     showInList: true,
-    showInGrid: true,
+    showInForm: true,
   },
   {
     key: "description",
@@ -21,7 +21,8 @@ export const workGroupFields: readonly EntityFieldDefinition[] = [
     type: "text",
     required: false,
     showInList: true,
-    showInGrid: true,
+    showInForm: true,
+    formColSpan: "full",
   },
   {
     key: "scheduled_at",
@@ -30,7 +31,7 @@ export const workGroupFields: readonly EntityFieldDefinition[] = [
     type: "datetime",
     required: false,
     showInList: true,
-    showInGrid: true,
+    showInForm: true,
   },
 ];
 
@@ -71,10 +72,10 @@ export const workGroupEntity = {
   route: "/work-groups",
   labelsKey: "workGroups",
   scope: "company",
-  pageMode: "editable-grid",
+  pageMode: "list-detail",
 
   primaryFieldDbName: "code",
-  newRowId: "__new_work_group__",
+  newRoute: "/work-groups/new",
 
   fields: workGroupFields,
   selectColumns: workGroupSelectColumns,
@@ -88,25 +89,19 @@ export const workGroupEntity = {
     ascending: true,
   },
 
-  grid: {
-    heightClass: "h-[calc(100vh-230px)]",
-    defaultColumnLayout: {
-      flex: 1,
-      minWidth: 150,
-    },
-    columnLayouts: {
-      code: {
-        flex: 1,
-        minWidth: 160,
+  formLayout: {
+    type: "sections",
+    sections: [
+      {
+        key: "general",
+        labelKey: "sectionGeneral",
+        columns: 2,
+        fields: [
+          "code",
+          "scheduled_at",
+          { field: "description", colSpan: "full" },
+        ],
       },
-      description: {
-        flex: 2,
-        minWidth: 260,
-      },
-      scheduled_at: {
-        flex: 1,
-        minWidth: 190,
-      },
-    },
+    ],
   },
-} satisfies EditableGridEntityDefinition;
+} satisfies ListDetailEntityDefinition;

@@ -18,6 +18,7 @@ type SaveAttendanceInput = {
   period: string;
   memberIds: string[];
   comment?: string | null;
+  allowDeleteWithoutComment?: boolean;
 };
 
 function uniqueIds(ids: string[]) {
@@ -37,6 +38,7 @@ export async function saveAttendanceAction({
   period,
   memberIds,
   comment,
+  allowDeleteWithoutComment = false,
 }: SaveAttendanceInput): Promise<EntityOperationResult<null>> {
   const normalizedDate = attendanceDate.trim();
   const normalizedPeriod = period.trim();
@@ -54,6 +56,13 @@ export async function saveAttendanceAction({
 
   if (!isAttendancePeriod(normalizedPeriod)) {
     return entityOperationError("Selecciona un tramo valido.");
+  }
+
+  const isDeletingAttendance =
+    allowDeleteWithoutComment && normalizedMemberIds.length === 0;
+
+  if (!normalizedComment && !isDeletingAttendance) {
+    return entityOperationError("El comentario es obligatorio.");
   }
 
   if (normalizedMemberIds.length > 0) {

@@ -27,6 +27,7 @@ import type {
   TreasuryAccountOption,
   TreasuryMemberOption,
 } from "../../treasury-general/TreasuryMovementModal";
+import type { WorkGroupActionsData } from "../../work-groups/WorkGroupActions";
 
 import FilterBar from "../FilterBar";
 import type { EntityDocumentFactBoxLabels } from "../EntityDocumentFactBox";
@@ -46,6 +47,7 @@ type EntityListDetailPageProps = {
   contentClassName?: string;
   compactList?: boolean;
   compactTable?: boolean;
+  workGroupActionsData?: WorkGroupActionsData;
 };
 
 type EntityListPageContext = {
@@ -449,6 +451,7 @@ export default async function EntityListDetailPage({
   contentClassName = "",
   compactList = false,
   compactTable = false,
+  workGroupActionsData,
 }: EntityListDetailPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const { dict } = await getDictionary();
@@ -592,6 +595,7 @@ export default async function EntityListDetailPage({
         treasuryMemberOptions={treasuryMemberOptions}
         defaultTreasuryMemberId={defaultTreasuryMemberId}
         bulkInventoryAdjustmentItems={bulkInventoryAdjustmentRecords}
+        workGroupActionsData={workGroupActionsData}
       />
     </section>
   );
