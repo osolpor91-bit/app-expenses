@@ -25,6 +25,16 @@ export const itemBalanceEntryFields: readonly EntityFieldDefinition[] = [
     showInForm: true,
   },
   {
+    key: "warehouse_code",
+    dbName: "warehouse_code",
+    labelKey: "warehouse",
+    type: "text",
+    required: false,
+    editable: false,
+    showInList: true,
+    showInForm: true,
+  },
+  {
     key: "created_at",
     dbName: "created_at",
     labelKey: "postingDate",
@@ -109,6 +119,7 @@ export const itemBalanceEntryFields: readonly EntityFieldDefinition[] = [
 export const itemBalanceEntrySearchColumns = [
   "item_code",
   "item_description",
+  "warehouse_code",
   "document_no",
   "comment",
 ] as const;
@@ -158,6 +169,7 @@ export const itemBalanceEntrySelectColumns = getDbColumnsFromFields(
     "tenant_id",
     "company_id",
     "item_id",
+    "warehouse_id",
     "created_at",
     "updated_at",
   ]

@@ -17,14 +17,18 @@ export type CreateInventoryAdjustmentInput = {
   postingDate: string;
   entryType: InventoryAdjustmentEntryType;
   quantity: string;
+  warehouseId: string;
   unitOfMeasure: string;
   comment?: string;
 };
 
 export type CreateBulkInventoryAdjustmentInput = {
   comment: string;
+  originWarehouseId: string;
+  destinationWarehouseId: string;
   lines: {
     itemId: string;
+    sourceQuantity?: string;
     actualQuantity: string;
   }[];
 };
@@ -69,6 +73,83 @@ function formatAdjustmentQuantity(value: number) {
   return String(roundedValue);
 }
 
+async function readWarehouse({
+  supabase,
+  tenantId,
+  companyId,
+  warehouseId,
+}: {
+  supabase: Awaited<ReturnType<typeof requireCompanyContext>>["supabase"];
+  tenantId: string;
+  companyId: string;
+  warehouseId: string;
+}) {
+  const { data, error } = await supabase
+    .from("warehouses")
+    .select("id, code, description, is_default")
+    .eq("id", warehouseId)
+    .eq("tenant_id", tenantId)
+    .eq("company_id", companyId)
+    .maybeSingle();
+
+  if (error) {
+    return entityOperationError(error.message);
+  }
+
+  if (!data) {
+    return entityOperationError("No se ha encontrado el almacén.");
+  }
+
+  return entityOperationOk({
+    id: String(data.id ?? ""),
+    code: String(data.code ?? "").trim().toUpperCase(),
+    description: String(data.description ?? "").trim(),
+    isDefault: Boolean(data.is_default),
+  });
+}
+
+async function readDefaultWarehouse({
+  supabase,
+  tenantId,
+  companyId,
+}: {
+  supabase: Awaited<ReturnType<typeof requireCompanyContext>>["supabase"];
+  tenantId: string;
+  companyId: string;
+}) {
+  const { data, error } = await supabase
+    .from("warehouses")
+    .select("id, code, description, is_default")
+    .eq("tenant_id", tenantId)
+    .eq("company_id", companyId)
+    .eq("is_default", true);
+
+  if (error) {
+    return entityOperationError(error.message);
+  }
+
+  if (!data || data.length === 0) {
+    return entityOperationError(
+      "No hay ningún almacén predeterminado. Marca uno en Configuraciones > Almacenes."
+    );
+  }
+
+  if (data.length > 1) {
+    return entityOperationError(
+      "Hay más de un almacén predeterminado. Deja solo uno marcado."
+    );
+  }
+
+  const warehouse = data[0];
+
+  return entityOperationOk({
+    id: String(warehouse.id ?? ""),
+    code: String(warehouse.code ?? "").trim().toUpperCase(),
+    description: String(warehouse.description ?? "").trim(),
+    isDefault: true,
+  });
+}
+
 export async function createInventoryAdjustmentAction(
   input: CreateInventoryAdjustmentInput
 ): Promise<EntityOperationResult<{ id: string }>> {
@@ -77,6 +158,7 @@ export async function createInventoryAdjustmentAction(
   const entryType = input.entryType.trim();
   const documentNo = "AJUSTE";
   const comment = input.comment?.trim() ?? "";
+  const warehouseId = input.warehouseId.trim();
   const normalizedQuantity = normalizeDecimalField(input.quantity);
 
   if (!itemId) {
@@ -89,6 +171,10 @@ export async function createInventoryAdjustmentAction(
 
   if (!isValidEntryType(entryType)) {
     return entityOperationError("El tipo de ajuste es obligatorio.");
+  }
+
+  if (!warehouseId) {
+    return entityOperationError("El almacén es obligatorio.");
   }
 
   if (!normalizedQuantity) {
@@ -108,6 +194,29 @@ export async function createInventoryAdjustmentAction(
       "No hay una empresa activa. Selecciona una empresa para ajustar inventario."
     );
   }
+
+  const defaultWarehouseResult = await readDefaultWarehouse({
+    supabase,
+    tenantId: tenant.id,
+    companyId: activeCompany.id,
+  });
+
+  if (!defaultWarehouseResult.ok) {
+    return defaultWarehouseResult;
+  }
+
+  const warehouseResult = await readWarehouse({
+    supabase,
+    tenantId: tenant.id,
+    companyId: activeCompany.id,
+    warehouseId,
+  });
+
+  if (!warehouseResult.ok) {
+    return warehouseResult;
+  }
+
+  const warehouse = warehouseResult.data;
 
   const { data: item, error: itemError } = await supabase
     .from("items")
@@ -143,6 +252,9 @@ export async function createInventoryAdjustmentAction(
       item_id: item.id,
       item_code: item.code,
       item_description: item.description,
+      warehouse_id: warehouse.id,
+      warehouse_code: warehouse.code,
+      warehouse_description: warehouse.description || null,
       created_at: getPostingDateTime(postingDate),
       updated_at: now,
       entry_type: entryType,
@@ -165,6 +277,8 @@ export async function createInventoryAdjustmentAction(
 
   revalidatePath("/items");
   revalidatePath("/item-balance-entries");
+  revalidatePath("/reports/inventory-by-product");
+  revalidatePath("/reports/inventory-by-warehouse");
   revalidatePath("/dashboard");
 
   return entityOperationOk({
@@ -176,38 +290,105 @@ export async function createBulkInventoryAdjustmentAction(
   input: CreateBulkInventoryAdjustmentInput
 ): Promise<EntityOperationResult<{ count: number }>> {
   const comment = String(input.comment ?? "").trim();
+  const originWarehouseId = String(input.originWarehouseId ?? "").trim();
+  const destinationWarehouseId = String(
+    input.destinationWarehouseId ?? ""
+  ).trim();
   const lines = Array.isArray(input.lines) ? input.lines : [];
 
   if (!comment) {
     return entityOperationError("El comentario es obligatorio.");
   }
 
+  if (!originWarehouseId) {
+    return entityOperationError("El almacén origen es obligatorio.");
+  }
+
+  if (!destinationWarehouseId) {
+    return entityOperationError("El almacén destino es obligatorio.");
+  }
+
   if (lines.length === 0) {
     return entityOperationError("No hay artículos activos para ajustar.");
   }
 
+  const usesSameWarehouseInput = originWarehouseId === destinationWarehouseId;
   const actualQuantityByItemId = new Map<string, number>();
+  const sourceQuantityByItemId = new Map<string, number>();
 
   for (const line of lines) {
     const itemId = line.itemId.trim();
-    const normalizedActualQuantity = normalizeDecimalField(line.actualQuantity);
+    const actualQuantityValue = String(line.actualQuantity ?? "").trim();
+    const sourceQuantityValue = String(
+      line.sourceQuantity ?? line.actualQuantity ?? ""
+    ).trim();
+    const normalizedActualQuantity = normalizeDecimalField(actualQuantityValue);
     const actualQuantity = Number(normalizedActualQuantity);
+    const normalizedSourceQuantity = normalizeDecimalField(sourceQuantityValue);
+    const sourceQuantity = Number(normalizedSourceQuantity);
 
     if (!itemId) {
       return entityOperationError("No se ha podido identificar un artículo.");
     }
 
+    if (usesSameWarehouseInput && !actualQuantityValue) {
+      continue;
+    }
+
+    if (!usesSameWarehouseInput) {
+      if (!actualQuantityValue) {
+        continue;
+      }
+
+      if (
+        !normalizedActualQuantity ||
+        !Number.isFinite(actualQuantity) ||
+        actualQuantity < 0
+      ) {
+        return entityOperationError(
+          "Las cantidades deben ser números mayores o iguales que cero."
+        );
+      }
+
+      if (actualQuantity <= quantityDifferenceThreshold) {
+        continue;
+      }
+
+      if (
+        !sourceQuantityValue ||
+        !normalizedSourceQuantity ||
+        !Number.isFinite(sourceQuantity) ||
+        sourceQuantity < 0
+      ) {
+        return entityOperationError(
+          "Las cantidades deben ser números mayores o iguales que cero."
+        );
+      }
+
+      actualQuantityByItemId.set(itemId, actualQuantity);
+      sourceQuantityByItemId.set(itemId, sourceQuantity);
+      continue;
+    }
+
     if (
       !normalizedActualQuantity ||
       !Number.isFinite(actualQuantity) ||
-      actualQuantity < 0
+      actualQuantity < 0 ||
+      !normalizedSourceQuantity ||
+      !Number.isFinite(sourceQuantity) ||
+      sourceQuantity < 0
     ) {
       return entityOperationError(
-        "El inventario real debe ser un número mayor o igual que cero."
+        "Las cantidades deben ser números mayores o iguales que cero."
       );
     }
 
     actualQuantityByItemId.set(itemId, actualQuantity);
+    sourceQuantityByItemId.set(itemId, sourceQuantity);
+  }
+
+  if (actualQuantityByItemId.size === 0) {
+    return entityOperationError("No hay diferencias que ajustar.");
   }
 
   const { supabase, tenant, activeCompany } = await requireCompanyContext();
@@ -217,6 +398,42 @@ export async function createBulkInventoryAdjustmentAction(
       "No hay una empresa activa. Selecciona una empresa para ajustar inventario."
     );
   }
+
+  const defaultWarehouseResult = await readDefaultWarehouse({
+    supabase,
+    tenantId: tenant.id,
+    companyId: activeCompany.id,
+  });
+
+  if (!defaultWarehouseResult.ok) {
+    return defaultWarehouseResult;
+  }
+
+  const originWarehouseResult = await readWarehouse({
+    supabase,
+    tenantId: tenant.id,
+    companyId: activeCompany.id,
+    warehouseId: originWarehouseId,
+  });
+
+  if (!originWarehouseResult.ok) {
+    return originWarehouseResult;
+  }
+
+  const destinationWarehouseResult = await readWarehouse({
+    supabase,
+    tenantId: tenant.id,
+    companyId: activeCompany.id,
+    warehouseId: destinationWarehouseId,
+  });
+
+  if (!destinationWarehouseResult.ok) {
+    return destinationWarehouseResult;
+  }
+
+  const originWarehouse = originWarehouseResult.data;
+  const destinationWarehouse = destinationWarehouseResult.data;
+  const usesSameWarehouse = originWarehouse.id === destinationWarehouse.id;
 
   const itemIds = Array.from(actualQuantityByItemId.keys());
 
@@ -254,6 +471,7 @@ export async function createBulkInventoryAdjustmentAction(
     .select("item_id, entry_type, quantity, unit_of_measure")
     .eq("tenant_id", tenant.id)
     .eq("company_id", activeCompany.id)
+    .eq("warehouse_id", originWarehouse.id)
     .in("item_id", itemIds);
 
   if (balanceEntriesError) {
@@ -281,28 +499,98 @@ export async function createBulkInventoryAdjustmentAction(
 
   const postingDate = getTodayInputValue();
   const now = new Date().toISOString();
-  const movements = items
-    .map((item) => {
+  if (!usesSameWarehouse) {
+    for (const item of items) {
       const itemId = String(item.id);
       const calculatedQuantity = calculatedQuantityByItemId.get(itemId) ?? 0;
-      const actualQuantity = actualQuantityByItemId.get(itemId);
+      const sourceQuantity = sourceQuantityByItemId.get(itemId) ?? 0;
 
-      if (actualQuantity === undefined) {
-        return null;
+      if (sourceQuantity - calculatedQuantity > quantityDifferenceThreshold) {
+        return entityOperationError(
+          `La salida de ${String(
+            item.code ?? ""
+          )} no puede ser mayor que el inventario calculado en origen.`
+        );
       }
 
-      const difference = actualQuantity - calculatedQuantity;
+    }
+  }
 
-      if (Math.abs(difference) <= quantityDifferenceThreshold) {
-        return null;
+  const movements = items.flatMap((item) => {
+    const itemId = String(item.id);
+    const calculatedQuantity = calculatedQuantityByItemId.get(itemId) ?? 0;
+    const actualQuantity = actualQuantityByItemId.get(itemId);
+    const sourceQuantity = sourceQuantityByItemId.get(itemId) ?? 0;
+    const unitOfMeasure = unitByItemId.get(itemId) ?? "";
+
+    if (actualQuantity === undefined) {
+      return [];
+    }
+
+    if (!usesSameWarehouse) {
+      const transferMovements = [];
+
+      if (sourceQuantity > quantityDifferenceThreshold) {
+        transferMovements.push({
+          tenant_id: tenant.id,
+          company_id: activeCompany.id,
+          item_id: item.id,
+          item_code: item.code,
+          item_description: item.description,
+          warehouse_id: originWarehouse.id,
+          warehouse_code: originWarehouse.code,
+          warehouse_description: originWarehouse.description || null,
+          created_at: getPostingDateTime(postingDate),
+          updated_at: now,
+          entry_type: "out",
+          document_no: "AJUSTE",
+          comment,
+          origin: "Ajuste",
+          quantity: formatAdjustmentQuantity(sourceQuantity),
+          unit_of_measure: unitOfMeasure,
+        });
       }
 
-      return {
+      if (actualQuantity > quantityDifferenceThreshold) {
+        transferMovements.push({
+          tenant_id: tenant.id,
+          company_id: activeCompany.id,
+          item_id: item.id,
+          item_code: item.code,
+          item_description: item.description,
+          warehouse_id: destinationWarehouse.id,
+          warehouse_code: destinationWarehouse.code,
+          warehouse_description: destinationWarehouse.description || null,
+          created_at: getPostingDateTime(postingDate),
+          updated_at: now,
+          entry_type: "in",
+          document_no: "AJUSTE",
+          comment,
+          origin: "Ajuste",
+          quantity: formatAdjustmentQuantity(actualQuantity),
+          unit_of_measure: unitOfMeasure,
+        });
+      }
+
+      return transferMovements;
+    }
+
+    const difference = actualQuantity - calculatedQuantity;
+
+    if (Math.abs(difference) <= quantityDifferenceThreshold) {
+      return [];
+    }
+
+    return [
+      {
         tenant_id: tenant.id,
         company_id: activeCompany.id,
         item_id: item.id,
         item_code: item.code,
         item_description: item.description,
+        warehouse_id: destinationWarehouse.id,
+        warehouse_code: destinationWarehouse.code,
+        warehouse_description: destinationWarehouse.description || null,
         created_at: getPostingDateTime(postingDate),
         updated_at: now,
         entry_type: difference > 0 ? "in" : "out",
@@ -310,12 +598,10 @@ export async function createBulkInventoryAdjustmentAction(
         comment,
         origin: "Ajuste",
         quantity: formatAdjustmentQuantity(Math.abs(difference)),
-        unit_of_measure: unitByItemId.get(itemId),
-      };
-    })
-    .filter((movement): movement is NonNullable<typeof movement> =>
-      Boolean(movement)
-    );
+        unit_of_measure: unitOfMeasure,
+      },
+    ];
+  });
 
   if (movements.length === 0) {
     return entityOperationError("No hay diferencias que ajustar.");
@@ -329,6 +615,8 @@ export async function createBulkInventoryAdjustmentAction(
 
   revalidatePath("/items");
   revalidatePath("/item-balance-entries");
+  revalidatePath("/reports/inventory-by-product");
+  revalidatePath("/reports/inventory-by-warehouse");
   revalidatePath("/dashboard");
 
   return entityOperationOk({

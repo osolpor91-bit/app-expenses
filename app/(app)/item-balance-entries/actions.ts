@@ -100,6 +100,7 @@ export async function updateItemBalanceEntryAction(
   revalidatePath("/item-balance-entries");
   revalidatePath("/items");
   revalidatePath("/reports/inventory-by-product");
+  revalidatePath("/reports/inventory-by-warehouse");
 
   return entityOperationOk(null);
 }

@@ -306,6 +306,19 @@ export default async function DashboardPage() {
               {dict.reports.inventoryByProduct}
             </p>
           </Link>
+
+          <Link
+            href="/reports/inventory-by-warehouse"
+            className="card-app-soft flex h-32 w-full flex-col justify-between p-5 transition hover:-translate-y-0.5 hover:bg-app sm:w-64"
+          >
+            <p className="text-sm font-medium text-app-muted">
+              {dict.dashboard.quickAction}
+            </p>
+
+            <p className="text-2xl font-bold text-primary-app">
+              {dict.reports.inventoryByWarehouse}
+            </p>
+          </Link>
         </div>
       </div>
     </section>

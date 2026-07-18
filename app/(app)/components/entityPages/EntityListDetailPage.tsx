@@ -16,6 +16,12 @@ import { mapEntityRecordsRelations } from "@/lib/entities/core/entityRelations";
 import { getDictionary } from "@/lib/i18n/server";
 import { applyBaseUnitInventoryToItems } from "@/lib/items/inventory";
 import {
+  getDefaultWarehouseId,
+  readWarehouseInventoryByItem,
+  readWarehouseOptions,
+  type WarehouseOption,
+} from "@/lib/warehouses/warehouseOptions";
+import {
   getEntityFilterParamNames,
   getFilterValues,
   type EntityFilterDefinition,
@@ -40,6 +46,8 @@ type EntityListDetailPageProps = {
   treasuryAccountOptions?: TreasuryAccountOption[];
   treasuryMemberOptions?: TreasuryMemberOption[];
   defaultTreasuryMemberId?: string;
+  warehouseOptions?: WarehouseOption[];
+  defaultWarehouseId?: string;
   backHref?: string;
   backLabel?: string;
   initiallyShowSecondaryFilters?: boolean;
@@ -444,6 +452,8 @@ export default async function EntityListDetailPage({
   treasuryAccountOptions,
   treasuryMemberOptions,
   defaultTreasuryMemberId,
+  warehouseOptions: providedWarehouseOptions,
+  defaultWarehouseId: providedDefaultWarehouseId,
   backHref,
   backLabel,
   initiallyShowSecondaryFilters,
@@ -507,6 +517,25 @@ export default async function EntityListDetailPage({
           })
         )
       : [];
+
+  const warehouseOptions =
+    providedWarehouseOptions ??
+    (entity.key === "items" && scopeAvailable
+      ? await readWarehouseOptions({
+          supabase,
+          context,
+        })
+      : []);
+  const defaultWarehouseId =
+    providedDefaultWarehouseId ?? getDefaultWarehouseId(warehouseOptions);
+  const bulkInventoryWarehouseInventoryByItemId =
+    entity.key === "items"
+      ? await readWarehouseInventoryByItem({
+          supabase,
+          context,
+          records: bulkInventoryAdjustmentRecords,
+        })
+      : {};
 
   const visibleListFieldKeys = await getVisibleListFieldKeys({
     entity,
@@ -594,6 +623,11 @@ export default async function EntityListDetailPage({
         treasuryAccountOptions={treasuryAccountOptions}
         treasuryMemberOptions={treasuryMemberOptions}
         defaultTreasuryMemberId={defaultTreasuryMemberId}
+        warehouseOptions={warehouseOptions}
+        defaultWarehouseId={defaultWarehouseId}
+        bulkInventoryWarehouseInventoryByItemId={
+          bulkInventoryWarehouseInventoryByItemId
+        }
         bulkInventoryAdjustmentItems={bulkInventoryAdjustmentRecords}
         workGroupActionsData={workGroupActionsData}
       />

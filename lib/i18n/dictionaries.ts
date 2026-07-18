@@ -109,6 +109,7 @@ export const dictionaries = {
         "Consulta el peso de cada cuenta sobre el total de ingresos.",
       expenseDistribution: "Distribución de gastos",
       inventoryByProduct: "Inventario por producto",
+      inventoryByWarehouse: "Inventario por almacén",
       backToReports: "Volver a informes",
       summaryView: "Resumen",
       detailView: "Detalle",
@@ -118,12 +119,16 @@ export const dictionaries = {
       totalInventory: "Total inventario",
       inventoryQuantity: "Inventario",
       unit: "Unidad",
+      warehouse: "Almacén",
+      allWarehouses: "Todos los almacenes",
       emptyIncomeDistribution:
         "No hay ingresos para el periodo seleccionado.",
       emptyExpenseDistribution:
         "No hay gastos para el periodo seleccionado.",
       emptyInventoryByProduct:
         "No hay productos activos para mostrar en el inventario.",
+      emptyInventoryByWarehouse:
+        "No hay inventario por almacén para mostrar.",
       emptyInventoryMovements: "Sin movimientos.",
       incomeDistributionReadError:
         "Error leyendo la distribución de ingresos",
@@ -131,6 +136,8 @@ export const dictionaries = {
         "Error leyendo la distribución de gastos",
       inventoryByProductReadError:
         "Error leyendo el inventario por producto",
+      inventoryByWarehouseReadError:
+        "Error leyendo el inventario por almacén",
       noActiveCompanyDescription:
         "No hay una empresa activa. Selecciona una empresa para consultar informes.",
     },
@@ -678,6 +685,10 @@ export const dictionaries = {
       bulkInventoryAdjustmentTitle: "Ajustar inventario",
       bulkInventoryAdjustmentCalculated: "Calculado",
       bulkInventoryAdjustmentReal: "Real",
+      bulkInventoryAdjustmentTransferOut: "Salida",
+      bulkInventoryAdjustmentTransferIn: "Entrada",
+      bulkInventoryAdjustmentOriginWarehouse: "Almacén origen",
+      bulkInventoryAdjustmentDestinationWarehouse: "Almacén destino",
       bulkInventoryAdjustmentNoActiveItems:
         "No hay artículos activos para ajustar.",
       bulkInventoryAdjustmentCreated: "Inventario ajustado correctamente.",
@@ -691,6 +702,7 @@ export const dictionaries = {
       adjustmentEntryTypeOut: "Salida",
       documentNo: "Nº documento",
       quantity: "Cantidad",
+      warehouse: "Almacén",
       unitOfMeasure: "Unidad de medida",
       comment: "Comentario",
       commentPlaceholder: "Comentario libre",
@@ -699,6 +711,40 @@ export const dictionaries = {
       close: "Cerrar",
       adjustmentCreated: "Ajuste de inventario creado correctamente.",
       adjustmentError: "Error al crear ajuste",
+      warehouseRequired: "El almacén es obligatorio.",
+      defaultWarehouseRequired:
+        "No hay ningún almacén predeterminado. Marca uno en Configuraciones > Almacenes.",
+    },
+
+    warehouses: {
+      title: "Almacenes",
+      code: "Código",
+      description: "Descripción",
+      isDefault: "Predeterminado",
+      emptyList: "No hay almacenes creados todavía.",
+      errorReading: "Error leyendo almacenes",
+      noActiveCompanyDescription:
+        "No hay una empresa activa. Selecciona una empresa para trabajar con almacenes.",
+      grid: {
+        deleteSelected: "Eliminar seleccionados",
+        selectedSuffix: "seleccionado(s)",
+        helpText:
+          "Edita los almacenes directamente en la lista. Solo uno puede estar marcado como predeterminado.",
+        createRequiredFields:
+          "Para crear un almacén informa el código.",
+        requiredFields: "El código es obligatorio.",
+        saveError: "Error al guardar",
+        createError: "Error al crear almacén",
+        deleteError: "Error al eliminar almacenes",
+        recordCreated: "Almacén creado correctamente.",
+        changeSaved: "Cambio guardado correctamente.",
+        selectAtLeastOneToDelete:
+          "Selecciona al menos un almacén para eliminar.",
+        confirmDelete: "¿Seguro que quieres eliminar {count} almacén(es)?",
+        noRowsDeleted:
+          "No se ha eliminado ningún almacén. Revisa la policy DELETE de RLS en Supabase.",
+        recordsDeleted: "Almacenes eliminados correctamente.",
+      },
     },
 
     itemBalanceEntries: {
@@ -715,6 +761,7 @@ export const dictionaries = {
       originSale: "Venta",
       originAdjustment: "Ajuste",
       comment: "Comentario",
+      warehouse: "Almacén",
       unitOfMeasure: "Unidad de medida",
 
       item: "Artículo",
@@ -1688,6 +1735,7 @@ export const dictionaries = {
         "View each account's weight over total income.",
       expenseDistribution: "Expense distribution",
       inventoryByProduct: "Inventory by product",
+      inventoryByWarehouse: "Inventory by warehouse",
       backToReports: "Back to reports",
       summaryView: "Summary",
       detailView: "Detail",
@@ -1697,17 +1745,23 @@ export const dictionaries = {
       totalInventory: "Total inventory",
       inventoryQuantity: "Inventory",
       unit: "Unit",
+      warehouse: "Warehouse",
+      allWarehouses: "All warehouses",
       emptyIncomeDistribution:
         "There is no income for the selected period.",
       emptyExpenseDistribution:
         "There are no expenses for the selected period.",
       emptyInventoryByProduct:
         "There are no active products to show in inventory.",
+      emptyInventoryByWarehouse:
+        "There is no inventory by warehouse to show.",
       emptyInventoryMovements: "No movements.",
       incomeDistributionReadError: "Error reading income distribution",
       expenseDistributionReadError: "Error reading expense distribution",
       inventoryByProductReadError:
         "Error reading inventory by product",
+      inventoryByWarehouseReadError:
+        "Error reading inventory by warehouse",
       noActiveCompanyDescription:
         "There is no active company. Select a company to view reports.",
     },
@@ -2253,6 +2307,10 @@ export const dictionaries = {
       bulkInventoryAdjustmentTitle: "Adjust inventory",
       bulkInventoryAdjustmentCalculated: "Calculated",
       bulkInventoryAdjustmentReal: "Actual",
+      bulkInventoryAdjustmentTransferOut: "Out",
+      bulkInventoryAdjustmentTransferIn: "In",
+      bulkInventoryAdjustmentOriginWarehouse: "Origin warehouse",
+      bulkInventoryAdjustmentDestinationWarehouse: "Destination warehouse",
       bulkInventoryAdjustmentNoActiveItems:
         "There are no active items to adjust.",
       bulkInventoryAdjustmentCreated: "Inventory adjusted successfully.",
@@ -2266,6 +2324,7 @@ export const dictionaries = {
       adjustmentEntryTypeOut: "Out",
       documentNo: "Document No.",
       quantity: "Quantity",
+      warehouse: "Warehouse",
       unitOfMeasure: "Unit of measure",
       comment: "Comment",
       commentPlaceholder: "Free comment",
@@ -2274,6 +2333,40 @@ export const dictionaries = {
       close: "Close",
       adjustmentCreated: "Inventory adjustment created successfully.",
       adjustmentError: "Error creating adjustment",
+      warehouseRequired: "Warehouse is required.",
+      defaultWarehouseRequired:
+        "There is no default warehouse. Mark one in Configurations > Warehouses.",
+    },
+
+    warehouses: {
+      title: "Warehouses",
+      code: "Code",
+      description: "Description",
+      isDefault: "Default",
+      emptyList: "There are no warehouses yet.",
+      errorReading: "Error reading warehouses",
+      noActiveCompanyDescription:
+        "There is no active company. Select a company to work with warehouses.",
+      grid: {
+        deleteSelected: "Delete selected",
+        selectedSuffix: "selected",
+        helpText:
+          "Edit warehouses directly in the list. Only one can be marked as default.",
+        createRequiredFields: "To create a warehouse, enter Code.",
+        requiredFields: "Code is required.",
+        saveError: "Error saving",
+        createError: "Error creating warehouse",
+        deleteError: "Error deleting warehouses",
+        recordCreated: "Warehouse created successfully.",
+        changeSaved: "Change saved successfully.",
+        selectAtLeastOneToDelete:
+          "Select at least one warehouse to delete.",
+        confirmDelete:
+          "Are you sure you want to delete {count} warehouse(s)?",
+        noRowsDeleted:
+          "No warehouse was deleted. Review the DELETE RLS policy in Supabase.",
+        recordsDeleted: "Warehouses deleted successfully.",
+      },
     },
 
     itemBalanceEntries: {
@@ -2298,6 +2391,7 @@ export const dictionaries = {
       originPurchase: "Purchase",
       originSale: "Sale",
       originAdjustment: "Adjustment",
+      warehouse: "Warehouse",
       unitOfMeasure: "Unit of measure",
 
       emptyList: "There are no balance entries for this item.",

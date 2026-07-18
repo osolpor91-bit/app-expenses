@@ -190,9 +190,60 @@ function revalidateEntity(entity: EntityDefinition, id?: string) {
   revalidatePath(entity.route);
   revalidatePath("/dashboard");
 
+  if (entity.key === "warehouses") {
+    revalidatePath("/items");
+    revalidatePath("/item-balance-entries");
+    revalidatePath("/reports/inventory-by-product");
+    revalidatePath("/reports/inventory-by-warehouse");
+  }
+
   if (id) {
     revalidatePath(`${entity.route}/${id}`);
   }
+}
+
+function usesSingleCompanyDefault(entity: EntityDefinition) {
+  return entity.key === "treasuryMembers" || entity.key === "warehouses";
+}
+
+async function clearOtherDefaultRecords({
+  supabase,
+  entity,
+  context,
+  exceptId,
+}: {
+  supabase: SupabaseServerClient;
+  entity: EntityDefinition;
+  context: EntityScopeContext;
+  exceptId?: string;
+}): Promise<EntityOperationResult<null>> {
+  if (!usesSingleCompanyDefault(entity) || !context.companyId) {
+    return entityOperationOk(null);
+  }
+
+  let query = supabase
+    .from(entity.table)
+    .update({
+      is_default: false,
+      ...(entity.updatedAtColumn
+        ? { [entity.updatedAtColumn]: new Date().toISOString() }
+        : {}),
+    })
+    .eq("tenant_id", context.tenantId)
+    .eq("company_id", context.companyId)
+    .eq("is_default", true);
+
+  if (exceptId) {
+    query = query.neq("id", exceptId);
+  }
+
+  const { error } = await query;
+
+  if (error) {
+    return entityOperationError(error.message);
+  }
+
+  return entityOperationOk(null);
 }
 
 async function getActionData({
@@ -1089,6 +1140,18 @@ export async function createEntityGridRecordAction({
   const { entity, supabase, context } = actionDataResult.data;
   const { dict } = await getDictionary();
 
+  if (usesSingleCompanyDefault(entity) && payload.is_default === true) {
+    const clearDefaultsResult = await clearOtherDefaultRecords({
+      supabase,
+      entity,
+      context,
+    });
+
+    if (!clearDefaultsResult.ok) {
+      return clearDefaultsResult;
+    }
+  }
+
   const result = await createStandardEntityRecord({
     supabase,
     entity,
@@ -1134,6 +1197,19 @@ export async function updateEntityGridRecordAction({
 
   const { entity, supabase, context } = actionDataResult.data;
   const { dict } = await getDictionary();
+
+  if (usesSingleCompanyDefault(entity) && payload.is_default === true) {
+    const clearDefaultsResult = await clearOtherDefaultRecords({
+      supabase,
+      entity,
+      context,
+      exceptId: id,
+    });
+
+    if (!clearDefaultsResult.ok) {
+      return clearDefaultsResult;
+    }
+  }
 
   const result = await updateStandardEntityRecord({
     supabase,

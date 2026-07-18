@@ -136,6 +136,10 @@ export default async function ConfigurationsPage() {
       label: dict.reports.title,
     },
     {
+      href: "/warehouses",
+      label: dict.warehouses.title,
+    },
+    {
       type: "label",
       label: "Grupos y asistencia",
     },

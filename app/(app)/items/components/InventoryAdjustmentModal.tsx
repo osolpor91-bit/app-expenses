@@ -7,6 +7,7 @@ import {
     createInventoryAdjustmentAction,
     type CreateInventoryAdjustmentInput,
 } from "../actions";
+import type { WarehouseOption } from "@/lib/warehouses/warehouseOptions";
 
 type InventoryAdjustmentItem = {
     id: string;
@@ -25,6 +26,7 @@ type InventoryAdjustmentModalLabels = Record<string, string | undefined> & {
     adjustmentEntryTypeIn?: string;
     adjustmentEntryTypeOut?: string;
     quantity?: string;
+    warehouse?: string;
     unitOfMeasure?: string;
     unitUnd?: string;
     unitKg?: string;
@@ -41,11 +43,15 @@ type InventoryAdjustmentModalLabels = Record<string, string | undefined> & {
     close?: string;
     adjustmentCreated?: string;
     adjustmentError?: string;
+    warehouseRequired?: string;
+    defaultWarehouseRequired?: string;
     noRecordId?: string;
 };
 
 type InventoryAdjustmentModalProps = {
     item: InventoryAdjustmentItem | null;
+    warehouseOptions: WarehouseOption[];
+    defaultWarehouseId: string;
     labels: InventoryAdjustmentModalLabels;
     onClose: () => void;
 };
@@ -90,6 +96,8 @@ function getDefaultUnitOfMeasure(item: InventoryAdjustmentItem | null) {
 
 export default function InventoryAdjustmentModal({
     item,
+    warehouseOptions,
+    defaultWarehouseId,
     labels,
     onClose,
 }: InventoryAdjustmentModalProps) {
@@ -99,12 +107,21 @@ export default function InventoryAdjustmentModal({
     const [entryType, setEntryType] = useState("");
     const [quantity, setQuantity] = useState("");
     const [comment, setComment] = useState("");
+    const [warehouseId, setWarehouseId] = useState(defaultWarehouseId);
     const [unitOfMeasure, setUnitOfMeasure] = useState(() =>
         getDefaultUnitOfMeasure(item)
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(() =>
+        defaultWarehouseId
+            ? null
+            : getLabel(
+                labels,
+                "defaultWarehouseRequired",
+                "No hay ningún almacén predeterminado. Marca uno en Configuraciones > Almacenes."
+            )
+    );
 
     const itemCode = useMemo(() => getStringValue(item?.code), [item]);
     const itemDescription = useMemo(
@@ -122,6 +139,24 @@ export default function InventoryAdjustmentModal({
             return;
         }
 
+        if (!defaultWarehouseId) {
+            setErrorMessage(
+                getLabel(
+                    labels,
+                    "defaultWarehouseRequired",
+                    "No hay ningún almacén predeterminado. Marca uno en Configuraciones > Almacenes."
+                )
+            );
+            return;
+        }
+
+        if (!warehouseId) {
+            setErrorMessage(
+                getLabel(labels, "warehouseRequired", "El almacén es obligatorio.")
+            );
+            return;
+        }
+
         setIsSubmitting(true);
         setMessage(null);
         setErrorMessage(null);
@@ -131,6 +166,7 @@ export default function InventoryAdjustmentModal({
             postingDate,
             entryType: entryType as CreateInventoryAdjustmentInput["entryType"],
             quantity,
+            warehouseId,
             unitOfMeasure,
             comment,
         };
@@ -224,7 +260,7 @@ export default function InventoryAdjustmentModal({
                             </label>
                         </div>
 
-                        <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(8rem,1fr)]">
+                        <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(10rem,1fr)_minmax(8rem,1fr)]">
                             <label className="block text-xs font-semibold text-app">
                                 {getLabel(labels, "selectedItemDescription", "Descripción")}
                                 <input
@@ -232,6 +268,23 @@ export default function InventoryAdjustmentModal({
                                     readOnly
                                     className="input-app mt-1 cursor-not-allowed bg-app-soft px-3 py-2 text-sm"
                                 />
+                            </label>
+
+                            <label className="block text-xs font-semibold text-app">
+                                {getLabel(labels, "warehouse", "Almacén")}
+                                <select
+                                    value={warehouseId}
+                                    onChange={(event) => setWarehouseId(event.target.value)}
+                                    className="input-app mt-1 px-3 py-2 text-sm"
+                                    required
+                                >
+                                    <option value="">-</option>
+                                    {warehouseOptions.map((warehouse) => (
+                                        <option key={warehouse.id} value={warehouse.id}>
+                                            {warehouse.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </label>
 
                             <label className="block text-xs font-semibold text-app">

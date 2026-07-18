@@ -489,7 +489,10 @@ export default function EntityEditableGridPageClient({
       return result;
     }
 
-    if (entity.key === "treasuryMembers" && payload.is_default === true) {
+    if (
+      (entity.key === "treasuryMembers" || entity.key === "warehouses") &&
+      payload.is_default === true
+    ) {
       router.refresh();
     }
 
@@ -518,7 +521,10 @@ export default function EntityEditableGridPageClient({
       return result;
     }
 
-    if (entity.key === "treasuryMembers" && payload.is_default === true) {
+    if (
+      (entity.key === "treasuryMembers" || entity.key === "warehouses") &&
+      payload.is_default === true
+    ) {
       router.refresh();
     }
 

@@ -40,6 +40,10 @@ import WorkGroupActions, {
 import ItemBalanceEntryEditModal, {
   type ItemBalanceEntryEditRecord,
 } from "../../item-balance-entries/ItemBalanceEntryEditModal";
+import type {
+  ItemWarehouseInventoryMap,
+  WarehouseOption,
+} from "@/lib/warehouses/warehouseOptions";
 
 type GenericListDetailRecord = EntityRecord & SelectableEntityRecord;
 
@@ -79,6 +83,9 @@ type EntityListDetailPageClientProps = {
   treasuryAccountOptions?: TreasuryAccountOption[];
   treasuryMemberOptions?: TreasuryMemberOption[];
   defaultTreasuryMemberId?: string;
+  warehouseOptions?: WarehouseOption[];
+  defaultWarehouseId?: string;
+  bulkInventoryWarehouseInventoryByItemId?: ItemWarehouseInventoryMap;
   bulkInventoryAdjustmentItems?: GenericListDetailRecord[];
   workGroupActionsData?: WorkGroupActionsData;
 };
@@ -293,6 +300,9 @@ export default function EntityListDetailPageClient({
   treasuryAccountOptions = [],
   treasuryMemberOptions = [],
   defaultTreasuryMemberId = "",
+  warehouseOptions = [],
+  defaultWarehouseId = "",
+  bulkInventoryWarehouseInventoryByItemId = {},
   bulkInventoryAdjustmentItems = [],
   workGroupActionsData,
 }: EntityListDetailPageClientProps) {
@@ -686,6 +696,8 @@ export default function EntityListDetailPageClient({
         <InventoryAdjustmentModal
           key={inventoryAdjustmentItemId}
           item={inventoryAdjustmentItem}
+          warehouseOptions={warehouseOptions}
+          defaultWarehouseId={defaultWarehouseId}
           labels={labels}
           onClose={closeInventoryAdjustmentModal}
         />
@@ -695,6 +707,9 @@ export default function EntityListDetailPageClient({
         <BulkInventoryAdjustmentModal
           key={bulkInventoryAdjustmentItems.map((item) => item.id).join("|")}
           items={bulkInventoryAdjustmentItems}
+          warehouseOptions={warehouseOptions}
+          defaultWarehouseId={defaultWarehouseId}
+          warehouseInventoryByItemId={bulkInventoryWarehouseInventoryByItemId}
           labels={labels}
           onClose={closeBulkInventoryAdjustmentModal}
         />

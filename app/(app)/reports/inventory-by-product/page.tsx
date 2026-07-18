@@ -10,6 +10,9 @@ import {
 } from "@/lib/formatters/fieldFormatters";
 import { getDictionary } from "@/lib/i18n/server";
 import { getSingleSearchParam } from "@/lib/search/textSearch";
+import { readWarehouseOptions } from "@/lib/warehouses/warehouseOptions";
+
+import WarehouseReportFilter from "./WarehouseReportFilter";
 
 type InventoryByProductPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -32,6 +35,7 @@ type InventoryMovementRecord = {
   entry_type?: unknown;
   quantity?: unknown;
   unit_of_measure?: unknown;
+  warehouse_id?: unknown;
 };
 
 type InventoryMovement = {
@@ -150,15 +154,34 @@ function buildInventoryRows({
   });
 }
 
-function getModeHref({ detail }: { detail: boolean }) {
+function getModeHref({
+  detail,
+  warehouseId,
+}: {
+  detail: boolean;
+  warehouseId: string;
+}) {
+  const query: Record<string, string> = {};
+
+  if (detail) {
+    query.detail = "true";
+  }
+
+  if (warehouseId) {
+    query.warehouseId = warehouseId;
+  }
+
   return detail
     ? {
         pathname: "/reports/inventory-by-product",
-        query: {
-          detail: "true",
-        },
+        query,
       }
-    : "/reports/inventory-by-product";
+    : warehouseId
+      ? {
+          pathname: "/reports/inventory-by-product",
+          query,
+        }
+      : "/reports/inventory-by-product";
 }
 
 export default async function InventoryByProductPage({
@@ -167,14 +190,32 @@ export default async function InventoryByProductPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const detailValue = getSingleSearchParam(resolvedSearchParams.detail);
   const showDetail = detailValue === "true" || detailValue === "1";
+  const requestedWarehouseId = getSingleSearchParam(
+    resolvedSearchParams.warehouseId
+  );
   const [{ supabase, tenant, activeCompany }, { dict }] = await Promise.all([
     requireCompanyContext(),
     getDictionary(),
   ]);
 
   let rows: InventoryByProductRow[] = [];
+  let warehouseOptions: Awaited<ReturnType<typeof readWarehouseOptions>> = [];
+  let selectedWarehouseId = "";
 
   if (activeCompany) {
+    warehouseOptions = await readWarehouseOptions({
+      supabase,
+      context: {
+        tenantId: tenant.id,
+        companyId: activeCompany.id,
+      },
+    });
+    selectedWarehouseId = warehouseOptions.some(
+      (warehouse) => warehouse.id === requestedWarehouseId
+    )
+      ? requestedWarehouseId
+      : "";
+
     const { data: products, error: productsError } = await supabase
       .from("items")
       .select("id, code, description, base_unit_of_measure")
@@ -195,15 +236,21 @@ export default async function InventoryByProductPage({
     let movements: InventoryMovementRecord[] = [];
 
     if (productIds.length > 0) {
-      const { data: movementRecords, error: movementsError } = await supabase
+      let movementQuery = supabase
         .from("item_balance_entries")
         .select(
-          "id, item_id, created_at, document_no, comment, origin, entry_type, quantity, unit_of_measure"
+          "id, item_id, warehouse_id, created_at, document_no, comment, origin, entry_type, quantity, unit_of_measure"
         )
         .eq("tenant_id", tenant.id)
         .eq("company_id", activeCompany.id)
-        .in("item_id", productIds)
-        .order("created_at", { ascending: false });
+        .in("item_id", productIds);
+
+      if (selectedWarehouseId) {
+        movementQuery = movementQuery.eq("warehouse_id", selectedWarehouseId);
+      }
+
+      const { data: movementRecords, error: movementsError } =
+        await movementQuery.order("created_at", { ascending: false });
 
       if (movementsError) {
         throw new Error(
@@ -234,27 +281,45 @@ export default async function InventoryByProductPage({
         </h1>
       </div>
 
-      <div className="inline-flex rounded-lg border border-app-border bg-app-soft p-1 text-xs font-semibold">
-        <Link
-          href={getModeHref({ detail: false })}
-          className={`rounded-md px-3 py-1.5 transition ${
-            showDetail
-              ? "text-app-muted hover:bg-app hover:text-primary-app"
-              : "bg-primary-app text-white"
-          }`}
-        >
-          {dict.reports.summaryView}
-        </Link>
-        <Link
-          href={getModeHref({ detail: true })}
-          className={`rounded-md px-3 py-1.5 transition ${
-            showDetail
-              ? "bg-primary-app text-white"
-              : "text-app-muted hover:bg-app hover:text-primary-app"
-          }`}
-        >
-          {dict.reports.detailView}
-        </Link>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-lg border border-app-border bg-app-soft p-1 text-xs font-semibold">
+          <Link
+            href={getModeHref({
+              detail: false,
+              warehouseId: selectedWarehouseId,
+            })}
+            className={`rounded-md px-3 py-1.5 transition ${
+              showDetail
+                ? "text-app-muted hover:bg-app hover:text-primary-app"
+                : "bg-primary-app text-white"
+            }`}
+          >
+            {dict.reports.summaryView}
+          </Link>
+          <Link
+            href={getModeHref({
+              detail: true,
+              warehouseId: selectedWarehouseId,
+            })}
+            className={`rounded-md px-3 py-1.5 transition ${
+              showDetail
+                ? "bg-primary-app text-white"
+                : "text-app-muted hover:bg-app hover:text-primary-app"
+            }`}
+          >
+            {dict.reports.detailView}
+          </Link>
+        </div>
+
+        <WarehouseReportFilter
+          warehouses={warehouseOptions}
+          selectedWarehouseId={selectedWarehouseId}
+          showDetail={showDetail}
+          labels={{
+            warehouse: dict.reports.warehouse,
+            allWarehouses: dict.reports.allWarehouses,
+          }}
+        />
       </div>
 
       {!activeCompany ? (

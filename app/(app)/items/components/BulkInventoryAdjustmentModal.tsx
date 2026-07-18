@@ -7,6 +7,10 @@ import {
   createBulkInventoryAdjustmentAction,
   type CreateBulkInventoryAdjustmentInput,
 } from "../actions";
+import type {
+  ItemWarehouseInventoryMap,
+  WarehouseOption,
+} from "@/lib/warehouses/warehouseOptions";
 
 type BulkInventoryAdjustmentItem = {
   id: string;
@@ -21,12 +25,18 @@ type BulkInventoryAdjustmentModalLabels = Record<string, string | undefined> & {
   bulkInventoryAdjustmentAction?: string;
   bulkInventoryAdjustmentCalculated?: string;
   bulkInventoryAdjustmentReal?: string;
+  bulkInventoryAdjustmentTransferOut?: string;
+  bulkInventoryAdjustmentTransferIn?: string;
+  bulkInventoryAdjustmentOriginWarehouse?: string;
+  bulkInventoryAdjustmentDestinationWarehouse?: string;
   bulkInventoryAdjustmentNoActiveItems?: string;
   bulkInventoryAdjustmentCreated?: string;
   bulkInventoryAdjustmentError?: string;
   bulkInventoryAdjustmentNoChanges?: string;
   comment?: string;
   commentPlaceholder?: string;
+  warehouseRequired?: string;
+  defaultWarehouseRequired?: string;
   accept?: string;
   adjusting?: string;
   close?: string;
@@ -34,6 +44,9 @@ type BulkInventoryAdjustmentModalLabels = Record<string, string | undefined> & {
 
 type BulkInventoryAdjustmentModalProps = {
   items: BulkInventoryAdjustmentItem[];
+  warehouseOptions: WarehouseOption[];
+  defaultWarehouseId: string;
+  warehouseInventoryByItemId: ItemWarehouseInventoryMap;
   labels: BulkInventoryAdjustmentModalLabels;
   onClose: () => void;
 };
@@ -56,33 +69,98 @@ function getQuantityInputValue(value: unknown) {
   return Number.isFinite(quantity) ? String(quantity) : "0";
 }
 
+function getOriginQuantities({
+  items,
+  warehouseInventoryByItemId,
+  originWarehouseId,
+}: {
+  items: BulkInventoryAdjustmentItem[];
+  warehouseInventoryByItemId: ItemWarehouseInventoryMap;
+  originWarehouseId: string;
+}) {
+  return Object.fromEntries(
+    items.map((item) => [
+      item.id,
+      getQuantityInputValue(
+        warehouseInventoryByItemId[item.id]?.[originWarehouseId] ?? 0
+      ),
+    ])
+  );
+}
+
+function getEmptyQuantities(items: BulkInventoryAdjustmentItem[]) {
+  return Object.fromEntries(items.map((item) => [item.id, ""]));
+}
+
+function getParsedQuantity(value: string) {
+  const quantity = Number(value.replace(",", "."));
+
+  return Number.isFinite(quantity) ? quantity : null;
+}
+
 export default function BulkInventoryAdjustmentModal({
   items,
+  warehouseOptions,
+  defaultWarehouseId,
+  warehouseInventoryByItemId,
   labels,
   onClose,
 }: BulkInventoryAdjustmentModalProps) {
   const router = useRouter();
+  const [originWarehouseId, setOriginWarehouseId] = useState(defaultWarehouseId);
+  const [destinationWarehouseId, setDestinationWarehouseId] =
+    useState(defaultWarehouseId);
   const [comment, setComment] = useState("");
   const [actualQuantities, setActualQuantities] = useState<
     Record<string, string>
+  >(() => getEmptyQuantities(items));
+  const [sourceQuantities, setSourceQuantities] = useState<
+    Record<string, string>
   >(() =>
-    Object.fromEntries(
-      items.map((item) => [item.id, getQuantityInputValue(item.inventory)])
-    )
+    getOriginQuantities({
+      items,
+      warehouseInventoryByItemId,
+      originWarehouseId: defaultWarehouseId,
+    })
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(() =>
+    defaultWarehouseId
+      ? null
+      : getLabel(
+          labels,
+          "defaultWarehouseRequired",
+          "No hay ningún almacén predeterminado. Marca uno en Configuraciones > Almacenes."
+        )
+  );
 
   const changedCount = useMemo(() => {
     return items.reduce((count, item) => {
-      const calculatedQuantity = Number(item.inventory ?? 0);
+      const calculatedQuantity = Number(
+        warehouseInventoryByItemId[item.id]?.[originWarehouseId] ?? 0
+      );
+      const sourceQuantity = Number(
+        String(sourceQuantities[item.id] ?? "").replace(",", ".")
+      );
+      const actualQuantityValue = String(actualQuantities[item.id] ?? "").trim();
       const actualQuantity = Number(
-        String(actualQuantities[item.id] ?? "").replace(",", ".")
+        actualQuantityValue.replace(",", ".")
       );
 
+      if (!Number.isFinite(calculatedQuantity)) {
+        return count;
+      }
+
+      if (originWarehouseId !== destinationWarehouseId) {
+        return Number.isFinite(actualQuantity) && actualQuantity > 0.000001
+          ? count + 1
+          : count;
+      }
+
       if (
-        !Number.isFinite(calculatedQuantity) ||
+        !actualQuantityValue ||
+        !Number.isFinite(sourceQuantity) ||
         !Number.isFinite(actualQuantity)
       ) {
         return count;
@@ -92,10 +170,68 @@ export default function BulkInventoryAdjustmentModal({
         ? count + 1
         : count;
     }, 0);
-  }, [actualQuantities, items]);
+  }, [
+    actualQuantities,
+    destinationWarehouseId,
+    items,
+    originWarehouseId,
+    sourceQuantities,
+    warehouseInventoryByItemId,
+  ]);
 
-  function updateActualQuantity(itemId: string, value: string) {
-    setActualQuantities((currentQuantities) => ({
+  const isTransferMode =
+    Boolean(originWarehouseId) &&
+    Boolean(destinationWarehouseId) &&
+    originWarehouseId !== destinationWarehouseId;
+
+  function changeOriginWarehouse(nextWarehouseId: string) {
+    const nextOriginQuantities = getOriginQuantities({
+      items,
+      warehouseInventoryByItemId,
+      originWarehouseId: nextWarehouseId,
+    });
+
+    setOriginWarehouseId(nextWarehouseId);
+    setActualQuantities(getEmptyQuantities(items));
+    setSourceQuantities(nextOriginQuantities);
+    setErrorMessage(null);
+    setMessage(null);
+  }
+
+  function changeDestinationWarehouse(nextWarehouseId: string) {
+    const willUseTransferMode =
+      Boolean(originWarehouseId) &&
+      Boolean(nextWarehouseId) &&
+      originWarehouseId !== nextWarehouseId;
+
+    setDestinationWarehouseId(nextWarehouseId);
+
+    if (willUseTransferMode) {
+      setActualQuantities(getEmptyQuantities(items));
+      setSourceQuantities(
+        getOriginQuantities({
+          items,
+          warehouseInventoryByItemId,
+          originWarehouseId,
+        })
+      );
+    } else if (isTransferMode) {
+      const nextOriginQuantities = getOriginQuantities({
+        items,
+        warehouseInventoryByItemId,
+        originWarehouseId,
+      });
+
+      setActualQuantities(getEmptyQuantities(items));
+      setSourceQuantities(nextOriginQuantities);
+    }
+
+    setErrorMessage(null);
+    setMessage(null);
+  }
+
+  function updateSourceQuantity(itemId: string, value: string) {
+    setSourceQuantities((currentQuantities) => ({
       ...currentQuantities,
       [itemId]: value,
     }));
@@ -103,8 +239,53 @@ export default function BulkInventoryAdjustmentModal({
     setMessage(null);
   }
 
+  function updateActualQuantity(itemId: string, value: string) {
+    setActualQuantities((currentQuantities) => ({
+      ...currentQuantities,
+      [itemId]: value,
+    }));
+
+    if (isTransferMode) {
+      const calculatedQuantity = Number(
+        warehouseInventoryByItemId[itemId]?.[originWarehouseId] ?? 0
+      );
+      const actualQuantity = getParsedQuantity(value.trim());
+
+      if (Number.isFinite(calculatedQuantity)) {
+        setSourceQuantities((currentQuantities) => ({
+          ...currentQuantities,
+          [itemId]:
+            actualQuantity === null
+              ? getQuantityInputValue(calculatedQuantity)
+              : getQuantityInputValue(actualQuantity),
+        }));
+      }
+    }
+
+    setErrorMessage(null);
+    setMessage(null);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!defaultWarehouseId) {
+      setErrorMessage(
+        getLabel(
+          labels,
+          "defaultWarehouseRequired",
+          "No hay ningún almacén predeterminado. Marca uno en Configuraciones > Almacenes."
+        )
+      );
+      return;
+    }
+
+    if (!originWarehouseId || !destinationWarehouseId) {
+      setErrorMessage(
+        getLabel(labels, "warehouseRequired", "El almacén es obligatorio.")
+      );
+      return;
+    }
 
     setIsSubmitting(true);
     setMessage(null);
@@ -112,8 +293,11 @@ export default function BulkInventoryAdjustmentModal({
 
     const payload: CreateBulkInventoryAdjustmentInput = {
       comment,
+      originWarehouseId,
+      destinationWarehouseId,
       lines: items.map((item) => ({
         itemId: item.id,
+        sourceQuantity: sourceQuantities[item.id] ?? "",
         actualQuantity: actualQuantities[item.id] ?? "",
       })),
     };
@@ -146,7 +330,7 @@ export default function BulkInventoryAdjustmentModal({
 
   return (
     <div className="fixed inset-0 z-[120] flex items-stretch justify-center bg-black/35 p-0 sm:items-center sm:px-4 sm:py-6">
-      <div className="flex h-full w-full flex-col border-0 border-primary-app bg-white shadow-[8px_8px_0_rgba(63,79,36,0.28)] sm:h-auto sm:max-h-[90vh] sm:max-w-5xl sm:rounded-3xl sm:border-4 sm:p-1">
+      <div className="flex h-full w-full flex-col border-0 border-primary-app bg-white shadow-[8px_8px_0_rgba(63,79,36,0.28)] sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:rounded-3xl sm:border-4 sm:p-1">
         <div className="flex min-h-0 flex-1 flex-col bg-app p-2 sm:rounded-[1.25rem] sm:border sm:border-app-border sm:p-4">
           <div className="mb-2 flex items-center justify-between gap-2">
             <h2 className="text-base font-black uppercase tracking-tight text-primary-app sm:text-lg">
@@ -170,8 +354,54 @@ export default function BulkInventoryAdjustmentModal({
             onSubmit={handleSubmit}
             className="flex min-h-0 flex-1 flex-col gap-2"
           >
+            <div className="grid gap-2 sm:grid-cols-2">
+              <label className="block text-[11px] font-semibold text-app sm:text-xs">
+                {getLabel(
+                  labels,
+                  "bulkInventoryAdjustmentOriginWarehouse",
+                  "Almacén origen"
+                )}
+                <select
+                  value={originWarehouseId}
+                  onChange={(event) => changeOriginWarehouse(event.target.value)}
+                  className="input-app mt-1 h-9 px-3 py-1.5 text-sm"
+                  required
+                >
+                  <option value="">-</option>
+                  {warehouseOptions.map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-[11px] font-semibold text-app sm:text-xs">
+                {getLabel(
+                  labels,
+                  "bulkInventoryAdjustmentDestinationWarehouse",
+                  "Almacén destino"
+                )}
+                <select
+                  value={destinationWarehouseId}
+                  onChange={(event) =>
+                    changeDestinationWarehouse(event.target.value)
+                  }
+                  className="input-app mt-1 h-9 px-3 py-1.5 text-sm"
+                  required
+                >
+                  <option value="">-</option>
+                  {warehouseOptions.map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
             <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-app-border bg-app">
-              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1fr)_2.25rem_4.5rem_2.75rem] items-center gap-1 border-b border-app-border bg-app-soft px-2 py-1.5 text-[10px] font-semibold uppercase text-app-muted sm:grid-cols-[1fr_1.15fr_0.8fr_0.85fr_0.9fr] sm:gap-2 sm:px-3 sm:py-2 sm:text-[11px]">
+              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1fr)_1.8rem_3.25rem_2.2rem] items-center gap-0.5 border-b border-app-border bg-app-soft px-1.5 py-1 text-[8.5px] font-semibold uppercase text-app-muted sm:grid-cols-[7.25rem_minmax(6rem,8.75rem)_3.75rem_4.25rem_3.25rem] sm:gap-1 sm:px-2 sm:py-1.5 sm:text-[9px]">
                 <span className="sm:hidden">Artículo</span>
                 <span className="hidden sm:block">
                   {getLabel(labels, "code", "Código")}
@@ -180,17 +410,31 @@ export default function BulkInventoryAdjustmentModal({
                   {getLabel(labels, "description", "Descripción")}
                 </span>
                 <span className="text-right sm:text-left">
-                  <span className="sm:hidden">Calc.</span>
+                  <span className="sm:hidden">
+                    {isTransferMode ? "Sal." : "Calc."}
+                  </span>
                   <span className="hidden sm:inline">
-                  {getLabel(
-                    labels,
-                    "bulkInventoryAdjustmentCalculated",
-                    "Calculado"
-                  )}
+                    {isTransferMode
+                      ? getLabel(
+                          labels,
+                          "bulkInventoryAdjustmentTransferOut",
+                          "Salida"
+                        )
+                      : getLabel(
+                          labels,
+                          "bulkInventoryAdjustmentCalculated",
+                          "Calculado"
+                        )}
                   </span>
                 </span>
                 <span className="text-right sm:text-left">
-                  {getLabel(labels, "bulkInventoryAdjustmentReal", "Real")}
+                  {isTransferMode
+                    ? getLabel(
+                        labels,
+                        "bulkInventoryAdjustmentTransferIn",
+                        "Entrada"
+                      )
+                    : getLabel(labels, "bulkInventoryAdjustmentReal", "Real")}
                 </span>
                 <span className="text-right sm:text-left">
                   {getLabel(labels, "unitOfMeasure", "Unidad")}
@@ -211,7 +455,9 @@ export default function BulkInventoryAdjustmentModal({
                     const itemCode = getStringValue(item.code);
                     const itemDescription = getStringValue(item.description);
                     const calculatedQuantity = getQuantityInputValue(
-                      item.inventory
+                      warehouseInventoryByItemId[item.id]?.[
+                        originWarehouseId
+                      ] ?? 0
                     );
                     const unitOfMeasure = getStringValue(
                       item.base_unit_of_measure
@@ -220,14 +466,14 @@ export default function BulkInventoryAdjustmentModal({
                     return (
                       <div
                         key={item.id}
-                        className="grid grid-cols-[minmax(0,1fr)_2.25rem_4.5rem_2.75rem] items-center gap-1 px-2 py-1.5 text-xs sm:grid-cols-[1fr_1.15fr_0.8fr_0.85fr_0.9fr] sm:gap-2 sm:px-3 sm:py-2 sm:text-sm"
+                        className="grid grid-cols-[minmax(0,1fr)_1.8rem_3.25rem_2.2rem] items-center gap-0.5 px-1.5 py-1 text-[10px] sm:grid-cols-[7.25rem_minmax(6rem,8.75rem)_3.75rem_4.25rem_3.25rem] sm:gap-1 sm:px-2 sm:py-1.5 sm:text-[11px]"
                       >
                         <div className="min-w-0">
                           <div className="truncate font-semibold leading-tight text-primary-app">
                             {itemCode}
                           </div>
                           <div
-                            className="truncate text-[11px] leading-tight text-app-muted sm:hidden"
+                            className="truncate text-[10px] leading-tight text-app-muted sm:hidden"
                             title={itemDescription}
                           >
                             {itemDescription}
@@ -243,16 +489,42 @@ export default function BulkInventoryAdjustmentModal({
                           </div>
                         </div>
 
-                        <div className="text-right font-semibold text-app sm:text-left">
-                          {calculatedQuantity}
-                        </div>
+                        {isTransferMode ? (
+                          <label className="block">
+                            <span className="sr-only">
+                              {getLabel(
+                                labels,
+                                "bulkInventoryAdjustmentTransferOut",
+                                "Salida"
+                              )}{" "}
+                              {itemCode}
+                            </span>
+                            <input
+                              value={sourceQuantities[item.id] ?? ""}
+                              onChange={(event) =>
+                                updateSourceQuantity(
+                                  item.id,
+                                  event.target.value
+                                )
+                              }
+                              className="input-app h-6 px-1 py-0.5 text-right text-[11px] font-semibold sm:px-1.5 sm:text-left"
+                              inputMode="decimal"
+                            />
+                          </label>
+                        ) : (
+                          <div className="text-right font-semibold text-app sm:text-left">
+                            {calculatedQuantity}
+                          </div>
+                        )}
 
                         <label className="block">
                           <span className="sr-only">
                             {getLabel(
                               labels,
-                              "bulkInventoryAdjustmentReal",
-                              "Real"
+                              isTransferMode
+                                ? "bulkInventoryAdjustmentTransferIn"
+                                : "bulkInventoryAdjustmentReal",
+                              isTransferMode ? "Entrada" : "Real"
                             )}{" "}
                             {itemCode}
                           </span>
@@ -261,9 +533,8 @@ export default function BulkInventoryAdjustmentModal({
                             onChange={(event) =>
                               updateActualQuantity(item.id, event.target.value)
                             }
-                            className="input-app h-8 px-1.5 py-1 text-right text-sm font-semibold sm:px-2 sm:text-left"
+                            className="input-app h-6 px-1 py-0.5 text-right text-[11px] font-semibold sm:px-1.5 sm:text-left"
                             inputMode="decimal"
-                            required
                           />
                         </label>
 
@@ -328,7 +599,12 @@ export default function BulkInventoryAdjustmentModal({
                 <button
                   type="submit"
                   className="btn-primary-app px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={isSubmitting || items.length === 0}
+                  disabled={
+                    isSubmitting ||
+                    items.length === 0 ||
+                    !originWarehouseId ||
+                    !destinationWarehouseId
+                  }
                 >
                   {isSubmitting
                     ? getLabel(labels, "adjusting", "Ajustando...")
