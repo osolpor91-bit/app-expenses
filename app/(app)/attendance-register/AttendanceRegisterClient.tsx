@@ -23,7 +23,6 @@ export type AttendanceLabels = {
   period: string;
   morning: string;
   afternoon: string;
-  fullDay: string;
   searchMember: string;
   searchMemberPlaceholder: string;
   selectedMembers: string;
@@ -49,7 +48,7 @@ type AttendanceRegisterClientProps = {
   mode?: "register" | "edit";
 };
 
-type AttendancePeriod = "morning" | "afternoon" | "full_day";
+type AttendancePeriod = "morning" | "afternoon";
 
 function getTodayValue() {
   const today = new Date();
@@ -104,16 +103,13 @@ function getInitialComment({
 function hasIncompatibleAttendance({
   attendances,
   attendanceDate,
-  period,
   memberId,
 }: {
   attendances: AttendanceRecord[];
   attendanceDate: string;
-  period: AttendancePeriod;
   memberId: string;
 }) {
-  const incompatiblePeriods =
-    period === "full_day" ? ["morning", "afternoon"] : ["full_day"];
+  const incompatiblePeriods = ["full_day"];
 
   return attendances.some(
     (attendance) =>
@@ -205,7 +201,6 @@ export default function AttendanceRegisterClient({
           !hasIncompatibleAttendance({
             attendances,
             attendanceDate,
-            period,
             memberId: member.id,
           })
       )
@@ -218,7 +213,6 @@ export default function AttendanceRegisterClient({
     attendances,
     members,
     normalizedSearchText,
-    period,
     selectedMemberIds,
   ]);
 
@@ -293,7 +287,6 @@ export default function AttendanceRegisterClient({
           >
             <option value="morning">{labels.morning}</option>
             <option value="afternoon">{labels.afternoon}</option>
-            <option value="full_day">{labels.fullDay}</option>
           </select>
         </label>
       </div>

@@ -21,7 +21,6 @@ function getLabels(dict: Awaited<ReturnType<typeof getDictionary>>["dict"]) {
     period: dict.attendance.period,
     morning: dict.attendance.morning,
     afternoon: dict.attendance.afternoon,
-    fullDay: dict.attendance.fullDay,
     searchMember: dict.attendance.searchMember,
     searchMemberPlaceholder: dict.attendance.searchMemberPlaceholder,
     selectedMembers: dict.attendance.selectedMembers,

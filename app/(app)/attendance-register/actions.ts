@@ -9,7 +9,7 @@ import {
   type EntityOperationResult,
 } from "@/lib/services/entityService";
 
-const attendancePeriods = ["morning", "afternoon", "full_day"] as const;
+const attendancePeriods = ["morning", "afternoon"] as const;
 
 type AttendancePeriod = (typeof attendancePeriods)[number];
 
@@ -85,8 +85,6 @@ export async function saveAttendanceAction({
       );
     }
 
-    const conflictingPeriods =
-      normalizedPeriod === "full_day" ? ["morning", "afternoon"] : ["full_day"];
     const { data: conflictingAttendances, error: conflictError } =
       await supabase
         .from("member_attendance")
@@ -94,7 +92,7 @@ export async function saveAttendanceAction({
         .eq("tenant_id", tenant.id)
         .eq("company_id", activeCompany.id)
         .eq("attendance_date", normalizedDate)
-        .in("period", conflictingPeriods)
+        .eq("period", "full_day")
         .in("treasury_member_id", normalizedMemberIds)
         .limit(1);
 
@@ -104,7 +102,7 @@ export async function saveAttendanceAction({
 
     if ((conflictingAttendances ?? []).length > 0) {
       return entityOperationError(
-        "No puedes registrar Todo el dia si ya existe Manana o Tarde, ni registrar Manana o Tarde si ya existe Todo el dia."
+        "No puedes registrar Manana o Tarde si ya existe Todo el dia."
       );
     }
   }
@@ -143,6 +141,7 @@ export async function saveAttendanceAction({
   }
 
   revalidatePath("/attendance-register");
+  revalidatePath("/attendance-edit");
   revalidatePath("/attendance-report");
 
   return entityOperationOk(null);

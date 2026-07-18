@@ -38,6 +38,12 @@ type AttendanceDetailRow = {
   comment: string;
 };
 
+type AttendanceDetailGroup = {
+  memberId: string;
+  memberName: string;
+  movements: AttendanceDetailRow[];
+};
+
 type AttendanceReportPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -146,39 +152,59 @@ function buildSummaryRows(records: AttendanceRecord[]) {
   });
 }
 
-function buildDetailRows(records: AttendanceRecord[]) {
-  return records
-    .map<AttendanceDetailRow>((record, index) => {
-      const member = getFirstRelation(record.treasury_members);
-      const memberId =
-        getStringValue(member?.id) || getStringValue(record.treasury_member_id);
+function buildDetailGroups(records: AttendanceRecord[]) {
+  const groupsByMemberId = new Map<string, AttendanceDetailGroup>();
 
-      return {
-        id: `${memberId || "member"}-${getStringValue(
-          record.attendance_date
-        )}-${getStringValue(record.period)}-${index}`,
-        memberName: getMemberName(member),
-        attendanceDate: getStringValue(record.attendance_date),
-        period: getStringValue(record.period),
-        comment: getStringValue(record.comment),
-      };
-    })
+  records.forEach((record, index) => {
+    const member = getFirstRelation(record.treasury_members);
+    const memberId =
+      getStringValue(member?.id) || getStringValue(record.treasury_member_id);
+    const normalizedMemberId = memberId || "member";
+    const memberName = getMemberName(member);
+    const group =
+      groupsByMemberId.get(normalizedMemberId) ??
+      ({
+        memberId: normalizedMemberId,
+        memberName,
+        movements: [],
+      } satisfies AttendanceDetailGroup);
+
+    group.movements.push({
+      id: `${normalizedMemberId}-${getStringValue(
+        record.attendance_date
+      )}-${getStringValue(record.period)}-${index}`,
+      memberName,
+      attendanceDate: getStringValue(record.attendance_date),
+      period: getStringValue(record.period),
+      comment: getStringValue(record.comment),
+    });
+
+    groupsByMemberId.set(normalizedMemberId, group);
+  });
+
+  return Array.from(groupsByMemberId.values())
+    .map((group) => ({
+      ...group,
+      movements: group.movements.sort((left, right) => {
+        const dateComparison = left.attendanceDate.localeCompare(
+          right.attendanceDate
+        );
+
+        if (dateComparison !== 0) {
+          return dateComparison;
+        }
+
+        return left.period.localeCompare(right.period);
+      }),
+    }))
     .sort((left, right) => {
-      const memberComparison = left.memberName.localeCompare(right.memberName);
+      const totalComparison = right.movements.length - left.movements.length;
 
-      if (memberComparison !== 0) {
-        return memberComparison;
+      if (totalComparison !== 0) {
+        return totalComparison;
       }
 
-      const dateComparison = left.attendanceDate.localeCompare(
-        right.attendanceDate
-      );
-
-      if (dateComparison !== 0) {
-        return dateComparison;
-      }
-
-      return left.period.localeCompare(right.period);
+      return left.memberName.localeCompare(right.memberName);
     });
 }
 
@@ -194,7 +220,7 @@ export default async function AttendanceReportPage({
   ]);
 
   let rows: AttendanceSummaryRow[] = [];
-  let detailRows: AttendanceDetailRow[] = [];
+  let detailGroups: AttendanceDetailGroup[] = [];
 
   if (activeCompany) {
     const { data, error } = await supabase
@@ -214,12 +240,12 @@ export default async function AttendanceReportPage({
     const records = (data ?? []) as AttendanceRecord[];
 
     rows = buildSummaryRows(records);
-    detailRows = buildDetailRows(records);
+    detailGroups = buildDetailGroups(records);
   }
 
   return (
     <section
-      className={`${showDetail ? "max-w-3xl" : "max-w-[560px]"} space-y-4`}
+      className="max-w-[560px] space-y-4"
     >
       <div className="space-y-1">
         <Link href="/configurations" className="link-app inline-block text-sm">
@@ -264,47 +290,49 @@ export default async function AttendanceReportPage({
         </div>
       ) : showDetail ? (
         <div className="overflow-hidden rounded-lg border border-app-border bg-app">
-          <div className="grid grid-cols-[minmax(0,1fr)_4rem_4.25rem] gap-1.5 border-b border-app-border bg-app-soft px-2 py-2 text-[10px] font-semibold uppercase text-app-muted sm:grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_minmax(0,0.9fr)] sm:px-3 sm:text-xs">
-            <span>{dict.attendance.member}</span>
-            <span>{dict.attendance.movementDate}</span>
-            <span>{dict.attendance.movementPeriod}</span>
-            <span className="hidden sm:block">{dict.attendance.comment}</span>
-          </div>
-
           <div className="divide-y divide-[var(--color-border)]">
-            {detailRows.map((row) => (
+            {detailGroups.map((group) => (
               <div
-                key={row.id}
-                className="grid grid-cols-[minmax(0,1fr)_4rem_4.25rem] gap-1.5 px-2 py-2 text-xs sm:grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_minmax(0,0.9fr)] sm:px-3 sm:text-sm"
+                key={group.memberId}
+                className="space-y-1.5 px-3 py-2.5 text-xs sm:text-sm"
               >
                 <div className="break-words font-bold leading-tight text-primary-app">
-                  {row.memberName}
-                  {row.comment ? (
-                    <div className="mt-1 break-words text-[11px] font-normal text-app-muted sm:hidden">
-                      {row.comment}
-                    </div>
-                  ) : null}
+                  {group.memberName}
                 </div>
-                <div className="leading-tight text-app">
-                  {formatDateValue(row.attendanceDate)}
-                </div>
-                <div className="leading-tight text-app">
-                  {getPeriodLabel({ period: row.period, dict })}
-                </div>
-                <div className="hidden break-words leading-tight text-app-muted sm:block">
-                  {row.comment || "-"}
-                </div>
+                <ul className="space-y-1">
+                  {group.movements.map((movement) => (
+                    <li
+                      key={movement.id}
+                      className="rounded-md bg-app-soft px-2 py-1.5 leading-tight text-app"
+                    >
+                      <span className="font-semibold text-primary-app">
+                        {formatDateValue(movement.attendanceDate)}
+                      </span>
+                      <span className="mx-1 text-app-muted">-</span>
+                      <span>
+                        {getPeriodLabel({ period: movement.period, dict })}
+                      </span>
+                      {movement.comment ? (
+                        <>
+                          <span className="mx-1 text-app-muted">-</span>
+                          <span className="text-app-muted">
+                            {movement.comment}
+                          </span>
+                        </>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-app-border bg-app">
-          <div className="grid grid-cols-[minmax(0,1fr)_2.8rem_2.8rem_3rem_2.8rem] gap-2 border-b border-app-border bg-app-soft px-2 py-2 text-[10px] font-semibold uppercase text-app-muted sm:grid-cols-[minmax(0,1fr)_3rem_3rem_3.4rem_3rem] sm:px-3 sm:text-xs">
+          <div className="grid grid-cols-[minmax(0,1fr)_3rem_3rem_3rem] gap-2 border-b border-app-border bg-app-soft px-2 py-2 text-[10px] font-semibold uppercase text-app-muted sm:px-3 sm:text-xs">
             <span>{dict.attendance.member}</span>
             <span className="text-center">{dict.attendance.morningShort}</span>
             <span className="text-center">{dict.attendance.afternoonShort}</span>
-            <span className="text-center">{dict.attendance.fullDayShort}</span>
             <span className="text-center">{dict.attendance.totalShort}</span>
           </div>
 
@@ -312,7 +340,7 @@ export default async function AttendanceReportPage({
             {rows.map((row) => (
               <div
                 key={row.memberId}
-                className="grid grid-cols-[minmax(0,1fr)_2.8rem_2.8rem_3rem_2.8rem] gap-2 px-2 py-2 text-xs sm:grid-cols-[minmax(0,1fr)_3rem_3rem_3.4rem_3rem] sm:px-3 sm:text-sm"
+                className="grid grid-cols-[minmax(0,1fr)_3rem_3rem_3rem] gap-2 px-2 py-2 text-xs sm:px-3 sm:text-sm"
               >
                 <div className="break-words font-bold leading-tight text-primary-app">
                   {row.memberName}
@@ -322,9 +350,6 @@ export default async function AttendanceReportPage({
                 </div>
                 <div className="text-center font-semibold text-app">
                   {row.afternoon}
-                </div>
-                <div className="text-center font-semibold text-app">
-                  {row.fullDay}
                 </div>
                 <div className="text-center font-black text-primary-app">
                   {row.total}
