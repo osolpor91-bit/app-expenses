@@ -9,10 +9,15 @@ import {
 import { useRouter } from "next/navigation";
 
 import AutocompleteInput from "../components/AutocompleteInput";
+import { formatDecimalValue } from "@/lib/formatters/fieldFormatters";
 import {
   treasuryMovementTypes,
   type TreasuryMovementType,
 } from "@/lib/treasury/treasuryGeneral";
+import {
+  evaluateDecimalArithmeticExpression,
+  hasDecimalArithmeticExpression,
+} from "@/lib/validation/decimalArithmeticExpression";
 
 import {
   createTreasuryMovementAction,
@@ -107,6 +112,12 @@ function parseBooleanValue(value: unknown) {
   }
 
   return String(value ?? "").trim().toLowerCase() === "true";
+}
+
+function formatTreasuryAmountExpressionResult(value: string) {
+  const formattedValue = formatDecimalValue(value, 2);
+
+  return formattedValue === "-" ? value : formattedValue;
 }
 
 export default function TreasuryMovementModal({
@@ -219,9 +230,35 @@ export default function TreasuryMovementModal({
     }
   }
 
+  function resolveAmountExpression(rawAmount: string) {
+    if (!hasDecimalArithmeticExpression(rawAmount)) {
+      return rawAmount;
+    }
+
+    const expressionResult = evaluateDecimalArithmeticExpression(rawAmount);
+
+    if (!expressionResult.ok) {
+      setErrorMessage(expressionResult.error);
+      return null;
+    }
+
+    const formattedAmount = formatTreasuryAmountExpressionResult(
+      expressionResult.value
+    );
+
+    setAmount(formattedAmount);
+    return formattedAmount;
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage(null);
+
+    const resolvedAmount = resolveAmountExpression(amount);
+
+    if (resolvedAmount === null) {
+      return;
+    }
 
     if (!accountId) {
       setErrorMessage(
@@ -263,7 +300,7 @@ export default function TreasuryMovementModal({
     const input: CreateTreasuryMovementInput = {
       treasuryType:
         treasuryType as CreateTreasuryMovementInput["treasuryType"],
-      amount,
+      amount: resolvedAmount,
       movementDate,
       accountId,
       paidByMemberId,
@@ -419,7 +456,13 @@ export default function TreasuryMovementModal({
                 {getLabel(labels, "treasuryMovementAmount", "Importe")}
                 <input
                   value={amount}
-                  onChange={(event) => setAmount(event.target.value)}
+                  onChange={(event) => {
+                    setAmount(event.target.value);
+                    setErrorMessage(null);
+                  }}
+                  onBlur={(event) => {
+                    resolveAmountExpression(event.target.value);
+                  }}
                   className="input-app mt-1 px-3 py-2 text-sm"
                   inputMode="decimal"
                   placeholder="0,00"

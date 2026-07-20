@@ -50,6 +50,14 @@ export default async function ReportsPage() {
       href: "/reports/inventory-by-warehouse",
       title: dict.reports.inventoryByWarehouse,
     },
+    {
+      href: "/attendance-report",
+      title: dict.attendance.reportTitle,
+    },
+    {
+      href: "/work-group-report",
+      title: dict.workGroups.reportTitle,
+    },
   ];
 
   return (

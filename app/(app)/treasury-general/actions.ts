@@ -12,6 +12,10 @@ import {
   isTreasuryMovementType,
   type TreasuryMovementType,
 } from "@/lib/treasury/treasuryGeneral";
+import {
+  evaluateDecimalArithmeticExpression,
+  hasDecimalArithmeticExpression,
+} from "@/lib/validation/decimalArithmeticExpression";
 import { normalizeDecimalField } from "@/lib/validation/fieldValidations";
 
 export type CreateTreasuryMovementInput = {
@@ -41,6 +45,22 @@ function isValidMovementDate(value: string) {
   const date = new Date(`${value}T00:00:00.000Z`);
 
   return Number.isFinite(date.getTime());
+}
+
+function resolveTreasuryMovementAmount(
+  amount: string
+): EntityOperationResult<string> {
+  if (!hasDecimalArithmeticExpression(amount)) {
+    return entityOperationOk(amount);
+  }
+
+  const expressionResult = evaluateDecimalArithmeticExpression(amount);
+
+  if (!expressionResult.ok) {
+    return entityOperationError(expressionResult.error);
+  }
+
+  return entityOperationOk(expressionResult.value);
 }
 
 async function saveTreasuryMovement({
@@ -233,8 +253,17 @@ async function saveTreasuryMovement({
 export async function createTreasuryMovementAction(
   input: CreateTreasuryMovementInput
 ): Promise<EntityOperationResult<{ id: string }>> {
+  const amountResult = resolveTreasuryMovementAmount(input.amount);
+
+  if (!amountResult.ok) {
+    return amountResult;
+  }
+
   return saveTreasuryMovement({
-    input,
+    input: {
+      ...input,
+      amount: amountResult.data,
+    },
   });
 }
 
@@ -242,6 +271,7 @@ export async function updateTreasuryMovementAction(
   input: UpdateTreasuryMovementInput
 ): Promise<EntityOperationResult<{ id: string }>> {
   const movementId = String(input.id ?? "").trim();
+  const amountResult = resolveTreasuryMovementAmount(input.amount);
 
   if (!movementId) {
     return entityOperationError(
@@ -249,8 +279,15 @@ export async function updateTreasuryMovementAction(
     );
   }
 
+  if (!amountResult.ok) {
+    return amountResult;
+  }
+
   return saveTreasuryMovement({
-    input,
+    input: {
+      ...input,
+      amount: amountResult.data,
+    },
     movementId,
   });
 }

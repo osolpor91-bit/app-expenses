@@ -50,8 +50,8 @@ export default async function WorkGroupReportPage() {
   return (
     <section className="space-y-4">
       <div className="space-y-2">
-        <Link href="/configurations" className="link-app inline-block text-sm">
-          {"<-"} {dict.reports.backToConfigurations}
+        <Link href="/reports" className="link-app inline-block text-sm">
+          {"<-"} {dict.reports.backToReports}
         </Link>
 
         <div className="flex flex-wrap items-center gap-3">

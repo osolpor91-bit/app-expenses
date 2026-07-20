@@ -44,6 +44,13 @@ type AttendanceDetailGroup = {
   movements: AttendanceDetailRow[];
 };
 
+type AttendanceBarGroup = {
+  total: number;
+  names: string[];
+};
+
+type AttendanceReportView = "summary" | "detail" | "barChart";
+
 type AttendanceReportPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -72,15 +79,39 @@ function getSingleSearchParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] ?? "" : value ?? "";
 }
 
-function getModeHref({ detail }: { detail: boolean }) {
-  return detail
-    ? {
-        pathname: "/attendance-report",
-        query: {
-          detail: "true",
-        },
-      }
-    : "/attendance-report";
+function getReportView(
+  searchParams: Record<string, string | string[] | undefined>
+): AttendanceReportView {
+  const viewValue = getSingleSearchParam(searchParams.view);
+
+  if (viewValue === "detail") {
+    return "detail";
+  }
+
+  if (viewValue === "barChart") {
+    return "barChart";
+  }
+
+  const detailValue = getSingleSearchParam(searchParams.detail);
+
+  if (detailValue === "true" || detailValue === "1") {
+    return "detail";
+  }
+
+  return "summary";
+}
+
+function getModeHref(view: AttendanceReportView) {
+  if (view === "summary") {
+    return "/attendance-report";
+  }
+
+  return {
+    pathname: "/attendance-report",
+    query: {
+      view,
+    },
+  };
 }
 
 function getPeriodLabel({
@@ -208,12 +239,52 @@ function buildDetailGroups(records: AttendanceRecord[]) {
     });
 }
 
+function getMemberFirstName(memberName: string) {
+  return memberName.trim().split(/\s+/)[0] || "-";
+}
+
+function buildBarGroups(rows: AttendanceSummaryRow[]) {
+  const groupsByTotal = new Map<number, AttendanceBarGroup>();
+
+  rows.forEach((row) => {
+    const group =
+      groupsByTotal.get(row.total) ??
+      ({
+        total: row.total,
+        names: [],
+      } satisfies AttendanceBarGroup);
+
+    group.names.push(getMemberFirstName(row.memberName));
+    groupsByTotal.set(row.total, group);
+  });
+
+  return Array.from(groupsByTotal.values())
+    .map((group) => ({
+      ...group,
+      names: group.names.sort((left, right) => left.localeCompare(right)),
+    }))
+    .sort((left, right) => right.total - left.total);
+}
+
+function getModeLinkClassName({
+  currentView,
+  view,
+}: {
+  currentView: AttendanceReportView;
+  view: AttendanceReportView;
+}) {
+  return `rounded-md px-3 py-1.5 transition ${
+    currentView === view
+      ? "bg-primary-app text-white"
+      : "text-app-muted hover:bg-app hover:text-primary-app"
+  }`;
+}
+
 export default async function AttendanceReportPage({
   searchParams,
 }: AttendanceReportPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const detailValue = getSingleSearchParam(resolvedSearchParams.detail);
-  const showDetail = detailValue === "true" || detailValue === "1";
+  const currentView = getReportView(resolvedSearchParams);
   const [{ supabase, tenant, activeCompany }, { dict }] = await Promise.all([
     requireCompanyContext(),
     getDictionary(),
@@ -221,6 +292,7 @@ export default async function AttendanceReportPage({
 
   let rows: AttendanceSummaryRow[] = [];
   let detailGroups: AttendanceDetailGroup[] = [];
+  let barGroups: AttendanceBarGroup[] = [];
 
   if (activeCompany) {
     const { data, error } = await supabase
@@ -241,15 +313,14 @@ export default async function AttendanceReportPage({
 
     rows = buildSummaryRows(records);
     detailGroups = buildDetailGroups(records);
+    barGroups = buildBarGroups(rows);
   }
 
   return (
-    <section
-      className="max-w-[560px] space-y-4"
-    >
+    <section className="max-w-3xl space-y-4">
       <div className="space-y-1">
-        <Link href="/configurations" className="link-app inline-block text-sm">
-          {"<-"} {dict.reports.backToConfigurations}
+        <Link href="/reports" className="link-app inline-block text-sm">
+          {"<-"} {dict.reports.backToReports}
         </Link>
 
         <h1 className="text-xl font-bold text-primary-app sm:text-3xl">
@@ -259,24 +330,31 @@ export default async function AttendanceReportPage({
 
       <div className="inline-flex rounded-lg border border-app-border bg-app-soft p-1 text-xs font-semibold">
         <Link
-          href={getModeHref({ detail: false })}
-          className={`rounded-md px-3 py-1.5 transition ${
-            showDetail
-              ? "text-app-muted hover:bg-app hover:text-primary-app"
-              : "bg-primary-app text-white"
-          }`}
+          href={getModeHref("summary")}
+          className={getModeLinkClassName({
+            currentView,
+            view: "summary",
+          })}
         >
           {dict.reports.summaryView}
         </Link>
         <Link
-          href={getModeHref({ detail: true })}
-          className={`rounded-md px-3 py-1.5 transition ${
-            showDetail
-              ? "bg-primary-app text-white"
-              : "text-app-muted hover:bg-app hover:text-primary-app"
-          }`}
+          href={getModeHref("detail")}
+          className={getModeLinkClassName({
+            currentView,
+            view: "detail",
+          })}
         >
           {dict.reports.detailView}
+        </Link>
+        <Link
+          href={getModeHref("barChart")}
+          className={getModeLinkClassName({
+            currentView,
+            view: "barChart",
+          })}
+        >
+          {dict.reports.barChartView}
         </Link>
       </div>
 
@@ -288,7 +366,7 @@ export default async function AttendanceReportPage({
         <div className="rounded-xl border border-app-border bg-app-soft p-4 text-sm text-app-muted">
           {dict.attendance.noAttendance}
         </div>
-      ) : showDetail ? (
+      ) : currentView === "detail" ? (
         <div className="overflow-hidden rounded-lg border border-app-border bg-app">
           <div className="divide-y divide-[var(--color-border)]">
             {detailGroups.map((group) => (
@@ -325,6 +403,40 @@ export default async function AttendanceReportPage({
                 </ul>
               </div>
             ))}
+          </div>
+        </div>
+      ) : currentView === "barChart" ? (
+        <div className="overflow-hidden rounded-lg border border-app-border bg-app p-3 sm:p-4">
+          <div className="space-y-3">
+            {barGroups.map((group) => {
+              const maxTotal = barGroups[0]?.total ?? group.total;
+              const widthPercentage =
+                maxTotal > 0 ? Math.max((group.total / maxTotal) * 100, 12) : 0;
+
+              return (
+                <div
+                  key={group.total}
+                  className="grid grid-cols-[2.5rem_minmax(0,1fr)] items-center gap-3"
+                >
+                  <div className="text-right text-sm font-black text-primary-app">
+                    {group.total}
+                  </div>
+                  <div className="relative min-h-10 min-w-0 overflow-hidden rounded-md bg-app-soft">
+                    <div
+                      className="absolute inset-y-0 left-0 rounded-md"
+                      style={{
+                        width: `${widthPercentage}%`,
+                        backgroundColor:
+                          "color-mix(in srgb, var(--color-primary) 22%, transparent)",
+                      }}
+                    />
+                    <div className="relative px-3 py-2 text-sm font-bold leading-snug text-primary-app">
+                      {group.names.join(", ")}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : (
