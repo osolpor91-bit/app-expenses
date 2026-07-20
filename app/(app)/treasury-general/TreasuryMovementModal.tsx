@@ -464,7 +464,6 @@ export default function TreasuryMovementModal({
                     resolveAmountExpression(event.target.value);
                   }}
                   className="input-app mt-1 px-3 py-2 text-sm"
-                  inputMode="decimal"
                   placeholder="0,00"
                   required
                   disabled={isSubmitting || formLockedAfterCreate}
