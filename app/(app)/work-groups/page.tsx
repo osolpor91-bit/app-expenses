@@ -45,6 +45,7 @@ function getLabels(dict: Awaited<ReturnType<typeof getDictionary>>["dict"]) {
     actions: dict.common.actions,
     viewAssignedGroups: dict.workGroups.viewAssignedGroups,
     viewAllGroups: dict.workGroups.viewAllGroups,
+    membersWithWork: dict.workGroups.membersWithWork,
     deleteAllAssignments: dict.workGroups.deleteAllAssignments,
     confirmDeleteAllAssignments: dict.workGroups.confirmDeleteAllAssignments,
     deleteAllAssignmentsError: dict.workGroups.deleteAllAssignmentsError,

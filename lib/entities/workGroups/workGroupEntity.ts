@@ -33,6 +33,17 @@ export const workGroupFields: readonly EntityFieldDefinition[] = [
     showInList: true,
     showInForm: true,
   },
+  {
+    key: "assigned_count",
+    dbName: "assigned_count",
+    labelKey: "assignedCount",
+    type: "integer",
+    required: false,
+    editable: false,
+    calculated: true,
+    showInList: true,
+    showInForm: false,
+  },
 ];
 
 export const workGroupFilters: readonly EntityFilterDefinition[] = [
@@ -58,13 +69,10 @@ export const workGroupFilters: readonly EntityFilterDefinition[] = [
   },
 ];
 
-export const workGroupSelectColumns = getDbColumnsFromFields(workGroupFields, [
-  "id",
-  "tenant_id",
-  "company_id",
-  "created_at",
-  "updated_at",
-]);
+export const workGroupSelectColumns = getDbColumnsFromFields(
+  workGroupFields.filter((field) => !field.calculated),
+  ["id", "tenant_id", "company_id", "created_at", "updated_at"]
+);
 
 export const workGroupEntity = {
   key: "workGroups",

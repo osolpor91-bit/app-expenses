@@ -1,7 +1,10 @@
 import { requireCompanyContext } from "@/lib/company/requireCompanyContext";
 import { requireTenant } from "@/lib/auth/requireTenant";
 import Link from "next/link";
-import type { ListDetailEntityDefinition } from "@/lib/entities/core/entityDefinition";
+import type {
+  EntityRecord,
+  ListDetailEntityDefinition,
+} from "@/lib/entities/core/entityDefinition";
 import {
   castEntityRecords,
   listEntityRecords,
@@ -445,6 +448,58 @@ async function getEntityRecords({
   return castEntityRecords(data ?? []);
 }
 
+async function applyWorkGroupAssignedCounts({
+  records,
+  supabase,
+  context,
+}: {
+  records: EntityRecord[];
+  supabase: SupabaseServerClient;
+  context: EntityScopeContext;
+}) {
+  if (records.length === 0 || !context.companyId) {
+    return records.map((record) => ({
+      ...record,
+      assigned_count: 0,
+    }));
+  }
+
+  const { data, error } = await supabase
+    .from("work_group_assignments")
+    .select("work_group_id, treasury_member_id")
+    .eq("tenant_id", context.tenantId)
+    .eq("company_id", context.companyId);
+
+  if (error) {
+    throw new Error(`Error leyendo asignaciones de grupos: ${error.message}`);
+  }
+
+  const memberIdsByGroupId = new Map<string, Set<string>>();
+
+  (data ?? []).forEach((assignment) => {
+    const groupId = String(assignment.work_group_id ?? "").trim();
+    const memberId = String(assignment.treasury_member_id ?? "").trim();
+
+    if (!groupId || !memberId) {
+      return;
+    }
+
+    const memberIds = memberIdsByGroupId.get(groupId) ?? new Set<string>();
+
+    memberIds.add(memberId);
+    memberIdsByGroupId.set(groupId, memberIds);
+  });
+
+  return records.map((record) => {
+    const groupId = String(record.id ?? "").trim();
+
+    return {
+      ...record,
+      assigned_count: memberIdsByGroupId.get(groupId)?.size ?? 0,
+    };
+  });
+}
+
 export default async function EntityListDetailPage({
   entity,
   searchParams,
@@ -493,9 +548,18 @@ export default async function EntityListDetailPage({
         })
       : records;
 
+  const recordsWithCalculatedValues =
+    entity.key === "workGroups"
+      ? await applyWorkGroupAssignedCounts({
+          records: recordsWithCalculatedInventory,
+          supabase,
+          context,
+        })
+      : recordsWithCalculatedInventory;
+
   const mappedRecords = mapEntityRecordsRelations(
     entity,
-    recordsWithCalculatedInventory
+    recordsWithCalculatedValues
   );
 
   const bulkInventoryAdjustmentRecords =

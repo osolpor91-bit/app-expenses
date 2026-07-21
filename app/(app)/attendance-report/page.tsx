@@ -21,6 +21,10 @@ type AttendanceRecord = {
   treasury_members?: TreasuryMemberRelation | TreasuryMemberRelation[] | null;
 };
 
+type AttendanceMemberRecord = TreasuryMemberRelation & {
+  id?: unknown;
+};
+
 type AttendanceSummaryRow = {
   memberId: string;
   memberName: string;
@@ -136,8 +140,31 @@ function getPeriodLabel({
   return period || "-";
 }
 
-function buildSummaryRows(records: AttendanceRecord[]) {
+function buildSummaryRows({
+  records,
+  members,
+}: {
+  records: AttendanceRecord[];
+  members: AttendanceMemberRecord[];
+}) {
   const rowByMemberId = new Map<string, AttendanceSummaryRow>();
+
+  members.forEach((member) => {
+    const memberId = getStringValue(member.id);
+
+    if (!memberId) {
+      return;
+    }
+
+    rowByMemberId.set(memberId, {
+      memberId,
+      memberName: getMemberName(member),
+      morning: 0,
+      afternoon: 0,
+      fullDay: 0,
+      total: 0,
+    });
+  });
 
   records.forEach((record) => {
     const member = getFirstRelation(record.treasury_members);
@@ -183,8 +210,28 @@ function buildSummaryRows(records: AttendanceRecord[]) {
   });
 }
 
-function buildDetailGroups(records: AttendanceRecord[]) {
+function buildDetailGroups({
+  records,
+  members,
+}: {
+  records: AttendanceRecord[];
+  members: AttendanceMemberRecord[];
+}) {
   const groupsByMemberId = new Map<string, AttendanceDetailGroup>();
+
+  members.forEach((member) => {
+    const memberId = getStringValue(member.id);
+
+    if (!memberId) {
+      return;
+    }
+
+    groupsByMemberId.set(memberId, {
+      memberId,
+      memberName: getMemberName(member),
+      movements: [],
+    });
+  });
 
   records.forEach((record, index) => {
     const member = getFirstRelation(record.treasury_members);
@@ -295,24 +342,49 @@ export default async function AttendanceReportPage({
   let barGroups: AttendanceBarGroup[] = [];
 
   if (activeCompany) {
-    const { data, error } = await supabase
-      .from("member_attendance")
-      .select(
-        "attendance_date, period, comment, treasury_member_id, treasury_members:treasury_member_id(id, first_name, last_name)"
-      )
-      .eq("tenant_id", tenant.id)
-      .eq("company_id", activeCompany.id)
-      .order("attendance_date", { ascending: true })
-      .order("period", { ascending: true });
+    const [membersResult, attendanceResult] = await Promise.all([
+      supabase
+        .from("treasury_members")
+        .select("id, first_name, last_name")
+        .eq("tenant_id", tenant.id)
+        .eq("company_id", activeCompany.id)
+        .eq("is_guest", false)
+        .eq("is_default", false)
+        .order("first_name", { ascending: true }),
+      supabase
+        .from("member_attendance")
+        .select(
+          "attendance_date, period, comment, treasury_member_id, treasury_members:treasury_member_id(id, first_name, last_name)"
+        )
+        .eq("tenant_id", tenant.id)
+        .eq("company_id", activeCompany.id)
+        .order("attendance_date", { ascending: true })
+        .order("period", { ascending: true }),
+    ]);
 
-    if (error) {
-      throw new Error(`${dict.attendance.errorReading}: ${error.message}`);
+    if (membersResult.error) {
+      throw new Error(
+        `${dict.attendance.membersReadError}: ${membersResult.error.message}`
+      );
     }
 
-    const records = (data ?? []) as AttendanceRecord[];
+    if (attendanceResult.error) {
+      throw new Error(
+        `${dict.attendance.errorReading}: ${attendanceResult.error.message}`
+      );
+    }
 
-    rows = buildSummaryRows(records);
-    detailGroups = buildDetailGroups(records);
+    const members = (membersResult.data ?? []) as AttendanceMemberRecord[];
+    const records = (attendanceResult.data ?? []) as AttendanceRecord[];
+
+    rows = buildSummaryRows({
+      records,
+      members,
+    });
+    detailGroups = buildDetailGroups({
+      records,
+      members,
+    });
     barGroups = buildBarGroups(rows);
   }
 
@@ -378,6 +450,12 @@ export default async function AttendanceReportPage({
                   {group.memberName}
                 </div>
                 <ul className="space-y-1">
+                  {group.movements.length === 0 ? (
+                    <li className="rounded-md bg-app-soft px-2 py-1.5 leading-tight text-app-muted">
+                      -
+                    </li>
+                  ) : null}
+
                   {group.movements.map((movement) => (
                     <li
                       key={movement.id}

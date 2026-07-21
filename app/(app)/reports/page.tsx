@@ -58,6 +58,10 @@ export default async function ReportsPage() {
       href: "/work-group-report",
       title: dict.workGroups.reportTitle,
     },
+    {
+      href: "/reports/work-members",
+      title: dict.workGroups.membersWithWorkReportTitle,
+    },
   ];
 
   return (

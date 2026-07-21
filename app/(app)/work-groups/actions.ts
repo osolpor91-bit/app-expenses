@@ -125,6 +125,7 @@ export async function saveWorkGroupAssignmentsAction({
   revalidatePath("/work-groups");
   revalidatePath("/work-group-assignments");
   revalidatePath("/work-group-report");
+  revalidatePath("/reports/work-members");
 
   return entityOperationOk(null);
 }
@@ -151,6 +152,7 @@ export async function deleteAllWorkGroupAssignmentsAction(): Promise<
   revalidatePath("/work-groups");
   revalidatePath("/work-group-assignments");
   revalidatePath("/work-group-report");
+  revalidatePath("/reports/work-members");
 
   return entityOperationOk(null);
 }

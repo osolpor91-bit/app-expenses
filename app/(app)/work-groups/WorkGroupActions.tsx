@@ -20,6 +20,7 @@ export type WorkGroupActionsLabels = WorkGroupAssignmentLabels & {
   actions: string;
   viewAssignedGroups: string;
   viewAllGroups: string;
+  membersWithWork: string;
   deleteAllAssignments: string;
   confirmDeleteAllAssignments: string;
   deleteAllAssignmentsError: string;
@@ -141,6 +142,13 @@ export default function WorkGroupActions({
         className="rounded-lg px-3 py-2 text-left text-sm font-semibold text-primary-app transition hover:bg-app-soft"
       >
         {labels.viewAllGroups}
+      </Link>
+
+      <Link
+        href="/reports/work-members"
+        className="rounded-lg px-3 py-2 text-left text-sm font-semibold text-primary-app transition hover:bg-app-soft"
+      >
+        {labels.membersWithWork}
       </Link>
 
       {message ? (
