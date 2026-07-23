@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import PublicLanguageSwitcher from "@/app/components/PublicLanguageSwitcher";
 import { getDictionary } from "@/lib/i18n/server";
 
 import PublicWorkGroupsLookup from "./PublicWorkGroupsLookup";
@@ -9,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function PublicWorkGroupsPage() {
-  const { locale, dict } = await getDictionary();
+  const { dict } = await getDictionary();
 
   return (
     <main className="min-h-screen bg-[#fbfaf6] text-app">
@@ -20,11 +19,6 @@ export default async function PublicWorkGroupsPage() {
           </Link>
 
           <nav className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <PublicLanguageSwitcher
-              currentLocale={locale}
-              label={dict.common.changeLanguage}
-            />
-
             <Link href="/login" className="btn-secondary-app px-5 py-2 text-sm">
               Acceso Junta
             </Link>
